@@ -31,7 +31,6 @@ public class CsvFileReader extends Constant implements Reader<Person> {
                     persons.add(per);
             }
         }
-        persons.forEach(System.out::println);
         return persons;
     }
 

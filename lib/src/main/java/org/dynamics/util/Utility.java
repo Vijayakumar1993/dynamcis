@@ -1,24 +1,73 @@
 package org.dynamics.util;
 
-import org.dynamics.model.Person;
+import com.google.common.primitives.Ints;
+import org.dynamics.model.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Utility {
+
     public static Integer getRandom(){
         Random random = new Random();
-        return random.nextInt();
+        return Math.abs(random.nextInt());
     }
 
     public Optional<List<Person>> filter(List<Person> persons){
         return Optional.of(persons);
     }
 
-    public static Vector<Vector<String>> converter(List<Person> persons){
+    public static Vector<Vector<Object>> converter(List<Person> persons){
         return new Vector<>(persons.stream().map(a->a.toVector()).collect(Collectors.toList()));
+    }
+
+    public static void createEvent(List<Person> persons, Event event){
+        Matcher matches = new Matcher();
+        List<Map<Person, Person>> op = new LinkedList<>();
+        Collections.shuffle(persons);
+        Map<String, Integer> keyPair = fixtureAndMatcher(persons.size());
+        Integer fixtureSize = keyPair.get("fixture");
+        Integer matcher = keyPair.get("matcher");
+
+        System.out.println("Matcher List "+matcher);
+        System.out.println("Fixture List "+fixtureSize);
+        //matcher only need to shuffle
+        List<Person> matcherList = persons.subList(0,matcher);
+        List<Match> matchList = new LinkedList<>();
+        for(int i=0;i<matcherList.size();i=i+2){
+            Match match = new Match();
+            match.setFrom(matcherList.get(i));
+            match.setTo(matcherList.get(i+1));
+            matchList.add(match);
+        }
+        matches.setMatches(matchList);
+        Fixture fixture = new Fixture();
+        List<Person> fixtures = persons.subList(matcher+1,persons.size());
+        fixture.setPersons(fixtures);
+
+        System.out.println(matches.getMatches().size());
+        System.out.println(fixture.getPersons().size());
+        event.setMatcher(matches);
+        event.setFixture(fixture);
+    }
+
+    public static Map<String, Integer> fixtureAndMatcher(int size){
+        Function<Integer,Integer> powerOf = a-> (int)Math.pow((double) 2,a);
+        int set = 2;
+        Map<String, Integer> keyPair = new LinkedHashMap<>();
+        for(int i=1; i<=size; i=i+1){
+            set = powerOf.apply(i);
+            if(set>size){
+                break;
+            }
+        }
+        Integer fixture = set-size;
+        Integer matcher = size-fixture;
+        keyPair.put("fixture",fixture);
+        keyPair.put("matcher", matcher);
+        return keyPair;
     }
 }

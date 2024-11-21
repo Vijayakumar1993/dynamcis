@@ -51,8 +51,8 @@ public class Person implements Serializable {
                 '}';
     }
 
-    public Vector<String> toVector(){
-        Vector<String> vector = new Vector<>();
+    public Vector<Object> toVector(){
+        Vector<Object> vector = new Vector<>();
         vector.add(this.id+"");
         vector.add(this.name);
         vector.add(this.gender.toString());
