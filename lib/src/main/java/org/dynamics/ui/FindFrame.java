@@ -1,18 +1,14 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
-import org.dynamics.model.Categories;
+import org.dynamics.model.*;
 import org.dynamics.model.Event;
-import org.dynamics.model.Gender;
-import org.dynamics.model.Person;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +16,7 @@ import java.util.stream.Collectors;
 public class FindFrame extends CommonFrame{
     private List<Person> persons;
     private List<Person> filteredPersons;
-    private DefaultTableModel tableModel;
+    private TablePair tableModel;
     private JLabel loger ;
     public FindFrame(String title, List<Person> persons) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
@@ -52,7 +48,7 @@ public class FindFrame extends CommonFrame{
         jsp.add(categoresBox);
 
         //submit button
-        JButton submit = new JButton("Submit");
+        JButton submit = new JButton("Find");
         submit.addActionListener(a->{
             String selectedName = nameField.getText();
             String selecetdGender = genderBox.getSelectedItem().toString();
@@ -76,9 +72,9 @@ public class FindFrame extends CommonFrame{
                     return true;
                 }
             }).collect(Collectors.toList());
-            tableModel.setRowCount(0);
+            tableModel.getDefaultTableModel().setRowCount(0);
             filteredPersons.forEach(per->{
-                tableModel.addRow(per.toVector());
+                tableModel.getDefaultTableModel().addRow(per.toVector());
             });
 
             this.loger.setText("Total : "+filteredPersons.size());
@@ -95,7 +91,7 @@ public class FindFrame extends CommonFrame{
     public void addDetails(Db db){
         List<Map<Person, Person>> entries = new LinkedList<>();
         Map<String, ActionListener> actions = new LinkedHashMap<>();
-        actions.put("Create Bout",(event)->{
+        actions.put("Create Event",(event)->{
             List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
             try {
                 JTextField eventName = textField();
@@ -111,7 +107,7 @@ public class FindFrame extends CommonFrame{
                 jsp.add(teamName);
                 jsp.add(desciption);
 
-                confirmation("Enter Event Name", ()->jsp);
+                confirmation("Please enter event details.", ()->jsp);
                 Event event1 = new Event();
                 event1.setId(Utility.getRandom());
                 event1.setEventName(eventName.getText());
@@ -120,7 +116,7 @@ public class FindFrame extends CommonFrame{
                 if(event1.isValid()){
                     Utility.createEvent(peoples,event1);
                     db.insert("Event_"+event1.getId().toString(),event1);
-                    alert("Boute Created successfully for "+peoples.size());
+                    alert("Event Created successfully for  the list of "+peoples.size()+" players.");
                 }else{
                     alert("Invalid entries for Event, Please enter correct details.");
                 }

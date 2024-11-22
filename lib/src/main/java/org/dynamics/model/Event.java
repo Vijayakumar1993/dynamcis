@@ -58,6 +58,6 @@ public class Event implements Serializable {
         this.fixture = fixture;
     }
     public Boolean isValid(){
-        return  this.teamName!="" && this.eventName!="";
+        return  !this.teamName.isEmpty() && !this.eventName.isEmpty();
     }
 }

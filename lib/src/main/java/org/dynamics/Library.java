@@ -15,9 +15,7 @@ import org.dynamics.ui.FindFrame;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -32,28 +30,29 @@ public class Library  extends CommonFrame {
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
-        searchMenuItems.put("Find",(ActionEvent e)->{
+        searchMenuItems.put("Find Players",(ActionEvent e)->{
             try {
                 JComboBox<String> comboBox = comboBox(db.keyFilterBy("File_"));
-                confirmation("hello",()->comboBox);
-                String keySelected = comboBox.getSelectedItem().toString();
-                if(keySelected!= null || keySelected!=""){
+                confirmation("Please select imported file.",()->comboBox);
+                String keySelected = comboBox.getSelectedItem().toString().trim();
+
+                if(!keySelected.isEmpty()){
                     List<Person> persons = db.find(keySelected);
                     FindFrame findFrame = new FindFrame("Find",persons);
                     findFrame.northpanel();
                     findFrame.addDetails(db);
                     findFrame.southPanel();
                 }else {
-                    alert("File not selected");
+                    alert("Please select valid file Id");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
         });
-        bouteMenuItems.put("Bout",(ActionEvent e)->{
+        bouteMenuItems.put("Find Events",(ActionEvent e)->{
             try {
-                BouteFrame bouteFrame = new BouteFrame("Bout List",db);
+                BouteFrame bouteFrame = new BouteFrame("Find Events",db);
                 bouteFrame.northPanel();
                 bouteFrame.centerPanel();
             } catch (Exception ex) {
@@ -84,7 +83,7 @@ public class Library  extends CommonFrame {
             }
         });
         men.put("File", fileMenuItems);
-        men.put("Bout", bouteMenuItems);
+        men.put("Event", bouteMenuItems);
         men.put("Search", searchMenuItems);
         super.menuBar(men);
     }

@@ -39,6 +39,8 @@ public class Utility {
         List<Match> matchList = new LinkedList<>();
         for(int i=0;i<matcherList.size();i=i+2){
             Match match = new Match();
+            match.setFromCorner(Corner.BLUE);
+            match.setToCorner(Corner.RED);
             match.setFrom(matcherList.get(i));
             match.setTo(matcherList.get(i+1));
             matchList.add(match);

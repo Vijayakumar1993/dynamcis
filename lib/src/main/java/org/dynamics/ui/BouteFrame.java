@@ -1,24 +1,27 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
+import org.dynamics.model.*;
 import org.dynamics.model.Event;
-import org.dynamics.model.Person;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BouteFrame extends CommonFrame{
     private Db db;
-    private DefaultTableModel matchTableModle;
-    private DefaultTableModel fixtureTableModel;
+    private TablePair matchTableModle;
+    private TablePair fixtureTableModel;
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.db = db;
@@ -29,32 +32,43 @@ public class BouteFrame extends CommonFrame{
         jsp.setBorder(BorderFactory.createTitledBorder("Find"));
         jsp.setBackground(Color.WHITE);
         JComboBox<String> pairedOptions = comboBox(paired);
-        pairedOptions.setBorder(BorderFactory.createTitledBorder("Boute List"));
+        pairedOptions.setBorder(BorderFactory.createTitledBorder("Event List"));
 
         JButton submit = new JButton("Submit");
         submit.addActionListener(a->{
             try {
-                Event event = db.findObject(pairedOptions.getSelectedItem().toString());
-                this.fixtureTableModel.setRowCount(0);
-                this.matchTableModle.setRowCount(0);
+                String selectedEventId = pairedOptions.getSelectedItem().toString();
+                if(selectedEventId.isEmpty()){
+                    alert("Kindly select the event.");
+                    return;
+                }
+                Event event = db.findObject(selectedEventId);
+                this.fixtureTableModel.getDefaultTableModel().setRowCount(0);
+                this.matchTableModle.getDefaultTableModel().setRowCount(0);
+
+
+                Enumeration<TableColumn> columns = this.matchTableModle.getjTable().getColumnModel().getColumns();
+                this.matchTableModle.getDefaultTableModel().addColumn("Winner");
 
                 event.getMatcher().getMatches().forEach(match -> {
 
                     Person fromPerson = match.getFrom();
                     Person toPerson = match.getTo();
 
-                    Vector<String> data = new Vector<>();
-                    data.add(fromPerson.getId()+"");
-                    data.add(event.getTeamName());
-                    data.add(fromPerson.getName());
+                    Vector<Object> data = new Vector<>();
+                    data.add(event.getTeamName().concat("-").concat(fromPerson.getName()).concat("(").concat(fromPerson.getId()+"").concat(")"));
+                    data.add(event.getTeamName().concat("-").concat(toPerson.getName()).concat("(").concat(toPerson.getId()+"").concat(")"));
 
-                    data.add(toPerson.getId()+"");
-                    data.add(event.getTeamName());
-                    data.add(toPerson.getName());
-                    this.matchTableModle.addRow(data);
+                    this.matchTableModle.getDefaultTableModel().addRow(data);
                 });
+
+
+                this.matchTableModle.getjTable().getColumn("Winner").setCellRenderer(new RadioButtonRenderer());
+                this.matchTableModle.getjTable().getColumn("Winner").setCellEditor(new RadioButtonEditor());
+
+
                 Utility.converter(event.getFixture().getPersons()).forEach(vec->{
-                    this.fixtureTableModel.addRow(vec);
+                    this.fixtureTableModel.getDefaultTableModel().addRow(vec);
                 });
 
             } catch (Exception e) {
@@ -77,12 +91,9 @@ public class BouteFrame extends CommonFrame{
 
 
         Vector<String> matcherColumn = new Vector<>();
-        matcherColumn.add("From Id");
-        matcherColumn.add("From Team Name");
-        matcherColumn.add("From  Name");
-        matcherColumn.add("To Id");
-        matcherColumn.add("To Team Name");
-        matcherColumn.add("To Name");
+        matcherColumn.add("Red Corner");
+        matcherColumn.add("Blue Corner");
+        matcherColumn.add("Winner");
 
         this.matchTableModle =  createTable(matcherPanel, new Vector<>(),matcherColumn,()->new LinkedHashMap<>());
         this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>());

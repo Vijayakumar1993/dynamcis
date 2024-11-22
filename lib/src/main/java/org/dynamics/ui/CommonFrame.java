@@ -1,7 +1,10 @@
 package org.dynamics.ui;
 
+import org.dynamics.model.TablePair;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -12,6 +15,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class CommonFrame extends JFrame {
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -57,7 +61,8 @@ public abstract class CommonFrame extends JFrame {
         return Optional.empty();
     }
 
-    public DefaultTableModel createTable(Container frame, Vector<Vector<Object>> rows, Vector<String> columns, Supplier<Map<String, ActionListener>> rightClickOptions){
+    public TablePair createTable(Container frame, Vector<Vector<Object>> rows,
+                                         Vector<String> columns, Supplier<Map<String, ActionListener>> rightClickOptions){
         DefaultTableModel model = new DefaultTableModel(rows, columns);
         JTable table = new JTable(model);
         table.getTableHeader().setFont(new Font("Serif",Font.BOLD,12));
@@ -70,11 +75,11 @@ public abstract class CommonFrame extends JFrame {
         jsp.setBackground(Color.WHITE);
         popupMenu(table,rightClickOptions.get());
         frame.add(jsp, BorderLayout.CENTER);
-        return model;
+        return new TablePair(model,table);
     }
 
     public void confirmation(String msg, Supplier<JComponent> supplier){
-        JOptionPane.showConfirmDialog(this,supplier.get(),"Choose ",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+        JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
     }
 
     public JComboBox<String> comboBox(List<String> data){
