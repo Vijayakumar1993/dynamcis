@@ -128,7 +128,7 @@ public abstract class CommonFrame extends JFrame {
 
     public JComboBox<Item> comboBoxForItems(String title, List<String> paired, Db db){
         JComboBox<Item> pairedOptions = new JComboBox<>();
-        pairedOptions.addItem(new Item(0,""));
+        pairedOptions.addItem(new Item(0l,""));
         List<Item> sortedItems = new LinkedList<>();
         paired.forEach(s->{
             try {

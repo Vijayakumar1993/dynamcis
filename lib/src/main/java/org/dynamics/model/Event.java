@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 public class Event implements Serializable {
-    private Integer id;
+    private Long id;
     private String eventName;
     private String teamName;
     private String description;
@@ -21,11 +21,11 @@ public class Event implements Serializable {
         this.parentEvent = parentEvent;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
