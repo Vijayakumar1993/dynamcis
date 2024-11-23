@@ -37,7 +37,8 @@ public class EventReport implements Report{
         doc.add(new Paragraph("\n\n"));
 
         List<Match> matches = event.getMatcher().getMatches();
-        PdfPTable table = new PdfPTable(3);
+        PdfPTable table = new PdfPTable(4);
+        table.addCell(getPdfCell("S.No"));
         table.addCell(getPdfCell("Blue Corner"));
         table.addCell(getPdfCell("Red Corner"));
         table.addCell(getPdfCell("Winner"));
@@ -49,6 +50,7 @@ public class EventReport implements Report{
             String fromValue = from.getName().concat("\n(").concat(from.getId()+"").concat(")");
             String toValue = to.getName().concat("\n(").concat(to.getId()+"").concat(")");
 
+            table.addCell((matches.indexOf(a)+1)+"");
             table.addCell(fromValue);
             table.addCell(toValue);
 
