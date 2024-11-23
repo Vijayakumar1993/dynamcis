@@ -34,4 +34,5 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation 'org.iq80.leveldb:leveldb:0.9'
+    implementation 'com.itextpdf:itextpdf:5.5.13.2'
 }

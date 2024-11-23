@@ -3,6 +3,7 @@ package org.dynamics.ui;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
+import org.dynamics.reports.EventReport;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -28,12 +29,36 @@ public class BouteFrame extends CommonFrame{
     public void southPanel(){
         JPanel panle = new JPanel();
         panle.setLayout(new BorderLayout());
-        JButton updateMatch = new JButton("Update");
-        JButton mergeWithFixture = new JButton("Next");
+        JButton updateMatch = new JButton("Save");
+        JButton mergeWithFixture = new JButton("Next Match");
         JButton freeze = new JButton("freeze");
+        JButton boutReport = new JButton("Generate Bout Report");
         freeze.setPreferredSize(new Dimension(100,20));
         freeze.setBackground(Color.RED);
 
+        boutReport.addActionListener(d->{
+            EventReport report = null;
+            try {
+                if(this.event!=null){
+                    Event ev = db.findObject("Event_"+this.event.getId());
+                    if(ev!=null){
+                        Optional<String> saveFile = fileSaver();
+                        if(saveFile.isPresent()){
+                            report = new EventReport(saveFile.get().concat(".pdf"));
+                            report.generateReport(ev);
+                        }
+                    }
+                }else {
+                    alert("Event Not selected. Please select.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                alert(e.getMessage());
+            }
+
+
+
+        });
         mergeWithFixture.addActionListener(a->{
             if(this.event==null){
                 alert("Event Not selected. Please select.");
@@ -128,6 +153,7 @@ public class BouteFrame extends CommonFrame{
         });
         JPanel grp = new JPanel(new FlowLayout());
         grp.add(freeze);
+        grp.add(boutReport);
         grp.add(updateMatch);
         grp.add(mergeWithFixture);
         panle.add(grp, BorderLayout.EAST);

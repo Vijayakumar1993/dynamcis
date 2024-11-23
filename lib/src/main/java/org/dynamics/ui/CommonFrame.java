@@ -65,6 +65,14 @@ public abstract class CommonFrame extends JFrame {
         }
         return Optional.empty();
     }
+    protected Optional<String> fileSaver(){
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showSaveDialog(this);
+        if(result == JFileChooser.APPROVE_OPTION){
+            return Optional.of(fileChooser.getSelectedFile().getAbsolutePath());
+        }
+        return Optional.empty();
+    }
 
     public Event eventPanel(List<Person> peoples, Db db, Event parentEvent) throws IOException {
         JTextField eventName = textField();
