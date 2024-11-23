@@ -49,7 +49,7 @@ public class Utility {
         }
         matches.setMatches(matchList);
         Fixture fixture = new Fixture();
-        List<Person> fixtures = persons.subList(matcher+1,persons.size());
+        List<Person> fixtures = persons.subList(matcher,persons.size());
         fixture.setPersons(fixtures);
 
         System.out.println(matches.getMatches().size());
@@ -64,10 +64,12 @@ public class Utility {
         Map<String, Integer> keyPair = new LinkedHashMap<>();
         for(int i=1; i<=size; i=i+1){
             set = powerOf.apply(i);
-            if(set>size){
+            if(set>=size){
                 break;
             }
         }
+
+        System.out.println("Chosen Set "+set);
         Integer fixture = set-size;
         Integer matcher = size-fixture;
         keyPair.put("fixture",fixture);

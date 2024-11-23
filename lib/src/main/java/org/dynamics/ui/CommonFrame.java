@@ -128,16 +128,19 @@ public abstract class CommonFrame extends JFrame {
     public JComboBox<Item> comboBoxForItems(String title, List<String> paired, Db db){
         JComboBox<Item> pairedOptions = new JComboBox<>();
         pairedOptions.addItem(new Item(0,""));
+        List<Item> sortedItems = new LinkedList<>();
         paired.forEach(s->{
             try {
                 Event event = db.findObject(s);
                 String description = event.getDescription();
-                pairedOptions.addItem(new Item(event.getId(), description));
+                sortedItems.add(new Item(event.getId(), description));
             } catch (Exception e) {
                 alert(e.getMessage());
                 e.printStackTrace();
             }
         });
+        sortedItems.sort(Comparator.comparing(Item::getDescription));
+        sortedItems.forEach(pairedOptions::addItem);
         pairedOptions.setBorder(BorderFactory.createTitledBorder(title));
         return pairedOptions;
     }
