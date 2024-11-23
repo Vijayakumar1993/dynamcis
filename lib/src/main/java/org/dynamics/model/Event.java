@@ -1,6 +1,7 @@
 package org.dynamics.model;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 public class Event implements Serializable {
     private Integer id;
@@ -9,7 +10,16 @@ public class Event implements Serializable {
     private String description;
     private Fixture fixture;
     private Matcher matcher;
+    private Event parentEvent;
 
+
+    public Event getParentEvent() {
+        return parentEvent;
+    }
+
+    public void setParentEvent(Event parentEvent) {
+        this.parentEvent = parentEvent;
+    }
 
     public Integer getId() {
         return id;
@@ -60,5 +70,39 @@ public class Event implements Serializable {
     }
     public Boolean isValid(){
         return  !this.teamName.isEmpty() && !this.eventName.isEmpty();
+    }
+
+    public Vector<Object> toVector(){
+        Vector<Object> vector = new Vector<>();
+        vector.add(this.id+"");
+        if(this.getParentEvent()!=null){
+            vector.add(this.getParentEvent().getEventName());
+        }else{
+            vector.add("NA");
+        }
+
+        vector.add(this.getTeamName());
+        vector.add(this.getEventName());
+        vector.add(this.getDescription());
+        vector.add(this.matcher.getMatches().size());
+        vector.add(this.getFixture().getPersons().size());
+        if(this.matcher.getWinner()!=null){
+            vector.add(this.matcher.getWinner().getName());
+        }else{
+            vector.add("Not Yet Decided");
+        }
+        return vector;
+    }
+    public static Vector<String> keys(){
+        Vector<String> keys = new Vector<>();
+        keys.add("Id");
+        keys.add("Event initiated from");
+        keys.add("Team Name");
+        keys.add("Event Name");
+        keys.add("Description");
+        keys.add("Total Matches");
+        keys.add("Total Fixtures");
+        keys.add("Winner");
+        return keys;
     }
 }

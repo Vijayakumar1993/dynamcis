@@ -1,19 +1,15 @@
 package org.dynamics.ui;
 
-import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
-import org.dynamics.model.*;
 import org.dynamics.model.Event;
+import org.dynamics.model.*;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BouteFrame extends CommonFrame{
@@ -21,48 +17,100 @@ public class BouteFrame extends CommonFrame{
     private Event event;
     private TablePair fixtureTableModel;
     private JPanel jscrollPanle = new JPanel();
+    private JComboBox<Item> pairedOptions;
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.db = db;
+        List<String> paired = this.db.keyFilterBy("Event_");
+        pairedOptions = comboBoxForItems("Events",paired,db);
     }
 
     public void southPanel(){
         JPanel panle = new JPanel();
         panle.setLayout(new BorderLayout());
-        JButton updateMatch = new JButton("Update Match");
-        JButton mergeWithFixture = new JButton("Merge");
+        JButton updateMatch = new JButton("Update");
+        JButton mergeWithFixture = new JButton("Next");
+        JButton freeze = new JButton("freeze");
+        freeze.setPreferredSize(new Dimension(100,20));
+        freeze.setBackground(Color.RED);
 
         mergeWithFixture.addActionListener(a->{
-            String eventName = this.event.getEventName().concat("(").concat(event.getId().toString()).concat(")");
-            List<Person> fixture = event.getFixture().getPersons();
-            List<Person> succesors = event.getMatcher().getMatches().stream().map(matches->matches.getSuccessor()).collect(Collectors.toList());
-            boolean isSuccssorNotPrepared = succesors.stream().anyMatch(s->s.getId()==0);
-
-            if(fixture.size()<=0){
-                alert("No Fixtures available to merge with Event("+eventName+")");
-                if(!isSuccssorNotPrepared){
-                    try {
-                      eventPanel(succesors,db,this.event);
-                    } catch (IOException e) {
-                        alert(e.getMessage());
-                        e.printStackTrace();
-                    }
-                }else {
-                    alert("Fixture not able to merge until winner list finalized for the event ("+eventName+")");
-                }
-            }else{
-                if(isSuccssorNotPrepared){
-                    alert("Fixture not able to merge until winner list finalized for the event ("+eventName+")");
-                }else{
-                    succesors.addAll(event.getFixture().getPersons());
-                    try {
-                       eventPanel(succesors,db,this.event);
-                    } catch (IOException e) {
-                        alert(e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
+            if(this.event==null){
+                alert("Event Not selected. Please select.");
+                return;
             }
+            try {
+                Event dbEvent = db.findObject("Event_"+this.event.getId());
+                String eventName = dbEvent.getEventName().concat("(").concat(dbEvent.getId().toString()).concat(")");
+                List<Person> fixture = dbEvent.getFixture().getPersons();
+                List<Person> succesors = dbEvent.getMatcher().getMatches().stream().map(matches->matches.getSuccessor()).collect(Collectors.toList());
+
+                boolean isSuccssorNotPrepared = succesors.stream().anyMatch(s->s.getId()==0);
+
+                if(isSuccssorNotPrepared){
+                    alert("Kindly finish the event ("+eventName+") to move next.");
+                }else{
+                    succesors.addAll(fixture);
+                    if(succesors.size()<=1){
+                        Corner successorCorner = dbEvent.getMatcher().getMatches().stream().map(match ->{
+                            if(match.getFrom().getId()==match.getSuccessor().getId()) return match.getFromCorner();
+                            else return match.getToCorner();
+                        } ).collect(Collectors.toList()).get(0);
+                        Person winner = succesors.get(0);
+                        dbEvent.getMatcher().setWinner(winner);
+                        dbEvent.getMatcher().setWinnerCorder(successorCorner);
+                        try {
+                            this.db.insert("Event_"+dbEvent.getId(), dbEvent);
+
+                            JPanel panel = new JPanel();
+                            panel.setBackground(successorCorner.getColor()); // Set background color
+                            JLabel wins = new JLabel(winner.getName());
+
+                            if(successorCorner==Corner.RED){
+                                wins.setForeground(Color.YELLOW);
+                            }else{
+                                wins.setForeground(Color.BLUE);
+                            }
+                            wins.setFont(new Font("Serif",Font.BOLD,12));
+                            panel.add(wins);
+
+                            confirmation("Winner",()->panel);
+                            alert("No More matches for the event("+this.event.getEventName()+")");
+                        } catch (IOException e) {
+                            alert(e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }else{
+                        try {
+                            eventPanel(succesors,db,dbEvent);
+                            List<String> paired = this.db.keyFilterBy("Event_");
+                            DefaultComboBoxModel<Item> comboBoxModel = new DefaultComboBoxModel<Item>();
+                            List<Item> sortedItems = new LinkedList<>();
+                            paired.forEach(s->{
+                                try {
+                                    Event event = db.findObject(s);
+                                    String description = event.getDescription();
+                                    sortedItems.add(new Item(event.getId(), description));
+                                } catch (Exception e) {
+                                    alert(e.getMessage());
+                                    e.printStackTrace();
+                                }
+                            });
+                            sortedItems.sort(Comparator.comparing(Item::getDescription));
+                            sortedItems.forEach(comboBoxModel::addElement);
+                            pairedOptions.setModel(comboBoxModel);
+                        } catch (IOException e) {
+                            alert(e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                alert(e.getMessage());
+            }
+
         });
         updateMatch.addActionListener(a->{
             try {
@@ -79,6 +127,7 @@ public class BouteFrame extends CommonFrame{
             }
         });
         JPanel grp = new JPanel(new FlowLayout());
+        grp.add(freeze);
         grp.add(updateMatch);
         grp.add(mergeWithFixture);
         panle.add(grp, BorderLayout.EAST);
@@ -86,11 +135,11 @@ public class BouteFrame extends CommonFrame{
     }
 
     public void northPanel(){
-        List<String> paired = this.db.keyFilterBy("Event_");
+
         JPanel jsp = new JPanel();
         jsp.setBorder(BorderFactory.createTitledBorder("Find"));
         jsp.setBackground(Color.WHITE);
-        JComboBox pairedOptions = comboBoxForItems("Events",paired,db);
+
 
         JButton submit = new JButton("Find");
 

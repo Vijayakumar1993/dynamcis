@@ -31,7 +31,7 @@ public abstract class CommonFrame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        this.commonNorthPanel();
+//        this.commonNorthPanel();
     }
 
     public void commonNorthPanel(){
@@ -86,6 +86,7 @@ public abstract class CommonFrame extends JFrame {
         event1.setEventName(eventName.getText());
         event1.setTeamName(teamName.getText());
         event1.setDescription(desciption.getText());
+        event1.setParentEvent(parentEvent);
         if(event1.isValid()){
 
             Utility.createEvent(peoples,event1);

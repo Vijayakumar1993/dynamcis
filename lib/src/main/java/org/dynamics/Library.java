@@ -10,6 +10,7 @@ import org.dynamics.reader.CsvFileReader;
 import org.dynamics.reader.Reader;
 import org.dynamics.ui.BouteFrame;
 import org.dynamics.ui.CommonFrame;
+import org.dynamics.ui.EventListFrame;
 import org.dynamics.ui.FindFrame;
 
 import javax.swing.*;
@@ -30,6 +31,7 @@ public class Library  extends CommonFrame {
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
+        this.commonNorthPanel();
         searchMenuItems.put("Find Players",(ActionEvent e)->{
             try {
                 JComboBox<String> comboBox = comboBox(db.keyFilterBy("File_"));
@@ -61,6 +63,15 @@ public class Library  extends CommonFrame {
                 alert(ex.getMessage());
             }
 
+        });
+        bouteMenuItems.put("List Events", (ActionEvent e)->{
+            try {
+                EventListFrame eventListFrame = new EventListFrame("List Events");
+                eventListFrame.listEvents(db);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                alert(ex.getMessage());
+            }
         });
         fileMenuItems.put("Import",(ActionEvent e)->{
             try {
