@@ -38,8 +38,8 @@ public class EventReport implements Report{
 
         List<Match> matches = event.getMatcher().getMatches();
         PdfPTable table = new PdfPTable(3);
-        table.addCell(getPdfCell("Red Corner"));
         table.addCell(getPdfCell("Blue Corner"));
+        table.addCell(getPdfCell("Red Corner"));
         table.addCell(getPdfCell("Winner"));
 
         matches.forEach(a->{
@@ -62,7 +62,7 @@ public class EventReport implements Report{
         doc.add(table);
         doc.close();
         this.pdfWriter.close();
-        JOptionPane.showConfirmDialog(null, "PDF Generated successfully.");
+        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
 
     }
 

@@ -1,13 +1,14 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
-import org.dynamics.model.*;
 import org.dynamics.model.Event;
+import org.dynamics.model.Item;
+import org.dynamics.model.Person;
+import org.dynamics.model.TablePair;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -15,12 +16,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class CommonFrame extends JFrame {
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -35,8 +33,12 @@ public abstract class CommonFrame extends JFrame {
     }
 
     public void commonNorthPanel(){
-        JLabel nameLable = new JLabel("Welcome "+System.getProperty("user.name"));
-        add(nameLable, BorderLayout.NORTH);
+        JPanel jsp = new JPanel();
+        jsp.setBorder(BorderFactory.createTitledBorder("Welcome"));
+        jsp.setBackground(Color.WHITE);
+        jsp.setFont(new Font("Serif",Font.BOLD,12));
+        jsp.add(new JLabel("Welcome "+System.getProperty("user.name")));
+        add(jsp, BorderLayout.NORTH);
     }
     public void menuBar(Map<String, Map<String, ActionListener>> menuItems){
         JMenuBar menuBar = new JMenuBar();

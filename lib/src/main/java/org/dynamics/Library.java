@@ -14,6 +14,7 @@ import org.dynamics.ui.EventListFrame;
 import org.dynamics.ui.FindFrame;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -28,10 +29,25 @@ public class Library  extends CommonFrame {
     private Map<String, ActionListener> fileMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> bouteMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> searchMenuItems = new LinkedHashMap<>();
+    private Map<String, ActionListener> contactUs = new LinkedHashMap<>();
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
         this.commonNorthPanel();
+        contactUs.put("Contact",(ActionEvent e)->{
+            JFrame jf = new JFrame("Contact Us");
+            jf.setTitle("Contact Us");
+            jf.setVisible(true);
+            jf.getContentPane().setBackground(Color.WHITE);
+            jf.setSize(new Dimension(300,150));
+            jf.setResizable(false);
+            jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            JPanel j = new JPanel();
+            JLabel cont = new JLabel("<html>Dynamics 101 MMA");
+            cont.setFont(new Font("Serif",Font.BOLD,25));
+            j.add(cont);
+            jf.add(j);
+        });
         searchMenuItems.put("Find Players",(ActionEvent e)->{
             try {
                 JComboBox<String> comboBox = comboBox(db.keyFilterBy("File_"));
@@ -68,6 +84,7 @@ public class Library  extends CommonFrame {
             try {
                 EventListFrame eventListFrame = new EventListFrame("List Events");
                 eventListFrame.listEvents(db);
+                eventListFrame.southPanel();
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(ex.getMessage());
@@ -94,9 +111,11 @@ public class Library  extends CommonFrame {
                 alert(ex.getMessage());
             }
         });
+
         men.put("File", fileMenuItems);
         men.put("Event", bouteMenuItems);
         men.put("Search", searchMenuItems);
+        men.put("Contact Us",contactUs);
         super.menuBar(men);
     }
     public static void main(String args[]) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
