@@ -75,6 +75,11 @@ public class LevelDb implements Db {
     }
 
     @Override
+    public void delete(String key) {
+         db.delete(key.getBytes());
+    }
+
+    @Override
     public Vector<String> keys() {
         Vector<String> keys = new Vector<>();
         DBIterator dbIterator = db.iterator();

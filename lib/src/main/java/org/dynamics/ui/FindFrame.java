@@ -94,33 +94,7 @@ public class FindFrame extends CommonFrame{
         actions.put("Create Event",(event)->{
             List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
             try {
-                JTextField eventName = textField();
-                eventName.setBorder(BorderFactory.createTitledBorder("Event Name"));
-                JTextField teamName = textField();
-                teamName.setBorder(BorderFactory.createTitledBorder("Team Name"));
-                JTextField desciption = textField();
-                desciption.setBorder(BorderFactory.createTitledBorder("Description"));
-
-                JPanel jsp = new JPanel();
-                jsp.setLayout(new GridLayout(3,1));
-                jsp.add(eventName);
-                jsp.add(teamName);
-                jsp.add(desciption);
-
-                confirmation("Please enter event details.", ()->jsp);
-                Event event1 = new Event();
-                event1.setId(Utility.getRandom());
-                event1.setEventName(eventName.getText());
-                event1.setTeamName(teamName.getText());
-                event1.setDescription(desciption.getText());
-                if(event1.isValid()){
-                    Utility.createEvent(peoples,event1);
-                    db.insert("Event_"+event1.getId().toString(),event1);
-                    alert("Event Created successfully for  the list of "+peoples.size()+" players.");
-                }else{
-                    alert("Invalid entries for Event, Please enter correct details.");
-                }
-
+                eventPanel(peoples,db,null);
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());

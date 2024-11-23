@@ -55,6 +55,7 @@ public class Library  extends CommonFrame {
                 BouteFrame bouteFrame = new BouteFrame("Find Events",db);
                 bouteFrame.northPanel();
                 bouteFrame.centerPanel();
+                bouteFrame.southPanel();
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(ex.getMessage());

@@ -1,80 +1,174 @@
 package org.dynamics.ui;
 
+import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
 import org.dynamics.model.*;
 import org.dynamics.model.Event;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BouteFrame extends CommonFrame{
     private Db db;
-    private TablePair matchTableModle;
+    private Event event;
     private TablePair fixtureTableModel;
+    private JPanel jscrollPanle = new JPanel();
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.db = db;
     }
+
+    public void southPanel(){
+        JPanel panle = new JPanel();
+        panle.setLayout(new BorderLayout());
+        JButton updateMatch = new JButton("Update Match");
+        JButton mergeWithFixture = new JButton("Merge");
+
+        mergeWithFixture.addActionListener(a->{
+            String eventName = this.event.getEventName().concat("(").concat(event.getId().toString()).concat(")");
+            List<Person> fixture = event.getFixture().getPersons();
+            List<Person> succesors = event.getMatcher().getMatches().stream().map(matches->matches.getSuccessor()).collect(Collectors.toList());
+            boolean isSuccssorNotPrepared = succesors.stream().anyMatch(s->s.getId()==0);
+
+            if(fixture.size()<=0){
+                alert("No Fixtures available to merge with Event("+eventName+")");
+                if(!isSuccssorNotPrepared){
+                    try {
+                      eventPanel(succesors,db,this.event);
+                    } catch (IOException e) {
+                        alert(e.getMessage());
+                        e.printStackTrace();
+                    }
+                }else {
+                    alert("Fixture not able to merge until winner list finalized for the event ("+eventName+")");
+                }
+            }else{
+                if(isSuccssorNotPrepared){
+                    alert("Fixture not able to merge until winner list finalized for the event ("+eventName+")");
+                }else{
+                    succesors.addAll(event.getFixture().getPersons());
+                    try {
+                       eventPanel(succesors,db,this.event);
+                    } catch (IOException e) {
+                        alert(e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        updateMatch.addActionListener(a->{
+            try {
+                if(this.event!=null){
+                    db.insert("Event_"+this.event.getId().toString(),this.event);
+                    alert("Event("+this.event.getEventName()+") updated successfully.");
+                }else{
+                    alert("Event Not selected. Please select.");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                alert(e.getMessage());
+            }
+        });
+        JPanel grp = new JPanel(new FlowLayout());
+        grp.add(updateMatch);
+        grp.add(mergeWithFixture);
+        panle.add(grp, BorderLayout.EAST);
+        add(panle,BorderLayout.SOUTH);
+    }
+
     public void northPanel(){
         List<String> paired = this.db.keyFilterBy("Event_");
         JPanel jsp = new JPanel();
         jsp.setBorder(BorderFactory.createTitledBorder("Find"));
         jsp.setBackground(Color.WHITE);
-        JComboBox<String> pairedOptions = comboBox(paired);
-        pairedOptions.setBorder(BorderFactory.createTitledBorder("Event List"));
+        JComboBox pairedOptions = comboBoxForItems("Events",paired,db);
 
-        JButton submit = new JButton("Submit");
+        JButton submit = new JButton("Find");
+
         submit.addActionListener(a->{
             try {
-                String selectedEventId = pairedOptions.getSelectedItem().toString();
-                if(selectedEventId.isEmpty()){
+                Item selectedItem = (Item)pairedOptions.getSelectedItem();
+                if(selectedItem == null || selectedItem.getId()==0){
                     alert("Kindly select the event.");
                     return;
                 }
-                Event event = db.findObject(selectedEventId);
+                String selectedEventId = "Event_"+((Item) pairedOptions.getSelectedItem()).getId().toString();
+                this.event = db.findObject(selectedEventId);
                 this.fixtureTableModel.getDefaultTableModel().setRowCount(0);
-                this.matchTableModle.getDefaultTableModel().setRowCount(0);
 
+                Matcher matcher = event.getMatcher();
+                List<Match> matches = matcher.getMatches();
+                jscrollPanle.removeAll();
+                jscrollPanle.revalidate();
+                jscrollPanle.repaint();
 
-                Enumeration<TableColumn> columns = this.matchTableModle.getjTable().getColumnModel().getColumns();
-                this.matchTableModle.getDefaultTableModel().addColumn("Winner");
-
-                event.getMatcher().getMatches().forEach(match -> {
-
+                JPanel innerPanle = new JPanel();
+                innerPanle.setLayout(new GridLayout(matches.size(),2));
+                matches.forEach(match -> {
+                    ButtonGroup buttonGroup = new ButtonGroup();
                     Person fromPerson = match.getFrom();
                     Person toPerson = match.getTo();
+                    Person succesor = match.getSuccessor();
+                    JRadioButton fromRadioButton = new JRadioButton(event.getTeamName().concat("-").concat(fromPerson.getName()).concat("(").concat(fromPerson.getId() + "").concat(")"));
+//                    fromRadioButton.setBackground(match.getFromCorner().getColor());
+                    fromRadioButton.setForeground(Color.BLUE);
+                    fromRadioButton.setFont(new Font("Serif",Font.BOLD,14));
+                    System.out.println("succesor "+succesor.getId());
 
-                    Vector<Object> data = new Vector<>();
-                    data.add(event.getTeamName().concat("-").concat(fromPerson.getName()).concat("(").concat(fromPerson.getId()+"").concat(")"));
-                    data.add(event.getTeamName().concat("-").concat(toPerson.getName()).concat("(").concat(toPerson.getId()+"").concat(")"));
+                    System.out.println("from person "+toPerson.getId());
 
-                    this.matchTableModle.getDefaultTableModel().addRow(data);
+                    if(succesor.getId()==fromPerson.getId()){
+                        fromRadioButton.setSelected(true);
+                    }
+
+
+
+
+                    //to radio button
+                    JRadioButton toRadioButton = new JRadioButton(event.getTeamName().concat("-").concat(toPerson.getName()).concat("(").concat(toPerson.getId() + "").concat(")"));
+//                    toRadioButton.setBackground(match.getToCorner().getColor());
+                    toRadioButton.setForeground(Color.RED);
+                    toRadioButton.setFont(new Font("Serif",Font.BOLD,14));
+                    System.out.println("succesor "+succesor.getId());
+
+                    System.out.println("to person "+toPerson.getId());
+
+                    if(succesor.getId()==toPerson.getId()){
+                        toRadioButton.setSelected(true);
+                    }
+
+                    toRadioButton.addActionListener(e->{
+                        System.out.println("updated ");
+                        match.setSuccessor(toPerson);
+                    });
+                    fromRadioButton.addActionListener(e->{
+                        System.out.println("updated ");
+                        match.setSuccessor(fromPerson);
+                    });
+                    buttonGroup.add(fromRadioButton);
+                    buttonGroup.add(toRadioButton);
+                    innerPanle.add(fromRadioButton);
+                    innerPanle.add(toRadioButton);
                 });
-
-
-                this.matchTableModle.getjTable().getColumn("Winner").setCellRenderer(new RadioButtonRenderer());
-                this.matchTableModle.getjTable().getColumn("Winner").setCellEditor(new RadioButtonEditor());
-
+                jscrollPanle.add(innerPanle, BorderLayout.CENTER);
 
                 Utility.converter(event.getFixture().getPersons()).forEach(vec->{
                     this.fixtureTableModel.getDefaultTableModel().addRow(vec);
                 });
-
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());
             }
+
         });
         jsp.add(pairedOptions);
         jsp.add(submit);
@@ -83,8 +177,7 @@ public class BouteFrame extends CommonFrame{
 
     public void centerPanel(){
 
-        JPanel matcherPanel = new JPanel();
-        matcherPanel.setLayout(new BorderLayout());
+        jscrollPanle.setLayout(new BorderLayout());
 
         JPanel fixterPanel = new JPanel();
         fixterPanel.setLayout(new BorderLayout());
@@ -94,11 +187,9 @@ public class BouteFrame extends CommonFrame{
         matcherColumn.add("Red Corner");
         matcherColumn.add("Blue Corner");
         matcherColumn.add("Winner");
-
-        this.matchTableModle =  createTable(matcherPanel, new Vector<>(),matcherColumn,()->new LinkedHashMap<>());
         this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>());
         JTabbedPane pane = new JTabbedPane();
-        pane.add("Matcher List",matcherPanel);
+        pane.add("Matcher List", new JScrollPane(jscrollPanle));
         pane.add("Fixture",fixterPanel);
         this.add(pane, BorderLayout.CENTER);
     }

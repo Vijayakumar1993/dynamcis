@@ -13,6 +13,7 @@ public interface Db {
 
     <T> T findObject(String key) throws IOException, ClassNotFoundException;
 
+    void delete(String key);
     Vector<String> keys();
 
     Vector<String> keyFilterBy(String startsWith);

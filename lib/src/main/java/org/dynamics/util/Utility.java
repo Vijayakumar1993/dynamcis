@@ -1,13 +1,14 @@
 package org.dynamics.util;
 
-import com.google.common.primitives.Ints;
 import org.dynamics.model.*;
+import org.dynamics.model.Event;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Utility {
 
@@ -23,6 +24,7 @@ public class Utility {
     public static Vector<Vector<Object>> converter(List<Person> persons){
         return new Vector<>(persons.stream().map(a->a.toVector()).collect(Collectors.toList()));
     }
+
 
     public static void createEvent(List<Person> persons, Event event){
         Matcher matches = new Matcher();

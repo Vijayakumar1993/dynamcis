@@ -1,6 +1,9 @@
 package org.dynamics.ui;
 
-import org.dynamics.model.TablePair;
+import org.dynamics.db.Db;
+import org.dynamics.model.*;
+import org.dynamics.model.Event;
+import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,11 +14,13 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class CommonFrame extends JFrame {
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -61,8 +66,40 @@ public abstract class CommonFrame extends JFrame {
         return Optional.empty();
     }
 
+    public Event eventPanel(List<Person> peoples, Db db, Event parentEvent) throws IOException {
+        JTextField eventName = textField();
+        eventName.setBorder(BorderFactory.createTitledBorder("Event Name"));
+        JTextField teamName = textField();
+        teamName.setBorder(BorderFactory.createTitledBorder("Team Name"));
+        JTextField desciption = textField();
+        desciption.setBorder(BorderFactory.createTitledBorder("Description"));
+
+        JPanel jsp = new JPanel();
+        jsp.setLayout(new GridLayout(3,1));
+        jsp.add(eventName);
+        jsp.add(teamName);
+        jsp.add(desciption);
+
+        confirmation("Please enter event details.", ()->jsp);
+        Event event1 = new Event();
+        event1.setId(Utility.getRandom());
+        event1.setEventName(eventName.getText());
+        event1.setTeamName(teamName.getText());
+        event1.setDescription(desciption.getText());
+        if(event1.isValid()){
+
+            Utility.createEvent(peoples,event1);
+            db.insert("Event_"+event1.getId().toString(),event1);
+            if(parentEvent!=null)
+                db.insert("Event_"+parentEvent.getId().toString(),parentEvent);
+            alert("Event Created successfully for  the list of "+peoples.size()+" players.");
+        }else{
+            alert("Invalid entries for Event, Please enter correct details.");
+        }
+        return event1;
+    }
     public TablePair createTable(Container frame, Vector<Vector<Object>> rows,
-                                         Vector<String> columns, Supplier<Map<String, ActionListener>> rightClickOptions){
+                                 Vector<String> columns, Supplier<Map<String, ActionListener>> rightClickOptions){
         DefaultTableModel model = new DefaultTableModel(rows, columns);
         JTable table = new JTable(model);
         table.getTableHeader().setFont(new Font("Serif",Font.BOLD,12));
@@ -86,6 +123,23 @@ public abstract class CommonFrame extends JFrame {
         data.add(0,"");
         JComboBox<String> comboBoxs = new JComboBox<>(new Vector<>(data));
         return comboBoxs;
+    }
+
+    public JComboBox<Item> comboBoxForItems(String title, List<String> paired, Db db){
+        JComboBox<Item> pairedOptions = new JComboBox<>();
+        pairedOptions.addItem(new Item(0,""));
+        paired.forEach(s->{
+            try {
+                Event event = db.findObject(s);
+                String description = event.getDescription();
+                pairedOptions.addItem(new Item(event.getId(), description));
+            } catch (Exception e) {
+                alert(e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        pairedOptions.setBorder(BorderFactory.createTitledBorder(title));
+        return pairedOptions;
     }
 
     public JTextField textField(){
