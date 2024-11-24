@@ -43,6 +43,7 @@ public class CsvFileReader extends Constant implements Reader<Person> {
             person.setName(data[0]);
             person.setGender(Gender.valueOf(data[1].toUpperCase()));
             person.setCategories(Categories.valueOf(data[2].toUpperCase()));
+            person.setWeight(Double.valueOf(data[3]));
             return person;
         }
 

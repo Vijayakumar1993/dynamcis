@@ -8,6 +8,8 @@ import org.dynamics.model.TablePair;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -18,6 +20,9 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class CommonFrame extends JFrame {
@@ -110,7 +115,7 @@ public abstract class CommonFrame extends JFrame {
         return event1;
     }
     public TablePair createTable(Container frame, Vector<Vector<Object>> rows,
-                                 Vector<String> columns, Supplier<Map<String, ActionListener>> rightClickOptions){
+                                 Vector<String> columns, Supplier<Map<String, ActionListener>> rightClickOptions, BiConsumer<JTable, TableModelEvent> modelListener){
         DefaultTableModel model = new DefaultTableModel(rows, columns);
         JTable table = new JTable(model);
         table.getTableHeader().setFont(new Font("Serif",Font.BOLD,12));
@@ -121,6 +126,11 @@ public abstract class CommonFrame extends JFrame {
         JScrollPane jsp = new JScrollPane(table);
         jsp.setBorder(BorderFactory.createTitledBorder("Details"));
         jsp.setBackground(Color.WHITE);
+        if(modelListener!=null){
+            table.getModel().addTableModelListener(e->{
+                modelListener.accept(table,e);
+            });
+        }
         popupMenu(table,rightClickOptions.get());
         frame.add(jsp, BorderLayout.CENTER);
         return new TablePair(model,table);
@@ -143,7 +153,7 @@ public abstract class CommonFrame extends JFrame {
         paired.forEach(s->{
             try {
                 Event event = db.findObject(s);
-                String description = event.getDescription();
+                String description = event.getEventName();
                 sortedItems.add(new Item(event.getId(), description));
             } catch (Exception e) {
                 alert(e.getMessage());

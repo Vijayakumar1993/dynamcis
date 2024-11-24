@@ -3,11 +3,20 @@ package org.dynamics.model;
 import java.io.Serializable;
 
 public class Match  implements Serializable {
+    private Long matchId;
     private Person from;
     private Corner fromCorner;
     private Person to;
     private Corner toCorner;
     private Person successor = new Person();
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
 
     public Person getFrom() {
         return from;

@@ -29,7 +29,7 @@ public class EventListFrame extends CommonFrame{
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        this.createTable(this,new Vector<>(eventsDetails),Event.keys(),()->new LinkedHashMap<>());
+        this.createTable(this,new Vector<>(eventsDetails),Event.keys(),()->new LinkedHashMap<>(),null);
     }
 
     public void southPanel(){

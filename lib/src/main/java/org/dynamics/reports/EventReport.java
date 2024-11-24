@@ -37,11 +37,15 @@ public class EventReport implements Report{
         doc.add(new Paragraph("\n\n"));
 
         List<Match> matches = event.getMatcher().getMatches();
-        PdfPTable table = new PdfPTable(4);
-        table.addCell(getPdfCell("S.No"));
+        PdfPTable table = new PdfPTable(5);
+        PdfPCell serionNumber = getPdfCell("S.No");
+        table.addCell(serionNumber);
+
+        table.addCell(getPdfCell("Match Id"));
         table.addCell(getPdfCell("Blue Corner"));
         table.addCell(getPdfCell("Red Corner"));
         table.addCell(getPdfCell("Winner"));
+        table.setWidths(new float[]{0.5f,2f,2f,2f,2f});
 
         matches.forEach(a->{
             Person from = a.getFrom();
@@ -50,15 +54,16 @@ public class EventReport implements Report{
             String fromValue = from.getName().concat("\n(").concat(from.getId()+"").concat(")");
             String toValue = to.getName().concat("\n(").concat(to.getId()+"").concat(")");
 
-            table.addCell((matches.indexOf(a)+1)+"");
-            table.addCell(fromValue);
-            table.addCell(toValue);
+            addStringCell((matches.indexOf(a)+1)+"",table);
+            addStringCell(a.getMatchId().toString(),table);
+            addStringCell(fromValue,table);
+            addStringCell(toValue,table);
 
             if(successor.getId()!=0){
                 String successorValue = successor.getName().concat("\n(").concat(successor.getId()+"").concat(")");
-                table.addCell(successorValue);
+                addStringCell(successorValue,table);
             }else{
-                table.addCell("");
+                addStringCell("",table);
             }
         });
         doc.add(table);
@@ -69,8 +74,19 @@ public class EventReport implements Report{
     }
 
     public PdfPCell getPdfCell(String msg){
-        PdfPCell cell = new PdfPCell(new Phrase(msg,new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD,BaseColor.WHITE)));
+        PdfPCell cell = new PdfPCell(new Phrase(msg,new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD,BaseColor.WHITE)));
         cell.setBackgroundColor(BaseColor.BLACK);
         return  cell;
     }
+
+    public void addStringCell(String msg,PdfPTable table){
+        PdfPCell cell = new PdfPCell();
+        cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM); // Only horizontal borders
+        Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
+        cell.addElement(new Phrase(msg, font)); // Add plain text
+        cell.setFixedHeight(30f);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        table.addCell(cell);
+    }
+
 }

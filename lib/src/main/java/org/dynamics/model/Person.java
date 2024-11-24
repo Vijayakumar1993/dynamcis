@@ -8,6 +8,7 @@ public class Person implements Serializable {
     private String name;
     private Gender gender;
     private Categories categories;
+    private Double weight = 0d;
 
     public long getId() {
         return id;
@@ -41,6 +42,14 @@ public class Person implements Serializable {
         this.categories = categories;
     }
 
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
     @Override
     public String toString() {
         return "Person{" +
@@ -48,6 +57,7 @@ public class Person implements Serializable {
                 ", name='" + name + '\'' +
                 ", gender=" + gender +
                 ", categories=" + categories +
+                ", weight=" + weight +
                 '}';
     }
 
@@ -57,6 +67,7 @@ public class Person implements Serializable {
         vector.add(this.name);
         vector.add(this.gender.toString());
         vector.add(this.categories.toString());
+        vector.add(this.weight.toString());
         return vector;
     }
     public static Vector<String> keys(){
@@ -65,6 +76,7 @@ public class Person implements Serializable {
         keys.add("Name");
         keys.add("Gender");
         keys.add("Category");
+        keys.add("Weight");
         return keys;
     }
 

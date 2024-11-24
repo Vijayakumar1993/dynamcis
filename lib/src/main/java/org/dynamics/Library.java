@@ -48,7 +48,7 @@ public class Library  extends CommonFrame {
             j.add(cont);
             jf.add(j);
         });
-        searchMenuItems.put("Find Players",(ActionEvent e)->{
+        searchMenuItems.put("Player",(ActionEvent e)->{
             try {
                 JComboBox<String> comboBox = comboBox(db.keyFilterBy("File_"));
                 confirmation("Please select imported file.",()->comboBox);
@@ -56,7 +56,7 @@ public class Library  extends CommonFrame {
 
                 if(!keySelected.isEmpty()){
                     List<Person> persons = db.find(keySelected);
-                    FindFrame findFrame = new FindFrame("Find",persons);
+                    FindFrame findFrame = new FindFrame("Find",persons,keySelected);
                     findFrame.northpanel();
                     findFrame.addDetails(db);
                     findFrame.southPanel();
@@ -114,7 +114,7 @@ public class Library  extends CommonFrame {
 
         men.put("File", fileMenuItems);
         men.put("Event", bouteMenuItems);
-        men.put("Search", searchMenuItems);
+        men.put("Players", searchMenuItems);
         men.put("Contact Us",contactUs);
         super.menuBar(men);
     }

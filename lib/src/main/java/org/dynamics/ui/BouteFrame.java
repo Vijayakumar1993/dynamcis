@@ -7,6 +7,8 @@ import org.dynamics.reports.EventReport;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
@@ -19,6 +21,7 @@ public class BouteFrame extends CommonFrame{
     private TablePair fixtureTableModel;
     private JPanel jscrollPanle = new JPanel();
     private JComboBox<Item> pairedOptions;
+    private JButton findButton;
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.db = db;
@@ -31,11 +34,73 @@ public class BouteFrame extends CommonFrame{
         panle.setLayout(new BorderLayout());
         JButton updateMatch = new JButton("Save");
         JButton mergeWithFixture = new JButton("Next Match");
-        JButton freeze = new JButton("freeze");
-        JButton boutReport = new JButton("Generate Bout Report");
-        freeze.setPreferredSize(new Dimension(100,20));
-        freeze.setBackground(Color.RED);
 
+        JButton shuffle = new JButton("Shuffle");
+        JButton clear = new JButton("Clear");
+        clear.setPreferredSize(new Dimension(100,20));
+        clear.setBackground(Color.RED);
+        JButton boutReport = new JButton("Generate Bout PDF");
+        shuffle.setPreferredSize(new Dimension(100,20));
+        shuffle.setBackground(Color.RED);
+
+        clear.addActionListener(a->{
+            this.event.getMatcher().getMatches().forEach(match->{
+                match.setSuccessor(new Person());
+            });
+            try {
+                db.insert("Event_"+this.event.getId(),this.event);
+            } catch (IOException e) {
+                e.printStackTrace();
+                alert(e.getMessage());
+            }
+            this.findButton.doClick();
+        });
+        shuffle.addActionListener(e->{
+            if(this.event==null){
+                alert("Event Not selected. Please select.");
+                return;
+            }
+
+            try {
+              this.event =  db.findObject("Event_"+this.event.getId());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                alert(ex.getMessage());
+            }
+            if(this.event.getMatcher().getMatches().stream().anyMatch(a->a.getSuccessor().getId()!=0)){
+                alert("Match Started, You can't shuffle.");
+                return;
+            }
+            Event existingEvent = this.event;
+            Event newEvent = new Event();
+            newEvent.setParentEvent(existingEvent.getParentEvent());
+            newEvent.setEventName(this.event.getEventName());
+            newEvent.setDescription(this.event.getDescription());
+            newEvent.setTeamName(this.event.getTeamName());
+            newEvent.setId(this.event.getId());
+
+            //take matched persons and fixture and shuffle and save, re run
+            List<Match> matches = this.event.getMatcher().getMatches();
+            List<Person> from = matches.stream().map(Match::getFrom).collect(Collectors.toList());
+            List<Person> to = matches.stream().map(Match::getTo).collect(Collectors.toList());
+            List<Person> fixtures = this.event.getFixture().getPersons();
+
+            from.addAll(to);
+            from.addAll(fixtures);
+
+            Collections.shuffle(from);
+            db.delete("Event_"+this.event.getId());
+            Utility.createEvent(from,newEvent);
+            try {
+                db.insert("Event_"+newEvent.getId().toString(),newEvent);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                alert(ex.getMessage());
+            }
+            if(this.findButton!=null){
+                this.findButton.doClick();
+            }
+        });
         boutReport.addActionListener(d->{
             EventReport report = null;
             try {
@@ -114,7 +179,7 @@ public class BouteFrame extends CommonFrame{
                             paired.forEach(s->{
                                 try {
                                     Event event = db.findObject(s);
-                                    String description = event.getDescription();
+                                    String description = event.getEventName();
                                     sortedItems.add(new Item(event.getId(), description));
                                 } catch (Exception e) {
                                     alert(e.getMessage());
@@ -151,12 +216,15 @@ public class BouteFrame extends CommonFrame{
                 alert(e.getMessage());
             }
         });
-        JPanel grp = new JPanel(new FlowLayout());
-        grp.add(freeze);
-        grp.add(boutReport);
-        grp.add(updateMatch);
-        grp.add(mergeWithFixture);
-        panle.add(grp, BorderLayout.EAST);
+        JPanel rightButtons = new JPanel(new FlowLayout());
+        JPanel leftButtons = new JPanel(new FlowLayout());
+        leftButtons.add(clear);
+        leftButtons.add(shuffle);
+        leftButtons.add(boutReport);
+        rightButtons.add(updateMatch);
+        rightButtons.add(mergeWithFixture);
+        panle.add(leftButtons, BorderLayout.WEST);
+        panle.add(rightButtons, BorderLayout.EAST);
         add(panle,BorderLayout.SOUTH);
     }
 
@@ -167,9 +235,9 @@ public class BouteFrame extends CommonFrame{
         jsp.setBackground(Color.WHITE);
 
 
-        JButton submit = new JButton("Find");
+        this.findButton = new JButton("Find");
 
-        submit.addActionListener(a->{
+        findButton.addActionListener(a->{
             try {
                 Item selectedItem = (Item)pairedOptions.getSelectedItem();
                 if(selectedItem == null || selectedItem.getId()==0){
@@ -187,7 +255,7 @@ public class BouteFrame extends CommonFrame{
                 jscrollPanle.repaint();
 
                 JPanel innerPanle = new JPanel();
-                innerPanle.setLayout(new GridLayout(matches.size(),2));
+                innerPanle.setLayout(new BoxLayout(innerPanle,BoxLayout.Y_AXIS));
                 matches.forEach(match -> {
                     ButtonGroup buttonGroup = new ButtonGroup();
                     Person fromPerson = match.getFrom();
@@ -231,10 +299,39 @@ public class BouteFrame extends CommonFrame{
                     });
                     buttonGroup.add(fromRadioButton);
                     buttonGroup.add(toRadioButton);
-                    innerPanle.add(fromRadioButton);
-                    innerPanle.add(toRadioButton);
+                    JButton clearSelection = new JButton("clear");
+                    clearSelection.addActionListener(e->{
+                        buttonGroup.clearSelection();
+                        match.setSuccessor(new Person());
+                    });
+                    buttonGroup.add(clearSelection);
+                    JPanel radioPanel = new JPanel();
+                    radioPanel.setLayout(new BoxLayout(radioPanel,BoxLayout.X_AXIS));
+                    radioPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                    radioPanel.add(fromRadioButton);
+                    radioPanel.add(toRadioButton);
+                    radioPanel.add(clearSelection);
+
+                    TitledBorder titleBorder = BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(Color.BLACK, 0),
+                            "(".concat(match.getMatchId().toString()).concat(")"),
+                            TitledBorder.DEFAULT_JUSTIFICATION,
+                            TitledBorder.DEFAULT_POSITION,
+                            new Font("Serif",Font.ITALIC ,15),
+                            new Color(220, 20, 60)
+                    );
+                    radioPanel.setBorder(titleBorder);
+                    innerPanle.setAlignmentX(Component.LEFT_ALIGNMENT);
+                    innerPanle.add(radioPanel);
+
+                    JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+                    separator.setPreferredSize(new Dimension(0, 1)); // Reduce height
+                    separator.setBorder(new EmptyBorder(0, 0, 0, 0)); // Remove any additional padding or margin
+
+                    innerPanle.add(separator);
                 });
-                jscrollPanle.add(innerPanle, BorderLayout.CENTER);
+
+                jscrollPanle.add(innerPanle, BorderLayout.NORTH);
 
                 Utility.converter(event.getFixture().getPersons()).forEach(vec->{
                     this.fixtureTableModel.getDefaultTableModel().addRow(vec);
@@ -246,7 +343,7 @@ public class BouteFrame extends CommonFrame{
 
         });
         jsp.add(pairedOptions);
-        jsp.add(submit);
+        jsp.add(this.findButton);
         this.add(jsp,BorderLayout.NORTH);
     }
 
@@ -262,7 +359,7 @@ public class BouteFrame extends CommonFrame{
         matcherColumn.add("Red Corner");
         matcherColumn.add("Blue Corner");
         matcherColumn.add("Winner");
-        this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>());
+        this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>(),null);
         JTabbedPane pane = new JTabbedPane();
         pane.add("Matcher List", new JScrollPane(jscrollPanle));
         pane.add("Fixture",fixterPanel);
