@@ -59,7 +59,7 @@ public class Library  extends CommonFrame {
                     FindFrame findFrame = new FindFrame("Find",persons,keySelected);
                     findFrame.northpanel();
                     findFrame.addDetails(db);
-                    findFrame.southPanel();
+                    findFrame.southPanel(db);
                 }else {
                     alert("Please select valid file Id");
                 }

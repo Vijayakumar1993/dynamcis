@@ -70,6 +70,11 @@ public class Person implements Serializable {
         vector.add(this.weight.toString());
         return vector;
     }
+
+    public Boolean isValid(){
+        return  !this.name.isEmpty() && !this.gender.toString().isEmpty() && !this.categories.toString().isEmpty() && !this.weight.toString().isEmpty()  ;
+    }
+
     public static Vector<String> keys(){
         Vector<String> keys = new Vector<>();
         keys.add("Id");

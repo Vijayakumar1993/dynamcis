@@ -1,14 +1,14 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
-import org.dynamics.model.*;
-import org.dynamics.model.Event;
+import org.dynamics.model.Categories;
+import org.dynamics.model.Gender;
+import org.dynamics.model.Person;
+import org.dynamics.model.TablePair;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -23,6 +23,7 @@ public class FindFrame extends CommonFrame{
     private List<Person> filteredPersons;
     private TablePair tableModel;
     private JLabel loger ;
+    private JButton find;
     private String fileKey;
     public FindFrame(String title, List<Person> persons, String fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
@@ -68,8 +69,8 @@ public class FindFrame extends CommonFrame{
         jsp.add(weightPanel);
 
         //submit button
-        JButton submit = new JButton("Find");
-        submit.addActionListener(a->{
+        this.find = new JButton("Find");
+        this.find.addActionListener(a->{
             String selectedName = nameField.getText();
             String selecetdGender = genderBox.getSelectedItem().toString();
             String selectedCategory = categoresBox.getSelectedItem().toString();
@@ -114,13 +115,90 @@ public class FindFrame extends CommonFrame{
 
             this.loger.setText("Total : "+filteredPersons.size());
         });
-        jsp.add(submit);
+        jsp.add(this.find);
 
         this.add(jsp,BorderLayout.NORTH);
     }
 
-    public void southPanel(){
-        this.add(this.loger, BorderLayout.SOUTH);
+    public void southPanel(Db db){
+        JButton createPerson = new JButton("Create Player");
+        JButton deletePlayer = new JButton("Delete Player");
+
+        deletePlayer.addActionListener(e->{
+
+            Integer result = JOptionPane.showConfirmDialog(this, "Are you sure?");
+            if(result == JOptionPane.YES_OPTION){
+                try {
+                    JTable jTable = tableModel.getjTable();
+                    List<String> removalIds = new LinkedList<>();
+                    IntStream.range(0,jTable.getRowCount()).forEach(a->{
+                        String id = jTable.getValueAt(a,0).toString();
+                        removalIds.add(id);
+                    });
+                    if(!removalIds.isEmpty()){
+                        Integer options = JOptionPane.showConfirmDialog(this, "Total : "+removalIds.size());
+                        if(options == JOptionPane.YES_OPTION){
+                            List<Person> removalPersons = this.persons.stream().filter(p->removalIds.contains(p.getId()+"")).collect(Collectors.toList());
+                            boolean isRemoved = this.persons.removeAll(removalPersons);
+                            System.out.println("Is Removed "+isRemoved);
+                            db.insert(fileKey,this.persons);
+                            alert(removalIds.size()+" Removed successfully.");
+                        }
+                    }
+
+                } catch (Exception ex) {
+                    alert(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        });
+        createPerson.addActionListener(a->{
+            JTextField name = textField();
+            name.setBorder(BorderFactory.createTitledBorder("Player Name"));
+            JComboBox<String> gender =  comboBox(Arrays.stream(Gender.values()).map(as->as.toString()).collect(Collectors.toList()));
+            gender.setBorder(BorderFactory.createTitledBorder("Team Name"));
+            JComboBox<String> category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
+            category.setBorder(BorderFactory.createTitledBorder("Description"));
+            JComboBox<String> weights = comboBox(IntStream.rangeClosed(0,100).mapToObj(sa->sa+"").collect(Collectors.toList()));
+            weights.setBorder(BorderFactory.createTitledBorder("Weight"));
+
+            JPanel jsp = new JPanel();
+            jsp.setLayout(new GridLayout(4,1,10,10));
+            jsp.add(name);
+            jsp.add(gender);
+            jsp.add(category);
+            jsp.add(weights);
+
+            confirmation("Please enter Player details.", ()->jsp);
+
+            try{
+                Person person = new Person();
+                person.setId(Utility.getRandom());
+                person.setName(name.getText());
+                person.setGender(Gender.valueOf(gender.getSelectedItem().toString()));
+                person.setCategories(Categories.valueOf(category.getSelectedItem().toString()));
+                person.setWeight(Double.valueOf(weights.getSelectedItem().toString()));
+                this.persons.add(person);
+                db.insert(fileKey,this.persons);
+            }catch (Exception e){
+                e.printStackTrace();
+                alert(e.getMessage());
+            }
+        });
+        JPanel westPan = new JPanel();
+        westPan.setLayout(new FlowLayout());
+        westPan.add(this.loger);
+
+        JPanel eastPan = new JPanel();
+        westPan.setLayout(new FlowLayout());
+        eastPan.add(deletePlayer);
+        eastPan.add(createPerson);
+
+        JPanel jp = new JPanel();
+        jp.setLayout(new BorderLayout());
+        jp.add(westPan, BorderLayout.WEST);
+        jp.add(eastPan,BorderLayout.EAST);
+        this.add(jp, BorderLayout.SOUTH);
     }
 
     public void addDetails(Db db){
@@ -128,11 +206,10 @@ public class FindFrame extends CommonFrame{
         Map<String, ActionListener> actions = new LinkedHashMap<>();
         BiConsumer<JTable, TableModelEvent> consumer = (table,modelEvet)->{
             int row = modelEvet.getFirstRow();
-            System.out.println(row);
-            if(row==0){
-                return;
-            }
-            String personId = table.getValueAt(modelEvet.getFirstRow(),0).toString();
+            int column = 0;
+            if(table.getRowCount()<=0) return;
+            String personId = table.getValueAt(row,column).toString();
+            System.out.println("Selected person "+personId);
             Person existingPerson = this.persons.stream().filter(people->people.getId()==Long.parseLong(personId)).collect(Collectors.toList()).get(0);
             if(existingPerson!=null){
                 int firstRow = modelEvet.getFirstRow();
@@ -166,8 +243,8 @@ public class FindFrame extends CommonFrame{
                         break;
                     case 4:
                         try {
-                           Double weight =  Double.parseDouble(changedEvents);
-                           existingPerson.setWeight(weight);
+                            Double weight =  Double.parseDouble(changedEvents);
+                            existingPerson.setWeight(weight);
                         }catch (Exception e){
                             e.printStackTrace();
                             alert("Invalid weight found at "+modelEvet.getFirstRow()+", Please provide valid number");
