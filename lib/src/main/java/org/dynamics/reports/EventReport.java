@@ -6,6 +6,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.dynamics.model.Event;
+import org.dynamics.model.Fixture;
 import org.dynamics.model.Match;
 import org.dynamics.model.Person;
 
@@ -30,13 +31,14 @@ public class EventReport implements Report{
 
         String eventName = event.getEventName();
         String eventDescription = event.getDescription();
-        Paragraph header = new Paragraph(eventName+"\n"+eventDescription);
+        Paragraph header = new Paragraph(eventName+"("+event.getId()+")\n"+eventDescription);
         header.setAlignment(Paragraph.ALIGN_CENTER);
         doc.add(header);
 
-        doc.add(new Paragraph("\n\n"));
+        doc.add(new Paragraph("\n"));
 
         List<Match> matches = event.getMatcher().getMatches();
+        List<Person> fixtures = event.getFixture().getPersons();
         PdfPTable table = new PdfPTable(5);
         PdfPCell serionNumber = getPdfCell("S.No");
         table.addCell(serionNumber);
@@ -67,6 +69,35 @@ public class EventReport implements Report{
             }
         });
         doc.add(table);
+
+        if(fixtures!=null && !fixtures.isEmpty()){
+
+            PdfPTable fixtrueTable = new PdfPTable(6);
+            PdfPCell sn = getPdfCell("S.No");
+            fixtrueTable.addCell(sn);
+            fixtrueTable.addCell(getPdfCell("Player Id"));
+            fixtrueTable.addCell(getPdfCell("Name"));
+            fixtrueTable.addCell(getPdfCell("Gender"));
+            fixtrueTable.addCell(getPdfCell("Category"));
+            fixtrueTable.addCell(getPdfCell("Weight"));
+            fixtrueTable.setWidths(new float[]{1f,3f,2f,1f,1f,1f});
+
+            fixtures.forEach(person->{
+                addStringCell((fixtures.indexOf(person)+1)+"",fixtrueTable);
+                addStringCell(person.getId()+"",fixtrueTable);
+                addStringCell(person.getName().concat("\n(").concat(person.getId()+"").concat(")"),fixtrueTable);
+                addStringCell(person.getGender().toString(),fixtrueTable);
+                addStringCell(person.getCategories().toString(),fixtrueTable);
+                addStringCell(person.getWeight().toString(),fixtrueTable);
+            });
+
+
+            Paragraph fixtureHeader = new Paragraph("\nFixtures");
+            fixtureHeader.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(fixtureHeader);
+            doc.add(new Paragraph("\n"));
+            doc.add(fixtrueTable);
+        }
         doc.close();
         this.pdfWriter.close();
         JOptionPane.showMessageDialog(null, "PDF Generated successfully.");

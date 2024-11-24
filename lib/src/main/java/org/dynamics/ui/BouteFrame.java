@@ -33,7 +33,10 @@ public class BouteFrame extends CommonFrame{
         JPanel panle = new JPanel();
         panle.setLayout(new BorderLayout());
         JButton updateMatch = new JButton("Save");
+        updateMatch.setBackground(Color.GREEN);
+
         JButton mergeWithFixture = new JButton("Next Match");
+        mergeWithFixture.setBackground(Color.GREEN);
 
         JButton shuffle = new JButton("Shuffle");
         JButton clear = new JButton("Clear");
@@ -172,10 +175,11 @@ public class BouteFrame extends CommonFrame{
                         }
                     }else{
                         try {
-                            eventPanel(succesors,db,dbEvent);
+                            Event nEvent = eventPanel(succesors,db,dbEvent);
                             List<String> paired = this.db.keyFilterBy("Event_");
                             DefaultComboBoxModel<Item> comboBoxModel = new DefaultComboBoxModel<Item>();
                             List<Item> sortedItems = new LinkedList<>();
+                            sortedItems.add(new Item(0L, "description"));
                             paired.forEach(s->{
                                 try {
                                     Event event = db.findObject(s);

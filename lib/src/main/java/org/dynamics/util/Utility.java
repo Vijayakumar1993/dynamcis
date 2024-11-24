@@ -1,13 +1,8 @@
 package org.dynamics.util;
 
 import org.dynamics.model.*;
-import org.dynamics.model.Event;
 
-import javax.swing.*;
-import java.awt.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -15,7 +10,7 @@ public class Utility {
 
     public static Long getRandom(){
         Random random = new Random();
-        return Math.abs(random.nextLong());
+        return Math.abs(Long.valueOf(random.nextInt()));
     }
 
     public Optional<List<Person>> filter(List<Person> persons){

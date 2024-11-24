@@ -82,6 +82,9 @@ public abstract class CommonFrame extends JFrame {
     }
 
     public Event eventPanel(List<Person> peoples, Db db, Event parentEvent) throws IOException {
+       if(peoples.size()<=0){
+           throw new IOException("Unable to create event for the peoples");
+       }
         JTextField eventName = textField();
         eventName.setBorder(BorderFactory.createTitledBorder("Event Name"));
         JTextField teamName = textField();
@@ -90,7 +93,7 @@ public abstract class CommonFrame extends JFrame {
         desciption.setBorder(BorderFactory.createTitledBorder("Description"));
 
         JPanel jsp = new JPanel();
-        jsp.setLayout(new GridLayout(3,1));
+        jsp.setLayout(new GridLayout(3,1,10,10));
         jsp.add(eventName);
         jsp.add(teamName);
         jsp.add(desciption);

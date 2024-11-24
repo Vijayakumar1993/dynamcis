@@ -39,6 +39,11 @@ public class FindFrame extends CommonFrame{
         JPanel jsp = new JPanel();
         jsp.setBorder(BorderFactory.createTitledBorder("Find"));
         jsp.setBackground(Color.WHITE);
+
+        JTextField ids = textField();
+        ids.setBorder(BorderFactory.createTitledBorder("Player Id"));
+        jsp.add(ids);
+
         //name filter
         JTextField nameField = textField();
         nameField.setBorder(BorderFactory.createTitledBorder("Name"));
@@ -72,12 +77,13 @@ public class FindFrame extends CommonFrame{
         this.find = new JButton("Find");
         this.find.addActionListener(a->{
             String selectedName = nameField.getText();
+            String selectedId = ids.getText().toString();
             String selecetdGender = genderBox.getSelectedItem().toString();
             String selectedCategory = categoresBox.getSelectedItem().toString();
             String selectedFrom = weightFrom.getSelectedItem().toString();
             String selectedTo = weightTo.getSelectedItem().toString();
             filteredPersons = persons.stream().filter(nameFilter->{
-                        if(selectedName!=""){
+                        if(selectedName.length()>0){
                             return nameFilter.getName().toLowerCase().contains(selectedName.toLowerCase());
                         }else{
                             return true;
@@ -85,6 +91,12 @@ public class FindFrame extends CommonFrame{
                     }).filter(genderFilter->{
                         if(selecetdGender!=""){
                             return genderFilter.getGender().toString().equalsIgnoreCase(selecetdGender);
+                        }else{
+                            return true;
+                        }
+                    }).filter(idsFilter->{
+                        if(selectedId.length()>0){
+                            return (""+idsFilter.getId()).equalsIgnoreCase(selectedId);
                         }else{
                             return true;
                         }
@@ -122,8 +134,8 @@ public class FindFrame extends CommonFrame{
 
     public void southPanel(Db db){
         JButton createPerson = new JButton("Create Player");
-        JButton deletePlayer = new JButton("Delete Player");
-
+        JButton deletePlayer = new JButton("Delete Players");
+        deletePlayer.setBackground(Color.RED);
         deletePlayer.addActionListener(e->{
 
             Integer result = JOptionPane.showConfirmDialog(this, "Are you sure?");
@@ -136,13 +148,14 @@ public class FindFrame extends CommonFrame{
                         removalIds.add(id);
                     });
                     if(!removalIds.isEmpty()){
-                        Integer options = JOptionPane.showConfirmDialog(this, "Total : "+removalIds.size());
+                        Integer options = JOptionPane.showConfirmDialog(this, "Total  "+removalIds.size()+" players are found to remove? \nAre you sure to remove?");
                         if(options == JOptionPane.YES_OPTION){
                             List<Person> removalPersons = this.persons.stream().filter(p->removalIds.contains(p.getId()+"")).collect(Collectors.toList());
                             boolean isRemoved = this.persons.removeAll(removalPersons);
                             System.out.println("Is Removed "+isRemoved);
                             db.insert(fileKey,this.persons);
                             alert(removalIds.size()+" Removed successfully.");
+                            this.find.doClick();
                         }
                     }
 
@@ -156,9 +169,9 @@ public class FindFrame extends CommonFrame{
             JTextField name = textField();
             name.setBorder(BorderFactory.createTitledBorder("Player Name"));
             JComboBox<String> gender =  comboBox(Arrays.stream(Gender.values()).map(as->as.toString()).collect(Collectors.toList()));
-            gender.setBorder(BorderFactory.createTitledBorder("Team Name"));
+            gender.setBorder(BorderFactory.createTitledBorder("Gender"));
             JComboBox<String> category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
-            category.setBorder(BorderFactory.createTitledBorder("Description"));
+            category.setBorder(BorderFactory.createTitledBorder("Category"));
             JComboBox<String> weights = comboBox(IntStream.rangeClosed(0,100).mapToObj(sa->sa+"").collect(Collectors.toList()));
             weights.setBorder(BorderFactory.createTitledBorder("Weight"));
 
