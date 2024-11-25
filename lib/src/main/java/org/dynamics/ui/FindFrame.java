@@ -193,6 +193,7 @@ public class FindFrame extends CommonFrame{
                 person.setWeight(Double.valueOf(weights.getSelectedItem().toString()));
                 this.persons.add(person);
                 db.insert(fileKey,this.persons);
+                alert("Person "+person.getName()+" created successfully....!");
             }catch (Exception e){
                 e.printStackTrace();
                 alert(e.getMessage());

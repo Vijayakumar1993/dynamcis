@@ -83,6 +83,7 @@ public class Library  extends CommonFrame {
         bouteMenuItems.put("List Events", (ActionEvent e)->{
             try {
                 EventListFrame eventListFrame = new EventListFrame("List Events");
+                eventListFrame.northPanel(db);
                 eventListFrame.listEvents(db);
                 eventListFrame.southPanel();
             } catch (Exception ex) {

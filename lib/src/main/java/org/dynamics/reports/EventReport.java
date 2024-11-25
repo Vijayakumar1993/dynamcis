@@ -104,13 +104,18 @@ public class EventReport implements Report{
 
     }
 
-    public PdfPCell getPdfCell(String msg){
-        PdfPCell cell = new PdfPCell(new Phrase(msg,new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD,BaseColor.WHITE)));
-        cell.setBackgroundColor(BaseColor.BLACK);
-        return  cell;
+    @Override
+    public void generateReport(List<Event> event,String title) throws DocumentException {
+
     }
 
-    public void addStringCell(String msg,PdfPTable table){
+    public PdfPCell getPdfCell(String msg) {
+        PdfPCell cell = new PdfPCell(new Phrase(msg, new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD, BaseColor.WHITE)));
+        cell.setBackgroundColor(BaseColor.BLACK);
+        return cell;
+    }
+
+    public void addStringCell(String msg, PdfPTable table) {
         PdfPCell cell = new PdfPCell();
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM); // Only horizontal borders
         Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
