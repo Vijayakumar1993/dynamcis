@@ -155,6 +155,10 @@ public class EventListFrame extends CommonFrame{
         eventReport.addActionListener(e->{
             Report report = null;
             try {
+                if(this.filterEvents.size()<=0){
+                    alert("No Events are available to generate report.");
+                    return;
+                }
                 Optional<String> saveFile = fileSaver();
                 if(saveFile.isPresent()){
                     report = new EventListReport(saveFile.get()+".pdf");

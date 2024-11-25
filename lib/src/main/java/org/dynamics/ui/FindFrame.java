@@ -233,35 +233,36 @@ public class FindFrame extends CommonFrame{
                 Object valueAt = table.getValueAt(firstRow, firstColumn);
                 if(valueAt==null) return;
                 String changedEvents = valueAt.toString();
-                switch (modelEvet.getColumn()){
+                switch (modelEvet.getColumn()) {
                     case 1:
                         existingPerson.setName(changedEvents);
                         break;
                     case 2:
-                        try{
+                        try {
                             Gender gender = Gender.valueOf(changedEvents);
                             existingPerson.setGender(gender);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            alert("Invalid Gender found at Row "+modelEvet.getFirstRow()+", please update with"+Gender.values().toString());
+                            alert("Invalid Gender found at Row " + modelEvet.getFirstRow() + ", please update with" + Arrays.stream(Gender.values()).collect(Collectors.toList()));
                         }
                         break;
                     case 3:
-                        try{
-                            Categories categories = Categories.valueOf(changedEvents);
+                        Categories categories = null;
+                        try {
+                            categories = Categories.valueOf(changedEvents);
                             existingPerson.setCategories(categories);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            alert("Invalid Gender found at Row "+modelEvet.getFirstRow()+", please update with"+Gender.values().toString());
+                            alert("Invalid Gender found at Row " + modelEvet.getFirstRow() + ", please update with" + Arrays.stream(Categories.values()).collect(Collectors.toList()));
                         }
                         break;
                     case 4:
                         try {
-                            Double weight =  Double.parseDouble(changedEvents);
+                            Double weight = Double.parseDouble(changedEvents);
                             existingPerson.setWeight(weight);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            alert("Invalid weight found at "+modelEvet.getFirstRow()+", Please provide valid number");
+                            alert("Invalid weight found at " + modelEvet.getFirstRow() + ", Please provide valid number");
                         }
                         break;
                     default:
