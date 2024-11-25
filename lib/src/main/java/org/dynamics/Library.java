@@ -5,6 +5,8 @@ package org.dynamics;
 
 import org.dynamics.db.Db;
 import org.dynamics.db.LevelDb;
+import org.dynamics.model.FileImport;
+import org.dynamics.model.Item;
 import org.dynamics.model.Person;
 import org.dynamics.reader.CsvFileReader;
 import org.dynamics.reader.Reader;
@@ -17,12 +19,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Library  extends CommonFrame {
     private Map<String, Map<String, ActionListener>> men = new LinkedHashMap<>();
@@ -50,13 +54,27 @@ public class Library  extends CommonFrame {
         });
         searchMenuItems.put("Player",(ActionEvent e)->{
             try {
-                JComboBox<String> comboBox = comboBox(db.keyFilterBy("File_"));
-                confirmation("Please select imported file.",()->comboBox);
-                String keySelected = comboBox.getSelectedItem().toString().trim();
+                List<String> fileImports = db.keyFilterBy("File_");
+                JComboBox<Item> comboBox = new JComboBox<>();
 
-                if(!keySelected.isEmpty()){
-                    List<Person> persons = db.find(keySelected);
-                    FindFrame findFrame = new FindFrame("Find",persons,keySelected);
+                 fileImports.stream().map(a->{
+                    try {
+                        FileImport fileImport  = db.findObject(a);
+                        comboBox.addItem(new Item(fileImport.getId(),fileImport.getName()));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        alert(ex.getMessage());
+                    }
+                    return null;
+                }).collect(Collectors.toList());
+
+                confirmation("Please select imported file.",()->comboBox);
+                Item keySelected = (Item)comboBox.getSelectedItem();
+
+                if(keySelected.getId()!=0){
+                    String fileKey = "File_"+keySelected.getId().toString();
+                    FileImport fileImport = db.findObject(fileKey);
+                    FindFrame findFrame = new FindFrame("Find",fileImport.getPerson(),fileImport);
                     findFrame.northpanel();
                     findFrame.addDetails(db);
                     findFrame.southPanel(db);
@@ -96,10 +114,10 @@ public class Library  extends CommonFrame {
                 fileChooser().ifPresent(filePath->{
                     Reader<Person> reader = null;
                     try {
-                        reader = new CsvFileReader(filePath);
+                        FileImport fileImport = new FileImport();
+                        reader = new CsvFileReader(filePath,fileImport);
                         List<Person> persons =  reader.read();
-                        String key = Paths.get(filePath).getFileName().toString().concat("_"+LocalDateTime.now().toString());
-                        db.insert("File_"+key,persons);
+                        db.insert("File_"+fileImport.getId(),fileImport);
                         alert("Total : "+persons.size()+" Uploaded Successfully...!");
                     } catch (Exception ex) {
                         ex.printStackTrace();

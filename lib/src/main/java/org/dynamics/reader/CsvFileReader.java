@@ -2,6 +2,7 @@ package org.dynamics.reader;
 
 import org.dynamics.constant.Constant;
 import org.dynamics.model.Categories;
+import org.dynamics.model.FileImport;
 import org.dynamics.model.Gender;
 import org.dynamics.model.Person;
 import org.dynamics.util.Utility;
@@ -16,7 +17,12 @@ import java.util.Optional;
 
 public class CsvFileReader extends Constant implements Reader<Person> {
     private FileReader reader;
-    public CsvFileReader(String fileName) throws FileNotFoundException {
+    private FileImport fileImport;
+    public CsvFileReader(String fileName,FileImport fileImport) throws FileNotFoundException {
+        this.fileImport = fileImport;
+        fileImport.setId(Utility.getRandom());
+        fileImport.setName(fileName);
+        fileImport.setImportedBy(System.getProperty("user.name"));
         reader = new FileReader(fileName);
     }
     @Override
@@ -31,6 +37,8 @@ public class CsvFileReader extends Constant implements Reader<Person> {
                     persons.add(per);
             }
         }
+        fileImport.setTotalCount(persons.size());
+        fileImport.setPerson(persons);
         return persons;
     }
 
@@ -44,6 +52,7 @@ public class CsvFileReader extends Constant implements Reader<Person> {
             person.setGender(Gender.valueOf(data[1].toUpperCase()));
             person.setCategories(Categories.valueOf(data[2].toUpperCase()));
             person.setWeight(Double.valueOf(data[3]));
+            person.setTeamName(data[4]);
             return person;
         }
 

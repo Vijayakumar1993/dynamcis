@@ -1,10 +1,7 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
-import org.dynamics.model.Categories;
-import org.dynamics.model.Gender;
-import org.dynamics.model.Person;
-import org.dynamics.model.TablePair;
+import org.dynamics.model.*;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -24,8 +21,8 @@ public class FindFrame extends CommonFrame{
     private TablePair tableModel;
     private JLabel loger ;
     private JButton find;
-    private String fileKey;
-    public FindFrame(String title, List<Person> persons, String fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    private FileImport fileKey;
+    public FindFrame(String title, List<Person> persons, FileImport fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.persons = persons;
         this.fileKey = fileKey;
@@ -48,6 +45,12 @@ public class FindFrame extends CommonFrame{
         JTextField nameField = textField();
         nameField.setBorder(BorderFactory.createTitledBorder("Name"));
         jsp.add(nameField);
+
+
+        //name filter
+        JTextField teamName = textField();
+        teamName.setBorder(BorderFactory.createTitledBorder("Team Name"));
+        jsp.add(teamName);
 
         //gender filter
         JComboBox<String> genderBox = comboBox(Arrays.stream(Gender.values()).map(a->a.toString()).collect(Collectors.toList()));
@@ -78,6 +81,7 @@ public class FindFrame extends CommonFrame{
         this.find.addActionListener(a->{
             String selectedName = nameField.getText();
             String selectedId = ids.getText().toString();
+            String selectedTeamName = teamName.getText().toString();
             String selecetdGender = genderBox.getSelectedItem().toString();
             String selectedCategory = categoresBox.getSelectedItem().toString();
             String selectedFrom = weightFrom.getSelectedItem().toString();
@@ -85,6 +89,12 @@ public class FindFrame extends CommonFrame{
             filteredPersons = persons.stream().filter(nameFilter->{
                         if(selectedName.length()>0){
                             return nameFilter.getName().toLowerCase().contains(selectedName.toLowerCase());
+                        }else{
+                            return true;
+                        }
+                    }).filter(teamFilter->{
+                        if(selectedTeamName.length()>0){
+                            return teamFilter.getTeamName().toLowerCase().contains(selectedTeamName.toLowerCase());
                         }else{
                             return true;
                         }
@@ -153,7 +163,8 @@ public class FindFrame extends CommonFrame{
                             List<Person> removalPersons = this.persons.stream().filter(p->removalIds.contains(p.getId()+"")).collect(Collectors.toList());
                             boolean isRemoved = this.persons.removeAll(removalPersons);
                             System.out.println("Is Removed "+isRemoved);
-                            db.insert(fileKey,this.persons);
+                            fileKey.setPerson(this.persons);
+                            db.insert("File_"+fileKey.getId(),fileKey);
                             alert(removalIds.size()+" Removed successfully.");
                             this.find.doClick();
                         }
@@ -168,6 +179,8 @@ public class FindFrame extends CommonFrame{
         createPerson.addActionListener(a->{
             JTextField name = textField();
             name.setBorder(BorderFactory.createTitledBorder("Player Name"));
+            JTextField teamName = textField();
+            teamName.setBorder(BorderFactory.createTitledBorder("Team Name"));
             JComboBox<String> gender =  comboBox(Arrays.stream(Gender.values()).map(as->as.toString()).collect(Collectors.toList()));
             gender.setBorder(BorderFactory.createTitledBorder("Gender"));
             JComboBox<String> category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
@@ -176,8 +189,9 @@ public class FindFrame extends CommonFrame{
             weights.setBorder(BorderFactory.createTitledBorder("Weight"));
 
             JPanel jsp = new JPanel();
-            jsp.setLayout(new GridLayout(4,1,10,10));
+            jsp.setLayout(new GridLayout(5,1,10,10));
             jsp.add(name);
+            jsp.add(teamName);
             jsp.add(gender);
             jsp.add(category);
             jsp.add(weights);
@@ -188,11 +202,13 @@ public class FindFrame extends CommonFrame{
                 Person person = new Person();
                 person.setId(Utility.getRandom());
                 person.setName(name.getText());
+                person.setTeamName(teamName.getText());
                 person.setGender(Gender.valueOf(gender.getSelectedItem().toString()));
                 person.setCategories(Categories.valueOf(category.getSelectedItem().toString()));
                 person.setWeight(Double.valueOf(weights.getSelectedItem().toString()));
                 this.persons.add(person);
-                db.insert(fileKey,this.persons);
+                fileKey.setPerson(this.persons);
+                db.insert("File_"+fileKey.getId(),fileKey);
                 alert("Person "+person.getName()+" created successfully....!");
             }catch (Exception e){
                 e.printStackTrace();
@@ -270,7 +286,8 @@ public class FindFrame extends CommonFrame{
 
                 }
                 try {
-                    db.insert(this.fileKey,this.persons);
+                    fileKey.setPerson(this.persons);
+                    db.insert("File_"+this.fileKey.getId(),fileKey);
                 } catch (IOException e) {
                     e.printStackTrace();
                     alert(e.getMessage());
