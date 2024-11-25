@@ -191,8 +191,16 @@ public class BouteFrame extends CommonFrame{
                                 }
                             });
                             sortedItems.sort(Comparator.comparing(Item::getDescription));
-                            sortedItems.forEach(comboBoxModel::addElement);
+                            sortedItems.forEach(model->{
+                                comboBoxModel.addElement(model);
+                                System.out.println(model.getId()+" ------- "+nEvent.getId());
+                                if(model.getId().equals(nEvent.getId())){
+                                    System.out.println("Equal id found to select");
+                                    comboBoxModel.setSelectedItem(model);
+                                }
+                            });
                             pairedOptions.setModel(comboBoxModel);
+                            this.findButton.doClick();
                         } catch (IOException e) {
                             alert(e.getMessage());
                             e.printStackTrace();
