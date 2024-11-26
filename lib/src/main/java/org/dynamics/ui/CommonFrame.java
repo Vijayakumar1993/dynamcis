@@ -111,7 +111,7 @@ public abstract class CommonFrame extends JFrame {
             db.insert("Event_"+event1.getId().toString(),event1);
             if(parentEvent!=null)
                 db.insert("Event_"+parentEvent.getId().toString(),parentEvent);
-            alert("Event Created successfully for  the list of "+peoples.size()+" players.");
+            alert(event1.getEventName()+" is Created successfully for  the list of "+peoples.size()+" players.");
         }else{
             alert("Invalid entries for Event, Please enter correct details.");
         }

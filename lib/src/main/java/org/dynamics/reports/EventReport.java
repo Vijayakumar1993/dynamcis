@@ -33,42 +33,46 @@ public class EventReport implements Report{
         String eventDescription = event.getDescription();
         Paragraph header = new Paragraph(eventName+"("+event.getId()+")\n"+eventDescription);
         header.setAlignment(Paragraph.ALIGN_CENTER);
-        doc.add(header);
+        if(eventName!=null ) doc.add(header);
 
         doc.add(new Paragraph("\n"));
 
         List<Match> matches = event.getMatcher().getMatches();
         List<Person> fixtures = event.getFixture().getPersons();
-        PdfPTable table = new PdfPTable(5);
-        PdfPCell serionNumber = getPdfCell("S.No");
-        table.addCell(serionNumber);
 
-        table.addCell(getPdfCell("Match Id"));
-        table.addCell(getPdfCell("Blue Corner"));
-        table.addCell(getPdfCell("Red Corner"));
-        table.addCell(getPdfCell("Winner"));
-        table.setWidths(new float[]{0.5f,2f,2f,2f,2f});
+        if(matches!=null && !matches.isEmpty()){
+            PdfPTable table = new PdfPTable(5);
+            PdfPCell serionNumber = getPdfCell("S.No");
+            table.addCell(serionNumber);
 
-        matches.forEach(a->{
-            Person from = a.getFrom();
-            Person to = a.getTo();
-            Person successor = a.getSuccessor();
-            String fromValue = from.getName().concat("\n(").concat(from.getId()+"").concat(")");
-            String toValue = to.getName().concat("\n(").concat(to.getId()+"").concat(")");
+            table.addCell(getPdfCell("Match Id"));
+            table.addCell(getPdfCell("Blue Corner"));
+            table.addCell(getPdfCell("Red Corner"));
+            table.addCell(getPdfCell("Winner"));
+            table.setWidths(new float[]{0.5f,2f,2f,2f,2f});
 
-            addStringCell((matches.indexOf(a)+1)+"",table);
-            addStringCell(a.getMatchId().toString(),table);
-            addStringCell(fromValue,table);
-            addStringCell(toValue,table);
+            matches.forEach(a->{
+                Person from = a.getFrom();
+                Person to = a.getTo();
+                Person successor = a.getSuccessor();
+                String fromValue = from.getName().concat("\n(").concat(from.getId()+"").concat(")");
+                String toValue = to.getName().concat("\n(").concat(to.getId()+"").concat(")");
 
-            if(successor.getId()!=0){
-                String successorValue = successor.getName().concat("\n(").concat(successor.getId()+"").concat(")");
-                addStringCell(successorValue,table);
-            }else{
-                addStringCell("",table);
-            }
-        });
-        doc.add(table);
+                addStringCell((matches.indexOf(a)+1)+"",table);
+                addStringCell(a.getMatchId().toString(),table);
+                addStringCell(fromValue,table);
+                addStringCell(toValue,table);
+
+                if(successor.getId()!=0){
+                    String successorValue = successor.getName().concat("\n(").concat(successor.getId()+"").concat(")");
+                    addStringCell(successorValue,table);
+                }else{
+                    addStringCell("",table);
+                }
+            });
+            doc.add(table);
+        }
+
 
         if(fixtures!=null && !fixtures.isEmpty()){
 

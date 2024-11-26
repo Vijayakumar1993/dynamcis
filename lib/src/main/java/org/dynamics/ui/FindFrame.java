@@ -1,8 +1,10 @@
 package org.dynamics.ui;
 
+import com.itextpdf.text.DocumentException;
 import org.dynamics.db.Db;
 import org.dynamics.model.*;
 import org.dynamics.model.Event;
+import org.dynamics.reports.EventReport;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -150,6 +152,7 @@ public class FindFrame extends CommonFrame{
     public void southPanel(Db db){
         JButton createPerson = new JButton("Create Player");
         JButton deletePlayer = new JButton("Delete Players");
+        JButton report = new JButton("Generete Report");
         deletePlayer.setBackground(Color.RED);
         deletePlayer.addActionListener(e->{
 
@@ -180,6 +183,28 @@ public class FindFrame extends CommonFrame{
                     ex.printStackTrace();
                 }
             }
+        });
+
+        report.addActionListener(e->{
+            Optional<String> saveFile = fileSaver();
+            if(saveFile.isPresent()){
+                EventReport reporter = null;
+                try {
+                    Event dummyEvent = new Event();
+                    Matcher matcher = new Matcher();
+                    matcher.setMatches(new LinkedList<>());
+                    dummyEvent.setMatcher(matcher);
+                    Fixture fixture = new Fixture();
+                    fixture.setPersons(this.filteredPersons);
+                    dummyEvent.setFixture(fixture);
+                    reporter = new EventReport(saveFile.get().concat(".pdf"));
+                    reporter.generateReport(dummyEvent);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    alert(ex.getMessage());
+                }
+            }
+
         });
         createPerson.addActionListener(a->{
             JTextField name = textField();
@@ -241,6 +266,7 @@ public class FindFrame extends CommonFrame{
         });
         JPanel westPan = new JPanel();
         westPan.setLayout(new FlowLayout());
+        westPan.add(report);
         westPan.add(this.loger);
 
         JPanel eastPan = new JPanel();
@@ -319,7 +345,7 @@ public class FindFrame extends CommonFrame{
             }
 
         };
-        actions.put("Create Event",(event)->{
+        actions.put("Create Fixtures",(event)->{
             List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
             try {
                 eventPanel(peoples,db,null,eventGender,eventCateogory);
