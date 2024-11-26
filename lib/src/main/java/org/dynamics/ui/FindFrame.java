@@ -2,6 +2,7 @@ package org.dynamics.ui;
 
 import org.dynamics.db.Db;
 import org.dynamics.model.*;
+import org.dynamics.model.Event;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -22,6 +23,8 @@ public class FindFrame extends CommonFrame{
     private JLabel loger ;
     private JButton find;
     private FileImport fileKey;
+    private Gender eventGender;
+    private Categories eventCateogory;
     public FindFrame(String title, List<Person> persons, FileImport fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.persons = persons;
@@ -100,6 +103,7 @@ public class FindFrame extends CommonFrame{
                         }
                     }).filter(genderFilter->{
                         if(selecetdGender!=""){
+                            this.eventGender = Gender.valueOf(selecetdGender);
                             return genderFilter.getGender().toString().equalsIgnoreCase(selecetdGender);
                         }else{
                             return true;
@@ -112,6 +116,7 @@ public class FindFrame extends CommonFrame{
                         }
                     }).filter(categoryFilter->{
                         if(selectedCategory!=""){
+                            this.eventCateogory = Categories.valueOf(selectedCategory);
                             return categoryFilter.getCategories().toString().equalsIgnoreCase(selectedCategory);
                         }else{
                             return true;
@@ -317,7 +322,9 @@ public class FindFrame extends CommonFrame{
         actions.put("Create Event",(event)->{
             List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
             try {
-                eventPanel(peoples,db,null);
+                System.out.println("gender seleced to op "+eventGender.toString());
+                System.out.println("gender eventCateogory to op "+eventCateogory.toString());
+              eventPanel(peoples,db,null,eventGender,eventCateogory);
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());

@@ -14,19 +14,21 @@ import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class BouteFrame extends CommonFrame{
     private Db db;
     private Event event;
     private TablePair fixtureTableModel;
     private JPanel jscrollPanle = new JPanel();
-    private JComboBox<Item> pairedOptions;
+    private JComboBox<Item> pairedOptions = new JComboBox<>();
+    private List<String> paired = new LinkedList<>();
     private JButton findButton;
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.db = db;
-        List<String> paired = this.db.keyFilterBy("Event_");
-        pairedOptions = comboBoxForItems("Events",paired,db);
+        this.paired = this.db.keyFilterBy("Event_");
+        comboBoxForItems("Events",paired,db,pairedOptions);
     }
 
     public void southPanel(){
@@ -65,7 +67,7 @@ public class BouteFrame extends CommonFrame{
             }
 
             try {
-              this.event =  db.findObject("Event_"+this.event.getId());
+                this.event =  db.findObject("Event_"+this.event.getId());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(ex.getMessage());
@@ -175,7 +177,7 @@ public class BouteFrame extends CommonFrame{
                         }
                     }else{
                         try {
-                            Event nEvent = eventPanel(succesors,db,dbEvent);
+                            Event nEvent = eventPanel(succesors,db,dbEvent,dbEvent.getSelectedGenderCategory(),dbEvent.getSelecetedEventCategory());
                             List<String> paired = this.db.keyFilterBy("Event_");
                             DefaultComboBoxModel<Item> comboBoxModel = new DefaultComboBoxModel<Item>();
                             List<Item> sortedItems = new LinkedList<>();
@@ -183,7 +185,7 @@ public class BouteFrame extends CommonFrame{
                             paired.forEach(s->{
                                 try {
                                     Event event = db.findObject(s);
-                                    String description = event.getEventName();
+                                    String description = event.getEventName().concat("("+event.getTeamName()+")");
                                     sortedItems.add(new Item(event.getId(), description));
                                 } catch (Exception e) {
                                     alert(e.getMessage());
@@ -354,11 +356,77 @@ public class BouteFrame extends CommonFrame{
             }
 
         });
+
+
+        JComboBox<String> category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
+        category.setBorder(BorderFactory.createTitledBorder("Category"));
+
+        JComboBox<String> gender =  comboBox(Arrays.stream(Gender.values()).map(as->as.toString()).collect(Collectors.toList()));
+        gender.setBorder(BorderFactory.createTitledBorder("Gender"));
+
+        category.addActionListener(a->{
+            String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
+            String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
+            findActions(genderSelectedItems,categorySelectedItem);
+        });
+
+        gender.addActionListener(a->{
+            String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
+            String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
+            findActions(genderSelectedItems,categorySelectedItem);
+        });
+        jsp.add(category);
+        jsp.add(gender);
         jsp.add(pairedOptions);
+
+
         jsp.add(this.findButton);
         this.add(jsp,BorderLayout.NORTH);
     }
 
+
+    public void findActions(String genderSelectedItem, String categorySelectedItem){
+        if(!genderSelectedItem.isEmpty() || !categorySelectedItem.isEmpty()){
+            this.pairedOptions.removeAllItems();
+            this.pairedOptions.addItem(new Item(0L,""));
+            this.paired = this.db.keyFilterBy("Event_");
+            List<Event> existingPairs = this.paired.stream().map(pair-> {
+                        try {
+                            return (Event)db.findObject(pair);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            alert(e.getMessage());
+                        }
+                        return  null;
+                    }).filter(genderFilter->{
+                        if(!genderSelectedItem.isEmpty()){
+                            return  genderFilter.getSelectedGenderCategory().toString().equalsIgnoreCase(genderSelectedItem);
+                        }else{
+                            return true;
+                        }
+                    }).filter(categoryFilter->{
+                        if(!categorySelectedItem.isEmpty()){
+                            return  categoryFilter.getSelecetedEventCategory().toString().equalsIgnoreCase(categorySelectedItem);
+                        }else{
+                            return true;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            existingPairs.forEach(es->{
+                try {
+                    String description = es.getEventName().concat("("+es.getTeamName()+")");
+                    this.pairedOptions.addItem(new Item(es.getId(),description));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    alert(e.getMessage());
+                }
+            });
+        }else{
+            this.pairedOptions.removeAllItems();
+            comboBoxForItems("Events",this.paired,db,this.pairedOptions);
+        }
+    }
     public void centerPanel(){
 
         jscrollPanle.setLayout(new BorderLayout());

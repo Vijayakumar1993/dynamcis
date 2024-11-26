@@ -1,10 +1,8 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
+import org.dynamics.model.*;
 import org.dynamics.model.Event;
-import org.dynamics.model.Item;
-import org.dynamics.model.Person;
-import org.dynamics.model.TablePair;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -81,7 +79,7 @@ public abstract class CommonFrame extends JFrame {
         return Optional.empty();
     }
 
-    public Event eventPanel(List<Person> peoples, Db db, Event parentEvent) throws IOException {
+    public Event eventPanel(List<Person> peoples, Db db, Event parentEvent, Gender gender, Categories categories) throws IOException {
        if(peoples.size()<=0){
            throw new IOException("Unable to create event for the peoples");
        }
@@ -105,6 +103,8 @@ public abstract class CommonFrame extends JFrame {
         event1.setTeamName(teamName.getText());
         event1.setDescription(desciption.getText());
         event1.setParentEvent(parentEvent);
+        event1.setSelectedGenderCategory(gender);
+        event1.setSelecetedEventCategory(categories);
         if(event1.isValid()){
 
             Utility.createEvent(peoples,event1);
@@ -149,14 +149,13 @@ public abstract class CommonFrame extends JFrame {
         return comboBoxs;
     }
 
-    public JComboBox<Item> comboBoxForItems(String title, List<String> paired, Db db){
-        JComboBox<Item> pairedOptions = new JComboBox<>();
+    public JComboBox<Item> comboBoxForItems(String title, List<String> paired, Db db, JComboBox<Item> pairedOptions){
         pairedOptions.addItem(new Item(0l,""));
         List<Item> sortedItems = new LinkedList<>();
         paired.forEach(s->{
             try {
                 Event event = db.findObject(s);
-                String description = event.getEventName();
+                String description = event.getEventName().concat("("+event.getTeamName()+")");
                 sortedItems.add(new Item(event.getId(), description));
             } catch (Exception e) {
                 alert(e.getMessage());

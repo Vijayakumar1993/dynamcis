@@ -5,6 +5,8 @@ import java.util.Vector;
 
 public class Event implements Serializable {
     private Long id;
+    private Categories selecetedEventCategory;
+    private Gender selectedGenderCategory;
     private String eventName;
     private String teamName;
     private String description;
@@ -12,6 +14,21 @@ public class Event implements Serializable {
     private Matcher matcher;
     private Event parentEvent;
 
+    public Categories getSelecetedEventCategory() {
+        return selecetedEventCategory;
+    }
+
+    public void setSelecetedEventCategory(Categories selecetedEventCategory) {
+        this.selecetedEventCategory = selecetedEventCategory;
+    }
+
+    public Gender getSelectedGenderCategory() {
+        return selectedGenderCategory;
+    }
+
+    public void setSelectedGenderCategory(Gender selectedGenderCategory) {
+        this.selectedGenderCategory = selectedGenderCategory;
+    }
 
     public Event getParentEvent() {
         return parentEvent;
