@@ -190,12 +190,13 @@ public class FindFrame extends CommonFrame{
             if(saveFile.isPresent()){
                 EventReport reporter = null;
                 try {
+                    List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
                     Event dummyEvent = new Event();
                     Matcher matcher = new Matcher();
                     matcher.setMatches(new LinkedList<>());
                     dummyEvent.setMatcher(matcher);
                     Fixture fixture = new Fixture();
-                    fixture.setPersons(this.filteredPersons);
+                    fixture.setPersons(peoples);
                     dummyEvent.setFixture(fixture);
                     reporter = new EventReport(saveFile.get().concat(".pdf"));
                     reporter.generateReport(dummyEvent);
