@@ -196,20 +196,39 @@ public class FindFrame extends CommonFrame{
             jsp.add(category);
             jsp.add(weights);
 
-            confirmation("Please enter Player details.", ()->jsp);
+            int result = confirmation("Please enter Player details.", ()->jsp);
 
+            if(result==JOptionPane.CANCEL_OPTION){
+                return;
+            }
             try{
+                Object selectedGender = gender.getSelectedItem();
+                Object selectedCategory = category.getSelectedItem();
+                Object selectedWeight = weights.getSelectedItem();
                 Person person = new Person();
                 person.setId(Utility.getRandom());
                 person.setName(name.getText());
                 person.setTeamName(teamName.getText());
-                person.setGender(Gender.valueOf(gender.getSelectedItem().toString()));
-                person.setCategories(Categories.valueOf(category.getSelectedItem().toString()));
-                person.setWeight(Double.valueOf(weights.getSelectedItem().toString()));
-                this.persons.add(person);
-                fileKey.setPerson(this.persons);
-                db.insert("File_"+fileKey.getId(),fileKey);
-                alert("Person "+person.getName()+" created successfully....!");
+                if(selectedGender!=""){
+                    person.setGender(Gender.valueOf(gender.getSelectedItem().toString()));
+                }
+                if(selectedCategory!=""){
+                    person.setCategories(Categories.valueOf(category.getSelectedItem().toString()));
+                }
+                if(selectedWeight!=""){
+                    person.setWeight(Double.valueOf(weights.getSelectedItem().toString()));
+                }
+                if(person.isValid()){
+                    this.persons.add(person);
+                    fileKey.setPerson(this.persons);
+                    db.insert("File_"+fileKey.getId(),fileKey);
+                    alert("Person "+person.getName()+" created successfully....!");
+                    this.find.doClick();
+                    createPerson.doClick();
+                }else {
+                    alert("Please fill all the fields.");
+                }
+
             }catch (Exception e){
                 e.printStackTrace();
                 alert(e.getMessage());

@@ -82,7 +82,7 @@ public class Person implements Serializable {
     }
 
     public Boolean isValid(){
-        return  !this.name.isEmpty() && !this.gender.toString().isEmpty() && !this.categories.toString().isEmpty() && !this.weight.toString().isEmpty()  ;
+        return  !this.teamName.isEmpty() && !this.name.isEmpty() && !this.gender.toString().isEmpty() && !this.categories.toString().isEmpty() && !this.weight.toString().isEmpty()  ;
     }
 
     public static Vector<String> keys(){

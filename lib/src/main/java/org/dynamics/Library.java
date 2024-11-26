@@ -14,6 +14,7 @@ import org.dynamics.ui.BouteFrame;
 import org.dynamics.ui.CommonFrame;
 import org.dynamics.ui.EventListFrame;
 import org.dynamics.ui.FindFrame;
+import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +33,6 @@ public class Library  extends CommonFrame {
     private Map<String, Map<String, ActionListener>> men = new LinkedHashMap<>();
     private Map<String, ActionListener> fileMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> bouteMenuItems = new LinkedHashMap<>();
-    private Map<String, ActionListener> searchMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> contactUs = new LinkedHashMap<>();
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
@@ -52,7 +52,29 @@ public class Library  extends CommonFrame {
             j.add(cont);
             jf.add(j);
         });
-        searchMenuItems.put("Player",(ActionEvent e)->{
+        fileMenuItems.put("New Players", (ActionEvent e)->{
+            String reportTitle = JOptionPane.showInputDialog("Please Enter the Player list name");
+            if(reportTitle.toString().isEmpty()){
+                alert("Please enter valid Report title");
+                return;
+            }
+            FileImport fileImport = new FileImport();
+            fileImport.setName(reportTitle);
+            fileImport.setImportedBy(System.getProperty("user.name"));
+            fileImport.setId(Utility.getRandom());
+            fileImport.setImportedTime(LocalDateTime.now());
+            try{
+                db.insert("File_"+fileImport.getId(),fileImport);
+                FindFrame findFrame = new FindFrame("Find",fileImport.getPerson(),fileImport);
+                findFrame.northpanel();
+                findFrame.addDetails(db);
+                findFrame.southPanel(db);
+            }catch (Exception es){
+                alert(es.getMessage());
+                es.printStackTrace();
+            }
+        });
+        fileMenuItems.put("Find Players",(ActionEvent e)->{
             try {
                 List<String> fileImports = db.keyFilterBy("File_");
                 JComboBox<Item> comboBox = new JComboBox<>();
@@ -68,19 +90,21 @@ public class Library  extends CommonFrame {
                     return null;
                 }).collect(Collectors.toList());
 
-                confirmation("Please select imported file.",()->comboBox);
-                Item keySelected = (Item)comboBox.getSelectedItem();
-
-                if(keySelected.getId()!=0){
-                    String fileKey = "File_"+keySelected.getId().toString();
-                    FileImport fileImport = db.findObject(fileKey);
-                    FindFrame findFrame = new FindFrame("Find",fileImport.getPerson(),fileImport);
-                    findFrame.northpanel();
-                    findFrame.addDetails(db);
-                    findFrame.southPanel(db);
-                }else {
-                    alert("Please select valid file Id");
+                Integer result = confirmation("Please select imported file.",()->comboBox);
+                if(result==JOptionPane.YES_OPTION){
+                    Item keySelected = (Item)comboBox.getSelectedItem();
+                    if(keySelected.getId()!=0){
+                        String fileKey = "File_"+keySelected.getId().toString();
+                        FileImport fileImport = db.findObject(fileKey);
+                        FindFrame findFrame = new FindFrame("Find",fileImport.getPerson(),fileImport);
+                        findFrame.northpanel();
+                        findFrame.addDetails(db);
+                        findFrame.southPanel(db);
+                    }else {
+                        alert("Please select valid file Id");
+                    }
                 }
+
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(ex.getMessage());
@@ -109,7 +133,9 @@ public class Library  extends CommonFrame {
                 alert(ex.getMessage());
             }
         });
-        fileMenuItems.put("Import",(ActionEvent e)->{
+
+
+        fileMenuItems.put("Import Players",(ActionEvent e)->{
             try {
                 fileChooser().ifPresent(filePath->{
                     Reader<Person> reader = null;
@@ -131,9 +157,8 @@ public class Library  extends CommonFrame {
             }
         });
 
-        men.put("File", fileMenuItems);
+        men.put("Player List", fileMenuItems);
         men.put("Event", bouteMenuItems);
-        men.put("Players", searchMenuItems);
         men.put("Contact Us",contactUs);
         super.menuBar(men);
     }

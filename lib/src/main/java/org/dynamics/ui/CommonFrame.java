@@ -86,9 +86,9 @@ public abstract class CommonFrame extends JFrame {
            throw new IOException("Unable to create event for the peoples");
        }
         JTextField eventName = textField();
-        eventName.setBorder(BorderFactory.createTitledBorder("Event Name"));
+        eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         JTextField teamName = textField();
-        teamName.setBorder(BorderFactory.createTitledBorder("Team Name"));
+        teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         JTextField desciption = textField();
         desciption.setBorder(BorderFactory.createTitledBorder("Description"));
 
@@ -98,7 +98,7 @@ public abstract class CommonFrame extends JFrame {
         jsp.add(teamName);
         jsp.add(desciption);
 
-        confirmation("Please enter event details.", ()->jsp);
+        confirmation("Please enter the details.", ()->jsp);
         Event event1 = new Event();
         event1.setId(Utility.getRandom());
         event1.setEventName(eventName.getText());
@@ -139,8 +139,8 @@ public abstract class CommonFrame extends JFrame {
         return new TablePair(model,table);
     }
 
-    public void confirmation(String msg, Supplier<JComponent> supplier){
-        JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+    public Integer confirmation(String msg, Supplier<JComponent> supplier){
+       return JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
     }
 
     public JComboBox<String> comboBox(List<String> data){
