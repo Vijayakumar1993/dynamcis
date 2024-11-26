@@ -322,9 +322,7 @@ public class FindFrame extends CommonFrame{
         actions.put("Create Event",(event)->{
             List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
             try {
-                System.out.println("gender seleced to op "+eventGender.toString());
-                System.out.println("gender eventCateogory to op "+eventCateogory.toString());
-              eventPanel(peoples,db,null,eventGender,eventCateogory);
+                eventPanel(peoples,db,null,eventGender,eventCateogory);
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());

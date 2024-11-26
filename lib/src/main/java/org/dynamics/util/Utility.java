@@ -1,10 +1,16 @@
 package org.dynamics.util;
 
+import org.checkerframework.checker.units.qual.C;
 import org.dynamics.model.*;
+import org.dynamics.model.Event;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utility {
 
@@ -42,12 +48,28 @@ public class Utility {
             match.setToCorner(Corner.RED);
             match.setFrom(matcherList.get(i));
             match.setTo(matcherList.get(i+1));
+            match.setPrimary(true);
             matchList.add(match);
         }
         matches.setMatches(matchList);
         Fixture fixture = new Fixture();
-        List<Person> fixtures = persons.subList(matcher,persons.size());
-        fixture.setPersons(fixtures);
+        List<Person> fixtures = new LinkedList<>(persons.subList(matcher,persons.size()));
+
+        if(fixtures.size()%2!=0){
+            Person buyer = fixtures.get(0);
+            fixture.setPersons(Stream.of(buyer).collect(Collectors.toList()));
+            fixtures.remove(0);
+        }
+        for(int i=0;i<fixtures.size();i=i+2){
+            Match match = new Match();
+            match.setMatchId(Utility.getRandom());
+            match.setFromCorner(Corner.BLUE);
+            match.setToCorner(Corner.RED);
+            match.setFrom(fixtures.get(i));
+            match.setTo(fixtures.get(i+1));
+            match.setPrimary(false);
+            matchList.add(match);
+        }
 
         System.out.println(matches.getMatches().size());
         System.out.println(fixture.getPersons().size());
@@ -72,5 +94,18 @@ public class Utility {
         keyPair.put("fixture",fixture);
         keyPair.put("matcher", matcher);
         return keyPair;
+    }
+
+    public static void setPanelEnabled(JPanel panel,boolean enabled){
+            for (Component comp : panel.getComponents()) {
+                comp.setEnabled(enabled);
+                if(!enabled){
+                    comp.setBackground(Color.GRAY);
+                    comp.setForeground(Color.GRAY);
+                }
+                if (comp instanceof JPanel) {
+                    setPanelEnabled((JPanel) comp, enabled); // Recursively handle nested panels
+                }
+        }
     }
 }

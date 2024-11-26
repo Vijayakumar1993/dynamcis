@@ -1,5 +1,6 @@
 package org.dynamics.ui;
 
+import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -24,6 +25,7 @@ public class BouteFrame extends CommonFrame{
     private JComboBox<Item> pairedOptions = new JComboBox<>();
     private List<String> paired = new LinkedList<>();
     private JButton findButton;
+    private JButton shuffle = new JButton("Shuffle");
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
         this.db = db;
@@ -40,7 +42,6 @@ public class BouteFrame extends CommonFrame{
         JButton mergeWithFixture = new JButton("Next Match");
         mergeWithFixture.setBackground(Color.GREEN);
 
-        JButton shuffle = new JButton("Shuffle");
         JButton clear = new JButton("Clear");
         clear.setPreferredSize(new Dimension(100,20));
         clear.setBackground(Color.RED);
@@ -221,11 +222,12 @@ public class BouteFrame extends CommonFrame{
                 if(this.event!=null){
                     db.insert("Event_"+this.event.getId().toString(),this.event);
                     alert("Event("+this.event.getEventName()+") updated successfully.");
+                    db.findObject("Event_"+this.event.getId().toString());
                 }else{
                     alert("Event Not selected. Please select.");
                 }
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -272,12 +274,16 @@ public class BouteFrame extends CommonFrame{
                 innerPanle.setLayout(new BoxLayout(innerPanle,BoxLayout.Y_AXIS));
                 matches.forEach(match -> {
                     ButtonGroup buttonGroup = new ButtonGroup();
+                    JButton successorButton = new JButton("NA");
+                    successorButton.setFont(new Font("Serif",Font.BOLD,14));
                     Person fromPerson = match.getFrom();
                     Person toPerson = match.getTo();
                     Person succesor = match.getSuccessor();
-                    JRadioButton fromRadioButton = new JRadioButton(event.getTeamName().concat("-").concat(fromPerson.getName()).concat("(").concat(fromPerson.getId() + "").concat(")"));
+                    JButton fromRadioButton = new JButton(fromPerson.getTeamName().concat("-").concat(fromPerson.getName()).concat("(").concat(fromPerson.getId() + "").concat(")"));
 //                    fromRadioButton.setBackground(match.getFromCorner().getColor());
-                    fromRadioButton.setForeground(Color.BLUE);
+                    fromRadioButton.setBackground(match.getFromCorner().getColor());
+                    fromRadioButton.setForeground(match.getFromCorner().getColor());
+                    fromRadioButton.setPreferredSize(new Dimension(100,50));
                     fromRadioButton.setFont(new Font("Serif",Font.BOLD,14));
                     System.out.println("succesor "+succesor.getId());
 
@@ -285,53 +291,71 @@ public class BouteFrame extends CommonFrame{
 
                     if(succesor.getId()==fromPerson.getId()){
                         fromRadioButton.setSelected(true);
+                        successorButton.setText(succesor.getTeamName().concat("-").concat(succesor.getName()).concat("(").concat(succesor.getId() + "").concat(")"));
+                        successorButton.setForeground(match.getFromCorner().getColor());
+                        successorButton.setBackground(match.getFromCorner().getColor());
+                    }
+                    if(succesor.getId()==toPerson.getId()){
+                        successorButton.setText(succesor.getTeamName().concat("-").concat(succesor.getName()).concat("(").concat(succesor.getId() + "").concat(")"));
+                        successorButton.setForeground(match.getToCorner().getColor());
+                        successorButton.setBackground(match.getToCorner().getColor());
                     }
 
-
-
-
                     //to radio button
-                    JRadioButton toRadioButton = new JRadioButton(event.getTeamName().concat("-").concat(toPerson.getName()).concat("(").concat(toPerson.getId() + "").concat(")"));
+                    JButton toRadioButton = new JButton(toPerson.getTeamName().concat("-").concat(toPerson.getName()).concat("(").concat(toPerson.getId() + "").concat(")"));
 //                    toRadioButton.setBackground(match.getToCorner().getColor());
-                    toRadioButton.setForeground(Color.RED);
+                    toRadioButton.setBackground(match.getToCorner().getColor());
+                    toRadioButton.setForeground(match.getToCorner().getColor());
+                    toRadioButton.setPreferredSize(new Dimension(100,50));
                     toRadioButton.setFont(new Font("Serif",Font.BOLD,14));
                     System.out.println("succesor "+succesor.getId());
 
                     System.out.println("to person "+toPerson.getId());
 
-                    if(succesor.getId()==toPerson.getId()){
-                        toRadioButton.setSelected(true);
-                    }
-
                     toRadioButton.addActionListener(e->{
                         System.out.println("updated ");
                         match.setSuccessor(toPerson);
+                        Person succes = match.getSuccessor();
+                        successorButton.setText(toPerson.getTeamName().concat("-").concat(succes.getName()).concat("(").concat(succes.getId() + "").concat(")"));
+                        successorButton.setForeground(match.getToCorner().getColor());
+                        successorButton.setBackground(match.getToCorner().getColor());
                     });
                     fromRadioButton.addActionListener(e->{
                         System.out.println("updated ");
                         match.setSuccessor(fromPerson);
+                        Person succes = match.getSuccessor();
+                        successorButton.setText(fromPerson.getTeamName().concat("-").concat(succes.getName()).concat("(").concat(succes.getId() + "").concat(")"));
+                        successorButton.setForeground(match.getFromCorner().getColor());
+                        successorButton.setBackground(match.getFromCorner().getColor());
                     });
                     buttonGroup.add(fromRadioButton);
                     buttonGroup.add(toRadioButton);
                     JButton clearSelection = new JButton("clear");
-                    clearSelection.addActionListener(e->{
-                        buttonGroup.clearSelection();
+                    successorButton.addActionListener(e->{
                         match.setSuccessor(new Person());
+                        successorButton.setText("NA");
+                        successorButton.setBackground(null);
+                        successorButton.setForeground(null);
                     });
                     buttonGroup.add(clearSelection);
                     JPanel radioPanel = new JPanel();
-                    radioPanel.setLayout(new BoxLayout(radioPanel,BoxLayout.X_AXIS));
+                    radioPanel.setMaximumSize(new Dimension(800,30));
+                    radioPanel.setLayout(new GridLayout(4,2));
                     radioPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
                     radioPanel.add(fromRadioButton);
+                    radioPanel.add(new JLabel());
+                    radioPanel.add(new JLabel());
+                    radioPanel.add(successorButton);
                     radioPanel.add(toRadioButton);
-                    radioPanel.add(clearSelection);
+                    radioPanel.add(new JLabel());
+                    Utility.setPanelEnabled(radioPanel,match.isPrimary());
 
                     TitledBorder titleBorder = BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(Color.BLACK, 0),
-                            "(".concat(match.getMatchId().toString()).concat(")"),
+                            match.getMatchId().toString(),
                             TitledBorder.DEFAULT_JUSTIFICATION,
                             TitledBorder.DEFAULT_POSITION,
-                            new Font("Serif",Font.ITALIC ,15),
+                            new Font("Serif",Font.BOLD ,15),
                             new Color(220, 20, 60)
                     );
                     radioPanel.setBorder(titleBorder);
@@ -398,15 +422,18 @@ public class BouteFrame extends CommonFrame{
                             alert(e.getMessage());
                         }
                         return  null;
-                    }).filter(genderFilter->{
-                        if(!genderSelectedItem.isEmpty()){
-                            return  genderFilter.getSelectedGenderCategory().toString().equalsIgnoreCase(genderSelectedItem);
+                    })
+                    .filter(genderFilter->{
+                        if(!genderSelectedItem.isEmpty() ){
+                            String gnCat = genderFilter.getSelectedGenderCategory()!=null?genderFilter.getSelectedGenderCategory().toString():"";
+                            return  gnCat.equalsIgnoreCase(genderSelectedItem);
                         }else{
                             return true;
                         }
                     }).filter(categoryFilter->{
-                        if(!categorySelectedItem.isEmpty()){
-                            return  categoryFilter.getSelecetedEventCategory().toString().equalsIgnoreCase(categorySelectedItem);
+                        if(!categorySelectedItem.isEmpty() ){
+                            String gnCat = categoryFilter.getSelecetedEventCategory()!=null?categoryFilter.getSelecetedEventCategory().toString():"";
+                            return  gnCat.equalsIgnoreCase(categorySelectedItem);
                         }else{
                             return true;
                         }
@@ -441,8 +468,11 @@ public class BouteFrame extends CommonFrame{
         matcherColumn.add("Winner");
         this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>(),null);
         JTabbedPane pane = new JTabbedPane();
-        pane.add("Matcher List", new JScrollPane(jscrollPanle));
-        pane.add("Fixture",fixterPanel);
+        JScrollPane sc = new JScrollPane(jscrollPanle);
+        sc.getVerticalScrollBar().setUnitIncrement(50);
+        sc.getHorizontalScrollBar().setUnitIncrement(50);
+        pane.add("Matcher List", sc);
+        pane.add("Buyer",fixterPanel);
         this.add(pane, BorderLayout.CENTER);
     }
 }

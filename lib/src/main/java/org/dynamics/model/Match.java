@@ -9,6 +9,15 @@ public class Match  implements Serializable {
     private Person to;
     private Corner toCorner;
     private Person successor = new Person();
+    private boolean isPrimary;
+
+    public boolean isPrimary() {
+        return isPrimary;
+    }
+
+    public void setPrimary(boolean primary) {
+        isPrimary = primary;
+    }
 
     public Long getMatchId() {
         return matchId;

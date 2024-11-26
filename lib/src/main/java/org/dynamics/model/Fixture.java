@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Fixture  implements Serializable {
-    private List<Person> persons;
+    private List<Person> persons = new LinkedList<>();
 
     public List<Person> getPersons() {
         return persons;
