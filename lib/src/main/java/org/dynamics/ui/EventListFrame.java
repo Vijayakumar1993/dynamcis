@@ -8,6 +8,7 @@ import org.dynamics.reports.Report;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ public class EventListFrame extends CommonFrame{
     private List<Event> availableEvent = new LinkedList<>();
     private TablePair eventTablePair = null;
     private List<Event> filterEvents = new LinkedList<>();
+    private JButton find = new JButton("Find");
     public EventListFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         super(title);
     }
@@ -30,13 +32,15 @@ public class EventListFrame extends CommonFrame{
         eventId.setBorder(BorderFactory.createTitledBorder("Event ID"));
         jsp.add(eventId);
 
-        JTextField eventName = textField();
-        eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
-        jsp.add(eventName);
+
 
         JTextField teamName = textField();
-        teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
+        teamName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         jsp.add(teamName);
+
+        JTextField eventName = textField();
+        eventName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
+        jsp.add(eventName);
 
         JTextField description = textField();
         description.setBorder(BorderFactory.createTitledBorder("Description"));
@@ -69,7 +73,6 @@ public class EventListFrame extends CommonFrame{
         fixtures.setBorder(BorderFactory.createTitledBorder("Fixtures Range"));
         jsp.add(fixtures);
 
-        JButton find = new JButton("Find");
         find.addActionListener(e->{
             try{
                 String selectedEventId = eventId.getText().toString().toLowerCase();
@@ -81,6 +84,15 @@ public class EventListFrame extends CommonFrame{
                 String selectedfixturesFrom = fixtursFrom.getSelectedItem().toString().toLowerCase();
                 String selectedfixturesTo = fixtursTo.getSelectedItem().toString().toLowerCase();
 
+                this.availableEvent = db.keyFilterBy("Event_").stream().map(avr->{
+                    try {
+                        return (Event)db.findObject(avr);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        alert(ex.getMessage());
+                    }
+                    return null;
+                }).collect(Collectors.toList());
                 this.filterEvents = availableEvent.stream().filter(event->{
                     if(!selectedEventId.isEmpty()){
                         return (""+event.getId()).toLowerCase().toLowerCase().contains(selectedEventId);
@@ -142,12 +154,27 @@ public class EventListFrame extends CommonFrame{
         this.eventTablePair = this.createTable(this,new Vector<>(eventsDetails),Event.keys(),()->new LinkedHashMap<>(),null);
     }
 
-    public void southPanel(){
+    public void southPanel(Db db){
         JButton eventReport = new JButton("Generate Bout List");
+        JButton deleteEvent = new JButton("Delete Event");
+        deleteEvent.setBackground(Color.RED);
         JPanel jsp = new JPanel();
         jsp.setLayout(new BorderLayout());
         ButtonGroup btn = new ButtonGroup();
+        btn.add(deleteEvent);
         btn.add(eventReport);
+
+        deleteEvent.addActionListener(a->{
+            this.filterEvents.forEach(event->{
+                System.out.println("Event "+event.getId()+" deletion started");
+                int result = JOptionPane.showConfirmDialog(null,"Are you sure to remove "+event.getId()+"?");
+                if(JOptionPane.YES_OPTION == result){
+                    db.delete("Event_"+event.getId());
+                    System.out.println("Event "+event.getId()+" deletion ends");
+                }
+            });
+            this.find.doClick();
+        });
 
         eventReport.addActionListener(e->{
             Report report = null;
@@ -182,6 +209,7 @@ public class EventListFrame extends CommonFrame{
             }
 
         });
+        jsp.add(deleteEvent, BorderLayout.WEST);
         jsp.add(eventReport, BorderLayout.EAST);
         this.add(jsp, BorderLayout.SOUTH);
     }

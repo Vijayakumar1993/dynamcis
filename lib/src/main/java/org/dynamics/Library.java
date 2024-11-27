@@ -127,7 +127,7 @@ public class Library  extends CommonFrame {
                 EventListFrame eventListFrame = new EventListFrame("List Events");
                 eventListFrame.northPanel(db);
                 eventListFrame.listEvents(db);
-                eventListFrame.southPanel();
+                eventListFrame.southPanel(db);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(ex.getMessage());
