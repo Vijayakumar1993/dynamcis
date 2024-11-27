@@ -11,11 +11,12 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -202,5 +203,28 @@ public abstract class CommonFrame extends JFrame {
             }
         }
         component.addMouseListener(new PopupClickListener());
+    }
+
+    public JTextField numbrFiled(){
+        JTextField decimalField = new JTextField(10);
+
+        decimalField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                String text = decimalField.getText();
+
+                // Allow digits, one dot, and backspace
+                if (!Character.isDigit(c) && c != '.' && c != KeyEvent.VK_BACK_SPACE) {
+                    e.consume();
+                }
+
+                // Prevent multiple dots
+                if (c == '.' && text.contains(".")) {
+                    e.consume();
+                }
+            }
+        });
+        return decimalField;
     }
 }

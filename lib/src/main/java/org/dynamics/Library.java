@@ -74,7 +74,7 @@ public class Library  extends CommonFrame {
                 es.printStackTrace();
             }
         });
-        fileMenuItems.put("Find Players",(ActionEvent e)->{
+        fileMenuItems.put("Search Players",(ActionEvent e)->{
             try {
                 List<String> fileImports = db.keyFilterBy("File_");
                 JComboBox<Item> comboBox = new JComboBox<>();
@@ -110,7 +110,7 @@ public class Library  extends CommonFrame {
                 alert(ex.getMessage());
             }
         });
-        bouteMenuItems.put("Find Events",(ActionEvent e)->{
+        bouteMenuItems.put("Search Events",(ActionEvent e)->{
             try {
                 BouteFrame bouteFrame = new BouteFrame("Find Events",db);
                 bouteFrame.northPanel();

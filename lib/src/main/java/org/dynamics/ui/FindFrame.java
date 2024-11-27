@@ -69,12 +69,11 @@ public class FindFrame extends CommonFrame{
         jsp.add(categoresBox);
 
         JPanel weightPanel = new JPanel();
-        List<String> weightsList = IntStream.rangeClosed(0,100).mapToObj(a->a+"").collect(Collectors.toList());
-        JComboBox<String> weightFrom = comboBox(weightsList);
+        JTextField weightFrom = numbrFiled();
         weightFrom.setBorder(BorderFactory.createTitledBorder("From"));
         weightPanel.add(weightFrom);
 
-        JComboBox<String> weightTo = comboBox(weightsList);
+        JTextField weightTo = numbrFiled();
         weightTo.setBorder(BorderFactory.createTitledBorder("To"));
         weightPanel.add(weightTo);
 
@@ -89,8 +88,8 @@ public class FindFrame extends CommonFrame{
             String selectedTeamName = teamName.getText().toString();
             String selecetdGender = genderBox.getSelectedItem().toString();
             String selectedCategory = categoresBox.getSelectedItem().toString();
-            String selectedFrom = weightFrom.getSelectedItem().toString();
-            String selectedTo = weightTo.getSelectedItem().toString();
+            String selectedFrom = weightFrom.getText().toString();
+            String selectedTo = weightTo.getText().toString();
             filteredPersons = persons.stream().filter(nameFilter->{
                         if(selectedName.length()>0){
                             return nameFilter.getName().toLowerCase().contains(selectedName.toLowerCase());
@@ -216,7 +215,7 @@ public class FindFrame extends CommonFrame{
             gender.setBorder(BorderFactory.createTitledBorder("Gender"));
             JComboBox<String> category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
             category.setBorder(BorderFactory.createTitledBorder("Category"));
-            JComboBox<String> weights = comboBox(IntStream.rangeClosed(0,100).mapToObj(sa->sa+"").collect(Collectors.toList()));
+            JTextField weights = numbrFiled();
             weights.setBorder(BorderFactory.createTitledBorder("Weight"));
 
             JPanel jsp = new JPanel();
@@ -235,7 +234,7 @@ public class FindFrame extends CommonFrame{
             try{
                 Object selectedGender = gender.getSelectedItem();
                 Object selectedCategory = category.getSelectedItem();
-                Object selectedWeight = weights.getSelectedItem();
+                Object selectedWeight = weights.getText();
                 Person person = new Person();
                 person.setId(Utility.getRandom());
                 person.setName(name.getText());
@@ -247,7 +246,7 @@ public class FindFrame extends CommonFrame{
                     person.setCategories(Categories.valueOf(category.getSelectedItem().toString()));
                 }
                 if(selectedWeight!=""){
-                    person.setWeight(Double.valueOf(weights.getSelectedItem().toString()));
+                    person.setWeight(Double.valueOf(weights.getText().toString()));
                 }
                 if(person.isValid()){
                     this.persons.add(person);
