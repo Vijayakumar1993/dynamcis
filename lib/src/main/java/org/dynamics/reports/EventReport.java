@@ -2,9 +2,7 @@ package org.dynamics.reports;
 
 
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import org.dynamics.model.Event;
 import org.dynamics.model.Fixture;
 import org.dynamics.model.Match;
@@ -23,6 +21,15 @@ public class EventReport implements Report{
     public EventReport(String fileName) throws IOException, DocumentException {
         this.doc = new Document(PageSize.LETTER,1f,1f,1f,1f);
         this.pdfWriter = PdfWriter.getInstance(doc, Files.newOutputStream(Paths.get(fileName)));
+        this.pdfWriter.setPageEvent(new PdfPageEventHelper(){
+            @Override
+            public void onEndPage(PdfWriter writer, Document doc) {
+                ColumnText.showTextAligned(writer.getDirectContent(),
+                        Element.ALIGN_CENTER,
+                        new Phrase("Page " + writer.getPageNumber()),
+                        (doc.left() + doc.right()) / 2, doc.bottom() + 10, 0);
+            }
+        });
         System.out.println("PDF Document created successfully...!");
     }
     @Override

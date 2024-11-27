@@ -1,6 +1,5 @@
 package org.dynamics.ui;
 
-import com.itextpdf.text.DocumentException;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.TablePair;
@@ -8,11 +7,9 @@ import org.dynamics.reports.EventListReport;
 import org.dynamics.reports.Report;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -159,6 +156,15 @@ public class EventListFrame extends CommonFrame{
                     alert("No Events are available to generate report.");
                     return;
                 }
+
+                //lets order the filter events as per the table
+                int actualRowCount = this.eventTablePair.getjTable().getRowCount();
+                for(int i=0;i<actualRowCount;i++){
+                        System.out.println(this.eventTablePair.getjTable().getValueAt(i,0));
+                }
+                List<Long> compartor = IntStream.range(0,actualRowCount).mapToObj(i->Long.valueOf(this.eventTablePair.getjTable().getValueAt(i,0).toString())).collect(Collectors.toList());
+
+                this.filterEvents = this.filterEvents.stream().sorted(Comparator.comparingLong(a->compartor.indexOf(a.getId()))).collect(Collectors.toList());
                 Optional<String> saveFile = fileSaver();
                 if(saveFile.isPresent()){
                     report = new EventListReport(saveFile.get()+".pdf");
