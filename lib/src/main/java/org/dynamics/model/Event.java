@@ -114,8 +114,8 @@ public class Event implements Serializable {
         Vector<String> keys = new Vector<>();
         keys.add("Id");
         keys.add("Event initiated from");
-        keys.add("Team Name");
-        keys.add("Event Name");
+        keys.add("Category Name");
+        keys.add("Weight Category");
         keys.add("Description");
         keys.add("Total Matches");
         keys.add("Total Fixtures");

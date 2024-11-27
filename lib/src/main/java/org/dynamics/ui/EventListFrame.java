@@ -34,11 +34,11 @@ public class EventListFrame extends CommonFrame{
         jsp.add(eventId);
 
         JTextField eventName = textField();
-        eventName.setBorder(BorderFactory.createTitledBorder("Event Name"));
+        eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         jsp.add(eventName);
 
         JTextField teamName = textField();
-        teamName.setBorder(BorderFactory.createTitledBorder("Team Name"));
+        teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         jsp.add(teamName);
 
         JTextField description = textField();
@@ -146,7 +146,7 @@ public class EventListFrame extends CommonFrame{
     }
 
     public void southPanel(){
-        JButton eventReport = new JButton("Generate Event report");
+        JButton eventReport = new JButton("Generate Bout List");
         JPanel jsp = new JPanel();
         jsp.setLayout(new BorderLayout());
         ButtonGroup btn = new ButtonGroup();

@@ -123,13 +123,13 @@ public class FindFrame extends CommonFrame{
                             return true;
                         }
                     }).filter(weightFilter->{
-                        if(selectedFrom!=""){
+                        if(selectedFrom.length()>0){
                             return weightFilter.getWeight().compareTo(Double.parseDouble(selectedFrom))>=1;
                         }else{
                             return true;
                         }
                     }).filter(weightFilter->{
-                        if(selectedTo!=""){
+                        if(selectedTo.length()>0){
                             return weightFilter.getWeight().compareTo(Double.parseDouble(selectedTo)) < 0;
                         }else{
                             return true;
@@ -151,7 +151,7 @@ public class FindFrame extends CommonFrame{
     public void southPanel(Db db){
         JButton createPerson = new JButton("Create Player");
         JButton deletePlayer = new JButton("Delete Players");
-        JButton report = new JButton("Generete Report");
+        JButton report = new JButton("Generate PDF");
         deletePlayer.setBackground(Color.RED);
         deletePlayer.addActionListener(e->{
 
