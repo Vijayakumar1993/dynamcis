@@ -3,26 +3,28 @@ package org.dynamics.reports;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import org.dynamics.model.Event;
-import org.dynamics.model.Fixture;
 import org.dynamics.model.Match;
-import org.dynamics.model.Person;
-import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Objects;
 
 public class EventReport implements Report{
 
     private PdfWriter pdfWriter;
     private Document doc;
     public EventReport(String fileName) throws IOException, DocumentException {
-        this.doc = new Document(PageSize.A1,1f,1f,1f,1f);
+        this.doc = new Document(PageSize.A4
+                ,3f,3f,3f,3f);
+        this.doc.setMargins(30, 30, 20, 20);
         this.pdfWriter = PdfWriter.getInstance(doc, Files.newOutputStream(Paths.get(fileName)));
         this.pdfWriter.setPageEvent(new PdfPageEventHelper(){
             @Override
@@ -30,7 +32,7 @@ public class EventReport implements Report{
                 ColumnText.showTextAligned(writer.getDirectContent(),
                         Element.ALIGN_CENTER,
                         new Phrase("Page " + writer.getPageNumber()),
-                        (doc.left() + doc.right()) / 2, doc.bottom() + 10, 0);
+                        (doc.left() + doc.right()) / 2, doc.bottom() + 2, 0);
             }
         });
         System.out.println("PDF Document created successfully...!");
@@ -38,41 +40,85 @@ public class EventReport implements Report{
     @Override
     public void generateReport( Event event) throws DocumentException {
         doc.open();
-        List<Event>  events = Utility.findListOfEvents(event);
-        List<List<String>> data = new LinkedList<>();
-        for(Event ev: events){
-            List<String> row = new LinkedList<>();
-            List<Match> matches = ev.getMatcher().getMatches();
-            matches.forEach(match -> {
-                    for(int i=0;i<events.indexOf(ev)+2;i++){
-                        row.add("");
-                    }
-                row.add(match.getFrom().getName());
-                if(ev.getParentEvent()!=null){
-                    for(int i=0;i<events.indexOf(ev)*2+1;i++){
-                        row.add("");
-                    }
-                }else{
-                    row.add("");
-                }
-                row.add(match.getTo().getName());
-            });
-            data.add(row);
-        }
+        if(event.getParentEvent()==null){
+            List<Match> matches = event.getMatcher().getMatches();
+            Paragraph categoryName = new Paragraph(event.getEventName());
+            categoryName.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(categoryName);
+            Paragraph teamName = new Paragraph(event.getEventName());
+            teamName.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(teamName);
 
-        List<List<String>> newData = transpose(data);
-        PdfPTable table = new PdfPTable(events.size());
-        newData.forEach(row->{
-            List<String> selRow = newData.get(newData.indexOf(row));
-            selRow.forEach(sel->{
-                addStringCell(selRow.get(selRow.indexOf(sel)),table);
+            doc.add(new LineSeparator());
+
+            Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(LocalDate.now()));
+            asOfDate.setSpacingAfter(20);
+            asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(asOfDate);
+
+
+
+            Paragraph noOfBoxers = new Paragraph("No of Boxers :"+noOFBoxers(event));
+            noOfBoxers.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(noOfBoxers);
+            doc.add(new Paragraph("\n"));
+            PdfPTable table = new PdfPTable(3);
+
+            class Content{
+                private String message;
+                private Integer border;
+                public Content(String message, Integer border){
+                    this.message = message;
+                    this.border = border;
+                }
+            }
+            table.setWidthPercentage(100);
+            table.addCell(getPdfCell("Team"));
+            table.addCell(getPdfCell("Name"));
+            table.addCell(getPdfCell(" "));
+            List<List<Content>> options = new LinkedList<>();
+            matches.forEach(match->{
+                List<Content> innerList = new LinkedList<>();
+                innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                innerList.add(new Content(match.getFrom().getTeamName(),Rectangle.BOTTOM));
+                innerList.add(new Content(match.getFrom().getName(),Rectangle.BOTTOM));
+                if(!match.isPrimary()){
+                    innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                    innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                    innerList.add(new Content(" ",Rectangle.RIGHT));
+                    innerList.add(new Content(" ",Rectangle.BOTTOM));
+                    innerList.add(new Content(match.getTo().getTeamName(),Rectangle.BOTTOM ));
+                    innerList.add(new Content(match.getTo().getName(),Rectangle.BOTTOM | Rectangle.RIGHT));
+                    innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                }else{
+                    innerList.add(new Content(" Bye ",Rectangle.BOTTOM));
+                }
+                options.add(innerList);
             });
-        });
-        doc.add(table);
+            Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
+            options.forEach(a->{
+                a.stream().filter(Objects::nonNull).forEach(c->{
+                    PdfPCell cell = new PdfPCell();
+                    cell.setBorder(c.border);
+                    cell.addElement(new Phrase(c.message,font));
+                    table.addCell(cell);
+                });
+            });
+            doc.add(table);
+
+        }
         doc.close();
         this.pdfWriter.close();
         JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
 
+    }
+    public long noOFBoxers(Event e){
+        List<Match> matches = e.getMatcher().getMatches();
+        long fixturesCount  = matches.stream().filter(Match::isPrimary).count();
+        long matcherCount = matches.stream().filter(m->!m.isPrimary()).count()*2;
+        return fixturesCount+matcherCount;
     }
     public static List<List<String>> transpose(List<List<String>> original) {
         // Find the maximum number of columns in any row

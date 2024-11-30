@@ -370,9 +370,9 @@ public class BouteFrame extends CommonFrame{
                         });
 
                         jscrollPanle.add(innerPanle);
-                        Utility.converter(event.getFixture().getPersons()).forEach(vec->{
+                      /*  Utility.converter(event.getFixture().getPersons()).forEach(vec->{
                             this.fixtureTableModel.getDefaultTableModel().addRow(vec);
-                        });
+                        });*/
                     }
                     jd.setVisible(false);
                 }
