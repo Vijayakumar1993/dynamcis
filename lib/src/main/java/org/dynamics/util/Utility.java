@@ -54,10 +54,6 @@ public class Utility {
             matchList.add(match);
         }
 
-        int actualFixtureSize = fixtureList.size();
-        if(actualFixtureSize%2!=0){
-            fixtureList.add(createNaPerson());
-        }
         //fixture matches
         for(int i=0;i<fixtureList.size();i=i+1){
             Person fr = fixtureList.get(i);

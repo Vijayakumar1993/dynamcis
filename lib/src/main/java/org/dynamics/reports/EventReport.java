@@ -64,7 +64,6 @@ public class EventReport implements Report{
     @Override
     public void generateReport( Event event) throws DocumentException {
         doc.open();
-        if(event.getParentEvent()==null){
             List<Match> matches = event.getMatcher().getMatches();
 
             PdfPTable titleTable = new PdfPTable(3);
@@ -171,7 +170,6 @@ public class EventReport implements Report{
             });
             doc.add(table);
 
-        }
 
         doc.close();
         this.pdfWriter.close();

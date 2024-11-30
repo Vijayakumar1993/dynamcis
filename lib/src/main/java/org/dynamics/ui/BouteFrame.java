@@ -85,13 +85,16 @@ public class BouteFrame extends CommonFrame{
 
             //take matched persons and fixture and shuffle and save, re run
             List<Match> matches = this.event.getMatcher().getMatches();
-            List<Person> from = matches.stream().map(Match::getFrom).collect(Collectors.toList());
-            List<Person> to = matches.stream().map(Match::getTo).collect(Collectors.toList());
+            List<Person> from = matches.stream().filter(m->!m.isPrimary()).map(Match::getFrom).collect(Collectors.toList());
+            List<Person> to = matches.stream().filter(m->!m.isPrimary()).map(Match::getTo).collect(Collectors.toList());
             List<Person> fixtures = this.event.getFixture().getPersons();
 
             from.addAll(to);
-            from.addAll(fixtures);
+            from.addAll(matches.stream().filter(Match::isPrimary).map(Match::getFrom).collect(Collectors.toList()));
+//            from.addAll(fixtures);
 
+            System.out.println("From size is "+from.size());
+            from = from.stream().distinct().collect(Collectors.toList());
             Collections.shuffle(from);
             db.delete("Event_"+this.event.getId());
             Utility.createEvent(from,newEvent);
@@ -362,6 +365,8 @@ public class BouteFrame extends CommonFrame{
                             successorButton.addActionListener(e->{
                                 match.setSuccessor(new Person());
                                 successorButton.setText("NA");
+                                successorButton.setForeground(Color.BLACK);
+                                successorButton.setBackground(Color.BLACK);
                             });
                             if(match.isPrimary() && isLastEvent && match.getSuccessor().getId()==0){
                                 fromButton.doClick();
