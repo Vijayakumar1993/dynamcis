@@ -1,10 +1,11 @@
 package org.dynamics.model;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Matcher  implements Serializable {
-    private List<Match> matches;
+    private List<Match> matches = new LinkedList<>();
 
     private Person winner;
     private Corner winnerCorder;

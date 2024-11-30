@@ -31,7 +31,7 @@ public class Utility {
     public static void createEvent(List<Person> persons, Event event){
         Matcher matches = new Matcher();
         List<Map<Person, Person>> op = new LinkedList<>();
-        Collections.shuffle(persons);
+//        Collections.shuffle(persons);
         Map<String, Integer> keyPair = fixtureAndMatcher(persons.size());
         Integer fixtureSize = keyPair.get("fixture");
         Integer matcher = keyPair.get("matcher");
@@ -42,6 +42,9 @@ public class Utility {
         List<Person> matcherList = persons.subList(0,matcher);
         List<Match> matchList = new LinkedList<>();
         for(int i=0;i<matcherList.size();i=i+2){
+            Person fr = matcherList.get(i);
+            Person tr = matcherList.get(i+1);
+            System.out.println("From "+fr.getName()+" --- To "+tr.getName());
             Match match = new Match();
             match.setMatchId(Utility.getRandom());
             match.setFromCorner(Corner.BLUE);
@@ -54,23 +57,7 @@ public class Utility {
         matches.setMatches(matchList);
         Fixture fixture = new Fixture();
         List<Person> fixtures = new LinkedList<>(persons.subList(matcher,persons.size()));
-
-        if(fixtures.size()%2!=0){
-            Person buyer = fixtures.get(0);
-            fixture.setPersons(Stream.of(buyer).collect(Collectors.toList()));
-            fixtures.remove(0);
-        }
-        for(int i=0;i<fixtures.size();i=i+2){
-            Match match = new Match();
-            match.setMatchId(Utility.getRandom());
-            match.setFromCorner(Corner.BLUE);
-            match.setToCorner(Corner.RED);
-            match.setFrom(fixtures.get(i));
-            match.setTo(fixtures.get(i+1));
-            match.setPrimary(false);
-            matchList.add(match);
-        }
-
+        fixture.setPersons(fixtures);
         System.out.println(matches.getMatches().size());
         System.out.println(fixture.getPersons().size());
         event.setMatcher(matches);
@@ -97,15 +84,26 @@ public class Utility {
     }
 
     public static void setPanelEnabled(JPanel panel,boolean enabled){
-            for (Component comp : panel.getComponents()) {
-                comp.setEnabled(enabled);
-                if(!enabled){
-                    comp.setBackground(Color.GRAY);
-                    comp.setForeground(Color.GRAY);
-                }
-                if (comp instanceof JPanel) {
-                    setPanelEnabled((JPanel) comp, enabled); // Recursively handle nested panels
-                }
+        for (Component comp : panel.getComponents()) {
+            comp.setEnabled(enabled);
+            if(!enabled){
+                comp.setBackground(Color.GRAY);
+                comp.setForeground(Color.GRAY);
+            }
+            if (comp instanceof JPanel) {
+                setPanelEnabled((JPanel) comp, enabled); // Recursively handle nested panels
+            }
         }
+    }
+
+    public static List<Event> findListOfEvents(Event event){
+        List<Event> listOfEvents = new LinkedList<>();
+        listOfEvents.add(event);
+        while(event.getParentEvent()!=null){
+            listOfEvents.add(event.getParentEvent());
+            event = event.getParentEvent();
+        }
+        Collections.reverse(listOfEvents);
+        return listOfEvents;
     }
 }

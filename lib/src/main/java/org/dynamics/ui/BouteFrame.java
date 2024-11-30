@@ -21,7 +21,7 @@ public class BouteFrame extends CommonFrame{
     private Db db;
     private Event event;
     private TablePair fixtureTableModel;
-    private JPanel jscrollPanle = new JPanel();
+    private JPanel jscrollPanle = new JPanel(new GridBagLayout());
     private JComboBox<Item> pairedOptions = new JComboBox<>();
     private List<String> paired = new LinkedList<>();
     private JButton findButton;
@@ -135,18 +135,21 @@ public class BouteFrame extends CommonFrame{
                 alert("Event Not selected. Please select.");
                 return;
             }
+            System.out.println("Next Match Event is "+this.event.getTeamName());
             try {
                 Event dbEvent = db.findObject("Event_"+this.event.getId());
                 String eventName = dbEvent.getEventName().concat("(").concat(dbEvent.getId().toString()).concat(")");
                 List<Person> fixture = dbEvent.getFixture().getPersons();
-                List<Person> succesors = dbEvent.getMatcher().getMatches().stream().map(matches->matches.getSuccessor()).collect(Collectors.toList());
 
+                List<Person> succesors = new LinkedList<>();
+                dbEvent.getMatcher().getMatches().forEach(ass->{
+                    succesors.add(ass.getSuccessor());
+                });
                 boolean isSuccssorNotPrepared = succesors.stream().anyMatch(s->s.getId()==0);
 
                 if(isSuccssorNotPrepared){
                     alert("Kindly finish the event ("+eventName+") to move next.");
                 }else{
-                    succesors.addAll(fixture);
                     if(succesors.size()<=1){
                         Corner successorCorner = dbEvent.getMatcher().getMatches().stream().map(match ->{
                             if(match.getFrom().getId()==match.getSuccessor().getId()) return match.getFromCorner();
@@ -264,116 +267,88 @@ public class BouteFrame extends CommonFrame{
                 this.event = db.findObject(selectedEventId);
                 this.fixtureTableModel.getDefaultTableModel().setRowCount(0);
 
-                Matcher matcher = event.getMatcher();
-                List<Match> matches = matcher.getMatches();
-                jscrollPanle.removeAll();
-                jscrollPanle.revalidate();
-                jscrollPanle.repaint();
+                //ensure that the parent event is present of not
+                List<Event> events = Utility.findListOfEvents(this.event);
+                if(!events.isEmpty()){
+                    jscrollPanle.removeAll();
+                    jscrollPanle.revalidate();
+                    jscrollPanle.repaint();
 
-                JPanel innerPanle = new JPanel();
-                innerPanle.setLayout(new BoxLayout(innerPanle,BoxLayout.Y_AXIS));
-                matches.forEach(match -> {
-                    ButtonGroup buttonGroup = new ButtonGroup();
-                    JButton successorButton = new JButton("NA");
-                    successorButton.setFont(new Font("Serif",Font.BOLD,14));
-                    Person fromPerson = match.getFrom();
-                    Person toPerson = match.getTo();
-                    Person succesor = match.getSuccessor();
-                    JButton fromRadioButton = new JButton(fromPerson.getTeamName().concat("-").concat(fromPerson.getName()).concat("(").concat(fromPerson.getId() + "").concat(")"));
-//                    fromRadioButton.setBackground(match.getFromCorner().getColor());
-                    fromRadioButton.setBackground(match.getFromCorner().getColor());
-                    fromRadioButton.setForeground(match.getFromCorner().getColor());
-                    fromRadioButton.setPreferredSize(new Dimension(100,50));
-                    fromRadioButton.setFont(new Font("Serif",Font.BOLD,14));
-                    System.out.println("succesor "+succesor.getId());
+                    System.out.println("List of events "+events);
+                    for(Event ev: events){
+                        System.out.println(ev.getEventName());
+                        Matcher matcher = ev.getMatcher();
+                        boolean isLastEvent = events.indexOf(ev)==events.size()-1;
+                        System.out.println("Is Last Event "+isLastEvent);
 
-                    System.out.println("from person "+toPerson.getId());
+                        List<Match> matches = matcher.getMatches();
+                        JPanel innerPanle = new JPanel();
+                        innerPanle.setLayout(new GridLayout(matches.size(),events.size(),0,0));
 
-                    if(succesor.getId()==fromPerson.getId()){
-                        fromRadioButton.setSelected(true);
-                        successorButton.setText(succesor.getTeamName().concat("-").concat(succesor.getName()).concat("(").concat(succesor.getId() + "").concat(")"));
-                        successorButton.setForeground(match.getFromCorner().getColor());
-                        successorButton.setBackground(match.getFromCorner().getColor());
+                        matches.forEach(match -> {
+                            Person fromPerson = match.getFrom();
+                            Person toPerson = match.getTo();
+                            String fromText = fromPerson.getName().concat("("+fromPerson.getId()+")").concat(fromPerson.getTeamName());
+                            String toText = toPerson.getName().concat("("+toPerson.getId()+")").concat(toPerson.getTeamName());
+
+                            System.out.println("from text "+fromText);
+                            System.out.println("to text "+toText);
+
+                            JButton toButton = new JButton(toText);
+                            toButton.setMaximumSize(new Dimension(300,50));
+
+
+                            JButton fromButton = new JButton(fromText);
+                            fromButton.setMaximumSize(new Dimension(300,50));
+
+
+                            JButton successorButton = new JButton("NA");
+                            if(isLastEvent){
+                                successorButton.setVisible(true);
+                                Person successor = match.getSuccessor();
+                                if(successor.getId()==fromPerson.getId()){
+                                    successorButton.setText(fromText);
+                                }else if(successor.getId()==toPerson.getId()){
+                                    successorButton.setText(toText);
+                                }
+                            }else{
+                                successorButton.setVisible(false);
+                            }
+
+                            JPanel matcherPanel = new JPanel();
+                            matcherPanel.setLayout(new GridLayout(3,2,0,0));
+                            matcherPanel.add(fromButton);
+                            matcherPanel.add(new JLabel(" "));
+                            matcherPanel.add(new JLabel(" "));
+                            matcherPanel.add(successorButton);
+                            matcherPanel.add(toButton);
+                            matcherPanel.add(new JLabel(" "));
+
+                            innerPanle.add(matcherPanel);
+
+                            //listeners
+                            fromButton.addActionListener(e->{
+                                System.out.println("updated ");
+                                match.setSuccessor(fromPerson);
+                                successorButton.setText(fromText);
+                            });
+                            toButton.addActionListener(e->{
+                                System.out.println("updated ");
+                                match.setSuccessor(toPerson);
+                                successorButton.setText(toText);
+                            });
+                            successorButton.addActionListener(e->{
+                                match.setSuccessor(new Person());
+                                successorButton.setText("NA");
+                            });
+                            //end of listeners
+                        });
+                        jscrollPanle.add(innerPanle);
+                        Utility.converter(event.getFixture().getPersons()).forEach(vec->{
+                            this.fixtureTableModel.getDefaultTableModel().addRow(vec);
+                        });
                     }
-                    if(succesor.getId()==toPerson.getId()){
-                        successorButton.setText(succesor.getTeamName().concat("-").concat(succesor.getName()).concat("(").concat(succesor.getId() + "").concat(")"));
-                        successorButton.setForeground(match.getToCorner().getColor());
-                        successorButton.setBackground(match.getToCorner().getColor());
-                    }
-
-                    //to radio button
-                    JButton toRadioButton = new JButton(toPerson.getTeamName().concat("-").concat(toPerson.getName()).concat("(").concat(toPerson.getId() + "").concat(")"));
-//                    toRadioButton.setBackground(match.getToCorner().getColor());
-                    toRadioButton.setBackground(match.getToCorner().getColor());
-                    toRadioButton.setForeground(match.getToCorner().getColor());
-                    toRadioButton.setPreferredSize(new Dimension(100,50));
-                    toRadioButton.setFont(new Font("Serif",Font.BOLD,14));
-                    System.out.println("succesor "+succesor.getId());
-
-                    System.out.println("to person "+toPerson.getId());
-
-                    toRadioButton.addActionListener(e->{
-                        System.out.println("updated ");
-                        match.setSuccessor(toPerson);
-                        Person succes = match.getSuccessor();
-                        successorButton.setText(toPerson.getTeamName().concat("-").concat(succes.getName()).concat("(").concat(succes.getId() + "").concat(")"));
-                        successorButton.setForeground(match.getToCorner().getColor());
-                        successorButton.setBackground(match.getToCorner().getColor());
-                    });
-                    fromRadioButton.addActionListener(e->{
-                        System.out.println("updated ");
-                        match.setSuccessor(fromPerson);
-                        Person succes = match.getSuccessor();
-                        successorButton.setText(fromPerson.getTeamName().concat("-").concat(succes.getName()).concat("(").concat(succes.getId() + "").concat(")"));
-                        successorButton.setForeground(match.getFromCorner().getColor());
-                        successorButton.setBackground(match.getFromCorner().getColor());
-                    });
-                    buttonGroup.add(fromRadioButton);
-                    buttonGroup.add(toRadioButton);
-                    JButton clearSelection = new JButton("clear");
-                    successorButton.addActionListener(e->{
-                        match.setSuccessor(new Person());
-                        successorButton.setText("NA");
-                        successorButton.setBackground(null);
-                        successorButton.setForeground(null);
-                    });
-                    buttonGroup.add(clearSelection);
-                    JPanel radioPanel = new JPanel();
-                    radioPanel.setMaximumSize(new Dimension(800,30));
-                    radioPanel.setLayout(new GridLayout(4,2));
-                    radioPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-                    radioPanel.add(fromRadioButton);
-                    radioPanel.add(new JLabel());
-                    radioPanel.add(new JLabel());
-                    radioPanel.add(successorButton);
-                    radioPanel.add(toRadioButton);
-                    radioPanel.add(new JLabel());
-                    Utility.setPanelEnabled(radioPanel,match.isPrimary());
-
-                    TitledBorder titleBorder = BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(Color.BLACK, 0),
-                            match.getMatchId().toString(),
-                            TitledBorder.DEFAULT_JUSTIFICATION,
-                            TitledBorder.DEFAULT_POSITION,
-                            new Font("Serif",Font.BOLD ,15),
-                            new Color(220, 20, 60)
-                    );
-                    radioPanel.setBorder(titleBorder);
-                    innerPanle.setAlignmentX(Component.LEFT_ALIGNMENT);
-                    innerPanle.add(radioPanel);
-
-                    JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-                    separator.setPreferredSize(new Dimension(0, 1)); // Reduce height
-                    separator.setBorder(new EmptyBorder(0, 0, 0, 0)); // Remove any additional padding or margin
-
-                    innerPanle.add(separator);
-                });
-
-                jscrollPanle.add(innerPanle, BorderLayout.NORTH);
-
-                Utility.converter(event.getFixture().getPersons()).forEach(vec->{
-                    this.fixtureTableModel.getDefaultTableModel().addRow(vec);
-                });
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());
@@ -456,7 +431,7 @@ public class BouteFrame extends CommonFrame{
     }
     public void centerPanel(){
 
-        jscrollPanle.setLayout(new BorderLayout());
+//        jscrollPanle.setLayout(new GridBagLayout());
 
         JPanel fixterPanel = new JPanel();
         fixterPanel.setLayout(new BorderLayout());
@@ -469,6 +444,8 @@ public class BouteFrame extends CommonFrame{
         this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>(),null);
         JTabbedPane pane = new JTabbedPane();
         JScrollPane sc = new JScrollPane(jscrollPanle);
+        sc.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        sc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         sc.getVerticalScrollBar().setUnitIncrement(50);
         sc.getHorizontalScrollBar().setUnitIncrement(50);
         pane.add("Matcher List", sc);
