@@ -167,13 +167,13 @@ public class EventListFrame extends CommonFrame{
         deleteEvent.addActionListener(a->{
             this.filterEvents.forEach(event->{
                 System.out.println("Event "+event.getId()+" deletion started");
-                int result = JOptionPane.showConfirmDialog(null,"Are you sure to remove "+event.getId()+"?");
+                int result = JOptionPane.showConfirmDialog(null,"Are you sure to remove "+event.getEventName()+"?");
                 if(JOptionPane.YES_OPTION == result){
                     db.delete("Event_"+event.getId());
                     System.out.println("Event "+event.getId()+" deletion ends");
+                    this.find.doClick();
                 }
             });
-            this.find.doClick();
         });
 
         eventReport.addActionListener(e->{

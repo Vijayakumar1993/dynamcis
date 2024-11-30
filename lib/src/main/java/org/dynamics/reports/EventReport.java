@@ -7,19 +7,22 @@ import org.dynamics.model.Event;
 import org.dynamics.model.Fixture;
 import org.dynamics.model.Match;
 import org.dynamics.model.Person;
+import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class EventReport implements Report{
 
     private PdfWriter pdfWriter;
     private Document doc;
     public EventReport(String fileName) throws IOException, DocumentException {
-        this.doc = new Document(PageSize.LETTER,1f,1f,1f,1f);
+        this.doc = new Document(PageSize.A1,1f,1f,1f,1f);
         this.pdfWriter = PdfWriter.getInstance(doc, Files.newOutputStream(Paths.get(fileName)));
         this.pdfWriter.setPageEvent(new PdfPageEventHelper(){
             @Override
@@ -35,86 +38,67 @@ public class EventReport implements Report{
     @Override
     public void generateReport( Event event) throws DocumentException {
         doc.open();
-
-        String eventName = event.getEventName();
-        String eventDescription = event.getDescription();
-        Paragraph header = new Paragraph(eventName+"("+event.getId()+")\n"+eventDescription);
-        header.setAlignment(Paragraph.ALIGN_CENTER);
-        if(eventName!=null ) doc.add(header);
-
-        doc.add(new Paragraph("\n"));
-
-        List<Match> matches = event.getMatcher().getMatches();
-        List<Person> fixtures = event.getFixture().getPersons();
-
-        if(matches!=null && !matches.isEmpty()){
-            PdfPTable table = new PdfPTable(5);
-            PdfPCell serionNumber = getPdfCell("S.No");
-            table.addCell(serionNumber);
-
-            table.addCell(getPdfCell("Match Id"));
-            table.addCell(getPdfCell("Blue Corner"));
-            table.addCell(getPdfCell("Red Corner"));
-            table.addCell(getPdfCell("Winner"));
-            table.setWidths(new float[]{0.5f,2f,2f,2f,2f});
-
-            matches.forEach(a->{
-                Person from = a.getFrom();
-                Person to = a.getTo();
-                Person successor = a.getSuccessor();
-                String fromValue = from.getName().concat("\n(").concat(from.getId()+"").concat(")");
-                String toValue = to.getName().concat("\n(").concat(to.getId()+"").concat(")");
-
-                addStringCell((matches.indexOf(a)+1)+"",table);
-                addStringCell(a.getMatchId().toString(),table);
-                addStringCell(fromValue,table);
-                addStringCell(toValue,table);
-
-                if(successor.getId()!=0){
-                    String successorValue = successor.getName().concat("\n(").concat(successor.getId()+"").concat(")");
-                    addStringCell(successorValue,table);
+        List<Event>  events = Utility.findListOfEvents(event);
+        List<List<String>> data = new LinkedList<>();
+        for(Event ev: events){
+            List<String> row = new LinkedList<>();
+            List<Match> matches = ev.getMatcher().getMatches();
+            matches.forEach(match -> {
+                    for(int i=0;i<events.indexOf(ev)+2;i++){
+                        row.add("");
+                    }
+                row.add(match.getFrom().getName());
+                if(ev.getParentEvent()!=null){
+                    for(int i=0;i<events.indexOf(ev)*2+1;i++){
+                        row.add("");
+                    }
                 }else{
-                    addStringCell("",table);
+                    row.add("");
                 }
+                row.add(match.getTo().getName());
             });
-            doc.add(table);
+            data.add(row);
         }
 
-
-        if(fixtures!=null && !fixtures.isEmpty()){
-
-            PdfPTable fixtrueTable = new PdfPTable(6);
-            PdfPCell sn = getPdfCell("S.No");
-            fixtrueTable.addCell(sn);
-            fixtrueTable.addCell(getPdfCell("Player Id"));
-            fixtrueTable.addCell(getPdfCell("Name"));
-            fixtrueTable.addCell(getPdfCell("Gender"));
-            fixtrueTable.addCell(getPdfCell("Category"));
-            fixtrueTable.addCell(getPdfCell("Weight"));
-            fixtrueTable.setWidths(new float[]{1f,3f,2f,1f,1f,1f});
-
-            fixtures.forEach(person->{
-                addStringCell((fixtures.indexOf(person)+1)+"",fixtrueTable);
-                addStringCell(person.getId()+"",fixtrueTable);
-                addStringCell(person.getName().concat("\n(").concat(person.getId()+"").concat(")"),fixtrueTable);
-                addStringCell(person.getGender().toString(),fixtrueTable);
-                addStringCell(person.getCategories().toString(),fixtrueTable);
-                addStringCell(person.getWeight().toString(),fixtrueTable);
+        List<List<String>> newData = transpose(data);
+        PdfPTable table = new PdfPTable(events.size());
+        newData.forEach(row->{
+            List<String> selRow = newData.get(newData.indexOf(row));
+            selRow.forEach(sel->{
+                addStringCell(selRow.get(selRow.indexOf(sel)),table);
             });
-
-
-            Paragraph fixtureHeader = new Paragraph("\nFixtures");
-            fixtureHeader.setAlignment(Paragraph.ALIGN_CENTER);
-            doc.add(fixtureHeader);
-            doc.add(new Paragraph("\n"));
-            doc.add(fixtrueTable);
-        }
+        });
+        doc.add(table);
         doc.close();
         this.pdfWriter.close();
         JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
 
     }
+    public static List<List<String>> transpose(List<List<String>> original) {
+        // Find the maximum number of columns in any row
+        int maxCols = 0;
+        for (List<String> row : original) {
+            maxCols = Math.max(maxCols, row.size());
+        }
 
+        List<List<String>> result = new LinkedList<>();
+
+        // For each column index, create a new row for the transposed result
+        for (int col = 0; col < maxCols; col++) {
+            List<String> newRow = new LinkedList<>();
+            for (List<String> row : original) {
+                // If the current row has enough columns, add the element, otherwise add null
+                if (col < row.size()) {
+                    newRow.add(row.get(col));
+                } else {
+                    newRow.add(null); // Or use an empty string, or any placeholder value
+                }
+            }
+            result.add(newRow);
+        }
+
+        return result;
+    }
     @Override
     public void generateReport(List<Event> event,String title) throws DocumentException {
 
@@ -128,7 +112,7 @@ public class EventReport implements Report{
 
     public void addStringCell(String msg, PdfPTable table) {
         PdfPCell cell = new PdfPCell();
-        cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM); // Only horizontal borders
+        cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
         Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
         cell.addElement(new Phrase(msg, font)); // Add plain text
         cell.setFixedHeight(30f);

@@ -1,6 +1,6 @@
 package org.dynamics.ui;
 
-import org.checkerframework.checker.units.qual.C;
+import jdk.nashorn.internal.scripts.JD;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -8,17 +8,15 @@ import org.dynamics.reports.EventReport;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class BouteFrame extends CommonFrame{
     private Db db;
+    private JLabel LOGGER = new JLabel();
     private Event event;
     private TablePair fixtureTableModel;
     private JPanel jscrollPanle = new JPanel(new GridBagLayout());
@@ -225,11 +223,9 @@ public class BouteFrame extends CommonFrame{
                 if(this.event!=null){
                     db.insert("Event_"+this.event.getId().toString(),this.event);
                     alert("Event("+this.event.getEventName()+") updated successfully.");
-                    db.findObject("Event_"+this.event.getId().toString());
                 }else{
                     alert("Event Not selected. Please select.");
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());
@@ -242,6 +238,8 @@ public class BouteFrame extends CommonFrame{
         leftButtons.add(boutReport);
         rightButtons.add(updateMatch);
         rightButtons.add(mergeWithFixture);
+
+        panle.add(LOGGER,BorderLayout.CENTER);
         panle.add(leftButtons, BorderLayout.WEST);
         panle.add(rightButtons, BorderLayout.EAST);
         add(panle,BorderLayout.SOUTH);
@@ -257,7 +255,9 @@ public class BouteFrame extends CommonFrame{
         this.findButton = new JButton("Find");
 
         findButton.addActionListener(a->{
+
             try {
+
                 Item selectedItem = (Item)pairedOptions.getSelectedItem();
                 if(selectedItem == null || selectedItem.getId()==0){
                     alert("Kindly select the event.");
@@ -274,6 +274,8 @@ public class BouteFrame extends CommonFrame{
                     jscrollPanle.revalidate();
                     jscrollPanle.repaint();
 
+                    JDialog jd = Utility.jDialog("Loading, Please wait....!");
+                    jd.setVisible(true);
                     System.out.println("List of events "+events);
                     for(Event ev: events){
                         System.out.println(ev.getEventName());
@@ -281,41 +283,57 @@ public class BouteFrame extends CommonFrame{
                         boolean isLastEvent = events.indexOf(ev)==events.size()-1;
                         System.out.println("Is Last Event "+isLastEvent);
 
+
                         List<Match> matches = matcher.getMatches();
                         JPanel innerPanle = new JPanel();
-                        innerPanle.setLayout(new GridLayout(matches.size(),events.size(),0,0));
+                        innerPanle.setLayout(new GridLayout(matches.size(),events.size(),2,2));
 
                         matches.forEach(match -> {
                             Person fromPerson = match.getFrom();
                             Person toPerson = match.getTo();
-                            String fromText = fromPerson.getName().concat("("+fromPerson.getId()+")").concat(fromPerson.getTeamName());
-                            String toText = toPerson.getName().concat("("+toPerson.getId()+")").concat(toPerson.getTeamName());
+                            String fromText = fromPerson.getName();
+                            if(fromPerson.getId()!=0) fromText.concat("("+fromPerson.getId()+")").concat(fromPerson.getTeamName());
+                            String toText = toPerson.getName();
+                            if(toPerson.getId()!=0) toText.concat("("+toPerson.getId()+")").concat(toPerson.getTeamName());
 
                             System.out.println("from text "+fromText);
                             System.out.println("to text "+toText);
 
                             JButton toButton = new JButton(toText);
                             toButton.setMaximumSize(new Dimension(300,50));
+                            toButton.setBackground(match.getToCorner().getColor());
+                            toButton.setForeground(match.getToCorner().getColor());
 
 
                             JButton fromButton = new JButton(fromText);
                             fromButton.setMaximumSize(new Dimension(300,50));
-
+                            fromButton.setBackground(match.getFromCorner().getColor());
+                            fromButton.setForeground(match.getFromCorner().getColor());
 
                             JButton successorButton = new JButton("NA");
                             if(isLastEvent){
                                 successorButton.setVisible(true);
                                 Person successor = match.getSuccessor();
+                                if(successor.getId()!=0){
+                                    successorButton.setText(successor.getName());
+                                }
                                 if(successor.getId()==fromPerson.getId()){
                                     successorButton.setText(fromText);
+                                    successorButton.setForeground(match.getFromCorner().getColor());
+                                    successorButton.setBackground(match.getFromCorner().getColor());
                                 }else if(successor.getId()==toPerson.getId()){
                                     successorButton.setText(toText);
+                                    successorButton.setForeground(match.getToCorner().getColor());
+                                    successorButton.setBackground(match.getToCorner().getColor());
                                 }
                             }else{
                                 successorButton.setVisible(false);
                             }
 
                             JPanel matcherPanel = new JPanel();
+                            if(match.isPrimary()){
+                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Fixture"));
+                            }
                             matcherPanel.setLayout(new GridLayout(3,2,0,0));
                             matcherPanel.add(fromButton);
                             matcherPanel.add(new JLabel(" "));
@@ -331,23 +349,32 @@ public class BouteFrame extends CommonFrame{
                                 System.out.println("updated ");
                                 match.setSuccessor(fromPerson);
                                 successorButton.setText(fromText);
+                                successorButton.setForeground(match.getFromCorner().getColor());
+                                successorButton.setBackground(match.getFromCorner().getColor());
                             });
                             toButton.addActionListener(e->{
                                 System.out.println("updated ");
                                 match.setSuccessor(toPerson);
                                 successorButton.setText(toText);
+                                successorButton.setForeground(match.getToCorner().getColor());
+                                successorButton.setBackground(match.getToCorner().getColor());
                             });
                             successorButton.addActionListener(e->{
                                 match.setSuccessor(new Person());
                                 successorButton.setText("NA");
                             });
+                            if(match.isPrimary() && isLastEvent && match.getSuccessor().getId()==0){
+                                fromButton.doClick();
+                            }
                             //end of listeners
                         });
+
                         jscrollPanle.add(innerPanle);
                         Utility.converter(event.getFixture().getPersons()).forEach(vec->{
                             this.fixtureTableModel.getDefaultTableModel().addRow(vec);
                         });
                     }
+                    jd.setVisible(false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

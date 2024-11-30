@@ -141,6 +141,12 @@ public class Library  extends CommonFrame {
                     Reader<Person> reader = null;
                     try {
                         FileImport fileImport = new FileImport();
+                        String reportTitle = JOptionPane.showInputDialog("Please Enter the Player list name");
+                        if(reportTitle.toString().isEmpty()){
+                            alert("Please enter valid Report title");
+                            return;
+                        }
+                        fileImport.setName(reportTitle);
                         reader = new CsvFileReader(filePath,fileImport);
                         List<Person> persons =  reader.read();
                         db.insert("File_"+fileImport.getId(),fileImport);
@@ -161,6 +167,7 @@ public class Library  extends CommonFrame {
         men.put("Event", bouteMenuItems);
         men.put("Contact Us",contactUs);
         super.menuBar(men);
+        setVisible(true);
     }
     public static void main(String args[]) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         Library library = new Library("Dynamcis 101 MMA");

@@ -21,7 +21,7 @@ public class CsvFileReader extends Constant implements Reader<Person> {
     public CsvFileReader(String fileName,FileImport fileImport) throws FileNotFoundException {
         this.fileImport = fileImport;
         fileImport.setId(Utility.getRandom());
-        fileImport.setName(fileName);
+        fileImport.setFilePath(fileName);
         fileImport.setImportedBy(System.getProperty("user.name"));
         reader = new FileReader(fileName);
     }

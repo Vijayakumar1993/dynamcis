@@ -1,38 +1,32 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
-import org.dynamics.model.*;
 import org.dynamics.model.Event;
+import org.dynamics.model.*;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class CommonFrame extends JFrame {
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         setTitle(title);
-        setVisible(true);
         getContentPane().setBackground(Color.WHITE);
-        setSize(new Dimension(300,300));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        setVisible(true);
 //        this.commonNorthPanel();
     }
 

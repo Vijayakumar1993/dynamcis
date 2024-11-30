@@ -8,10 +8,19 @@ import java.util.List;
 public class FileImport<T> implements Serializable {
     private Long id;
     private String name;
+    private String filePath;
     private  String importedBy;
     private LocalDateTime importedTime;
     private Integer totalCount;
     private List<T> person = new LinkedList<>();
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
     public List<T> getPerson() {
         return person;
