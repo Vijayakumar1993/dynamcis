@@ -120,7 +120,12 @@ public class Event implements Serializable {
         vector.add(this.getTeamName());
         vector.add(this.getEventName());
         vector.add(this.getDescription());
-        vector.add(this.getEventDate().toString());
+        if(this.getEventDate()!=null){
+            vector.add(this.getEventDate().toString());
+        }else{
+            vector.add("");
+        }
+
         vector.add(this.getRoundOf().toString());
         vector.add(this.matcher.getMatches().size());
         vector.add(this.getFixture().getPersons().size());

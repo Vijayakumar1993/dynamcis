@@ -64,11 +64,13 @@ public abstract class CommonFrame extends JFrame {
 
         events.forEach(a->{
             System.out.println(a.getEventDate());
-            if(LocalDate.now().isBefore(a.getEventDate()) || LocalDate.now().isEqual(a.getEventDate())){
-                JLabel lab =new JLabel(a.getEventDate().toString()+": "+a.getEventName());
-                lab.setFont(new Font("Serif",Font.BOLD,12));
-                panel.add(lab);
-                panel.add(new JLabel(" "));
+            if(a.getEventDate()!=null){
+                if(LocalDate.now().isBefore(a.getEventDate()) || LocalDate.now().isEqual(a.getEventDate())){
+                    JLabel lab =new JLabel(a.getEventDate().toString()+": "+a.getEventName());
+                    lab.setFont(new Font("Serif",Font.BOLD,12));
+                    panel.add(lab);
+                    panel.add(new JLabel(" "));
+                }
             }
         });
 
