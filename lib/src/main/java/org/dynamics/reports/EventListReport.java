@@ -155,13 +155,12 @@ public class EventListReport implements Report{
                         addStringCell(a.getTo().getTeamName(),teamTable,noBorder);
                         table.addCell(teamTable);
                     });
-                    doc.add(table);doc.add(new Paragraph("\n"));
-                } catch (DocumentException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(null,e.getMessage());
                 }
-
             });
+            doc.add(table);
             doc.close();
             this.pdfWriter.close();
             JOptionPane.showMessageDialog(null, "PDF Generated successfully.");

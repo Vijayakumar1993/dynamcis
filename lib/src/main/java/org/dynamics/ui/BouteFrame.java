@@ -336,7 +336,9 @@ public class BouteFrame extends CommonFrame{
 
                             JPanel matcherPanel = new JPanel();
                             if(match.isPrimary()){
-                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Fixture"));
+                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Fixture #"+match.getMatchId()));
+                            }else{
+                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Match #"+match.getMatchId()));
                             }
                             matcherPanel.setLayout(new GridLayout(3,2,0,0));
                             matcherPanel.add(fromButton);
@@ -482,7 +484,6 @@ public class BouteFrame extends CommonFrame{
         sc.getVerticalScrollBar().setUnitIncrement(50);
         sc.getHorizontalScrollBar().setUnitIncrement(50);
         pane.add("Matcher List", sc);
-        pane.add("Buyer",fixterPanel);
         this.add(pane, BorderLayout.CENTER);
     }
 }

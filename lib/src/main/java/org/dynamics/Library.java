@@ -35,7 +35,12 @@ public class Library  extends CommonFrame {
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
-        this.commonNorthPanel();
+        this.commonNorthPanel(db);
+        this.commonWestPanel(db);
+        this.commonCenterPanel(db);
+        this.commonSouthPanal(db);
+        this.westPanel(db)
+        ;
         contactUs.put("Contact",(ActionEvent e)->{
             JFrame jf = new JFrame("Contact Us");
             jf.setTitle("Contact Us");

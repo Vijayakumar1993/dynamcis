@@ -5,6 +5,7 @@ import org.dynamics.model.*;
 import org.dynamics.model.Event;
 
 import javax.swing.*;
+import javax.swing.text.html.Option;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -39,15 +40,26 @@ public class Utility {
         System.out.println("Matcher List "+matcher);
         System.out.println("Fixture List "+fixtureSize);
 
+        List<Event> events = findListOfEvents(event);
+        Optional<Integer> sumOptional = events.stream().map(a->{
+            int size =0;
+            Matcher matcher1 = a.getMatcher();
+            if(matcher1!=null){
+                size = matcher1.getMatches().size();
+            }
+            return size;
+        }).reduce(Integer::sum);
+        int appenderSize = sumOptional.orElse(0);
         List<Person> matcherList = persons.subList(0,matcher);
         List<Person> fixtureList = persons.subList(matcher,persons.size());
         List<Match> matchList = new LinkedList<>();
         for(int i=0;i<matcherList.size();i=i+2){
+            appenderSize = appenderSize+1;
             Person fr = matcherList.get(i);
             Person tr = matcherList.get(i+1);
             System.out.println("From "+fr.getName()+" --- To "+tr.getName());
             Match match = new Match();
-            match.setMatchId(Utility.getRandom());
+            match.setMatchId((long) (appenderSize));
             match.setFromCorner(Corner.BLUE);
             match.setToCorner(Corner.RED);
             match.setFrom(matcherList.get(i));
@@ -57,11 +69,12 @@ public class Utility {
 
         //fixture matches
         for(int i=0;i<fixtureList.size();i=i+1){
+            appenderSize = appenderSize+1;
             Person fr = fixtureList.get(i);
             Person tr = fixtureList.get(i);
             System.out.println("From "+fr.getName()+" --- To "+tr.getName());
             Match match = new Match();
-            match.setMatchId(Utility.getRandom());
+            match.setMatchId((long)appenderSize);
             match.setFromCorner(Corner.BLUE);
             match.setToCorner(Corner.RED);
             match.setFrom(fr);

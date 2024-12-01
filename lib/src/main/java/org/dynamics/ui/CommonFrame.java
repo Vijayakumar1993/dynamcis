@@ -4,7 +4,6 @@ import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
 import org.dynamics.util.Utility;
-import org.jdatepicker.JDatePanel;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -14,6 +13,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -25,8 +26,14 @@ import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class CommonFrame extends JFrame {
+
+    private TablePair pair;
+    private DefaultMutableTreeNode root = new DefaultMutableTreeNode("Fixtures List");
+    private DefaultTreeModel treeModel = new DefaultTreeModel(root);
+    private JTree jtree = new JTree(treeModel);
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         setTitle(title);
         getContentPane().setBackground(Color.WHITE);
@@ -38,13 +45,207 @@ public abstract class CommonFrame extends JFrame {
 //        this.commonNorthPanel();
     }
 
+    public void westPanel(Db db){
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
 
-    public void commonNorthPanel(){
+        List<Event> events = new LinkedList<>();
+        List<String> eventKeys = db.keyFilterBy("Event_");
+        if(eventKeys!=null && !eventKeys.isEmpty()){
+            eventKeys.stream().sorted().forEach(event->{
+                try {
+                    Event ev = db.findObject(event);
+                    events.add(ev);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        events.forEach(a->{
+            System.out.println(a.getEventDate());
+            if(LocalDate.now().isBefore(a.getEventDate()) || LocalDate.now().isEqual(a.getEventDate())){
+                JLabel lab =new JLabel(a.getEventDate().toString()+": "+a.getEventName());
+                lab.setFont(new Font("Serif",Font.BOLD,12));
+                panel.add(lab);
+                panel.add(new JLabel(" "));
+            }
+        });
+
+        panel.setBorder(BorderFactory.createTitledBorder("Upcoming Events"));
+        add(new JScrollPane(panel),BorderLayout.EAST);
+    }
+    public void commonCenterPanel(Db db){
+        Vector<String> columns = new Vector<>();
+        columns.add("Fixture Id");
+        columns.add("Category Name");
+        columns.add("Weight Category");
+        columns.add("Total No of Teams");
+        columns.add("Total No of Match");
+
+        Vector<Vector<Object>> rows = new Vector<>();
+        List<String> eventKeys = db.keyFilterBy("Event_");
+        if(eventKeys!=null && !eventKeys.isEmpty()){
+            eventKeys.stream().sorted().forEach(event->{
+                try {
+                    Event ev = db.findObject(event);
+                    if(ev.getParentEvent()==null){
+                        List<Match> matches = ev.getMatcher().getMatches();
+                        Set<String> fromTeamNames = matches.stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
+                        Set<String> toTeamNames = matches.stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
+                        fromTeamNames.addAll(toTeamNames);
+                        Vector<Object> row = new Vector<>();
+                        row.add(ev.getId().toString());
+                        row.add(ev.getTeamName());
+                        row.add(ev.getEventName());
+                        row.add(fromTeamNames.size()+"");
+                        row.add(matches.size()+"");
+                        rows.add(row);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            });
+        }
+        this.pair = this.createTable(this,rows, columns,()->new LinkedHashMap<>(),null);
+    }
+
+    public void commonSouthPanal(Db db){
+        JPanel jps = new JPanel();
+        jps.setLayout(new BorderLayout());
+        JButton refresh = new JButton("Refresh");
+        refresh.setBackground(Color.GREEN);
+        refresh.addActionListener(e->{
+            root.removeAllChildren();
+            List<String> eventKeys = db.keyFilterBy("Event_");
+            if(eventKeys!=null && !eventKeys.isEmpty()){
+                eventKeys.stream().sorted().forEach(event->{
+                    try {
+                        Event ev = db.findObject(event);
+                        if(ev.getParentEvent()==null){
+                            Item item = new Item(ev.getId(),ev.getEventName().concat("("+ev.getTeamName()+")"));
+                            DefaultMutableTreeNode node = new DefaultMutableTreeNode(item);
+                            root.add(node);
+                            treeModel.reload();
+                        }
+                    } catch (Exception es) {
+                        throw new RuntimeException(es);
+                    }
+
+                });
+            }
+        });
+        jps.add(refresh,BorderLayout.WEST);
+        jps.setBorder(BorderFactory.createTitledBorder("Logger"));
+        add(jps,BorderLayout.SOUTH);
+
+    }
+    public void commonWestPanel(Db db) throws IOException, ClassNotFoundException {
+        List<String> eventKeys = db.keyFilterBy("Event_");
+        if(eventKeys!=null && !eventKeys.isEmpty()){
+            eventKeys.stream().sorted().forEach(event->{
+                try {
+                    Event ev = db.findObject(event);
+                    if(ev.getParentEvent()==null){
+                        Item item = new Item(ev.getId(),ev.getEventName().concat("("+ev.getTeamName()+")"));
+                        DefaultMutableTreeNode node = new DefaultMutableTreeNode(item);
+                        root.add(node);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            });
+        }
+
+        jtree.addTreeSelectionListener(e->{
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) jtree.getLastSelectedPathComponent();
+            if(node!=null){
+                Object obj = node.getUserObject();
+                if(obj instanceof Item){
+                    Item item = (Item)node.getUserObject();
+                    System.out.println(item);
+                    this.pair.getDefaultTableModel().setRowCount(0);
+                    try {
+                        Event ev = db.findObject("Event_"+item.getId());
+                        List<Match> matches = ev.getMatcher().getMatches();
+                        Set<String> fromTeamNames = matches.stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
+                        Set<String> toTeamNames = matches.stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
+                        fromTeamNames.addAll(toTeamNames);
+                        Vector<String> row = new Vector<>();
+                        row.add(ev.getId().toString());
+                        row.add(ev.getTeamName());
+                        row.add(ev.getEventName());
+                        row.add(fromTeamNames.size()+"");
+                        row.add(matches.size()+"");
+                        this.pair.getDefaultTableModel().addRow(row);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }else{
+                    Vector<Vector<Object>> rows = new Vector<>();
+                    List<String> oldKeys = db.keyFilterBy("Event_");
+                    if(oldKeys!=null && !oldKeys.isEmpty()){
+                        this.pair.getDefaultTableModel().setRowCount(0);
+                        oldKeys.stream().sorted().forEach(event->{
+                            try {
+                                Event ev = db.findObject(event);
+                                if(ev.getParentEvent()==null){
+                                    List<Match> matches = ev.getMatcher().getMatches();
+                                    Set<String> fromTeamNames = matches.stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
+                                    Set<String> toTeamNames = matches.stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
+                                    fromTeamNames.addAll(toTeamNames);
+                                    Vector<Object> row = new Vector<>();
+                                    row.add(ev.getId().toString());
+                                    row.add(ev.getTeamName());
+                                    row.add(ev.getEventName());
+                                    row.add(fromTeamNames.size()+"");
+                                    row.add(matches.size()+"");
+                                    this.pair.getDefaultTableModel().addRow(row);
+                                }
+                            } catch (Exception e1) {
+                                throw new RuntimeException(e1);
+                            }
+
+                        });
+                    }
+                }
+            }
+        });
         JPanel jsp = new JPanel();
-        jsp.setBorder(BorderFactory.createTitledBorder("Welcome"));
+        jsp.add(jtree);
+        jsp.setBorder(BorderFactory.createTitledBorder("Event Tree"));
+        jsp.setMinimumSize(new Dimension(300,300));
+        add(jsp, BorderLayout.WEST);
+    }
+    public void commonNorthPanel(Db db){
+        JPanel jsp = new JPanel();
+        jsp.setLayout(new BorderLayout());
         jsp.setBackground(Color.WHITE);
         jsp.setFont(new Font("Serif",Font.BOLD,12));
-        jsp.add(new JLabel("Welcome "+System.getProperty("user.name")));
+        JLabel welcomeLable =new JLabel("Welcome "+System.getProperty("user.name"));
+        welcomeLable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        jsp.add(welcomeLable,BorderLayout.EAST);
+        try {
+            Configuration configuration =  db.findObject("configuration");
+            if(configuration!=null){
+                ImageIcon icon = new ImageIcon((String)configuration.get("right-logo"));
+                JLabel imageLable = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
+                jsp.add(imageLable,BorderLayout.WEST);
+                JLabel titlelable = new JLabel((String)configuration.get("title"));
+                titlelable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
+                titlelable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
+                titlelable.setFont(new Font("Serif",Font.BOLD,30));
+                jsp.add(titlelable,BorderLayout.CENTER);
+            }
+        } catch (Exception es) {
+            es.printStackTrace();
+            alert(es.getMessage());
+        }
+
+
+        jsp.setBorder(BorderFactory.createTitledBorder("Welcome"));
         add(jsp, BorderLayout.NORTH);
     }
     public void menuBar(Map<String, Map<String, ActionListener>> menuItems){
@@ -84,9 +285,9 @@ public abstract class CommonFrame extends JFrame {
     }
 
     public Event eventPanel(List<Person> peoples, Db db, Event parentEvent, Gender gender, Categories categories) throws IOException {
-       if(peoples.size()<=0){
-           throw new IOException("Unable to create event for the peoples");
-       }
+        if(peoples.size()<=0){
+            throw new IOException("Unable to create event for the peoples");
+        }
         JTextField eventName = textField();
         eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         JTextField teamName = textField();
@@ -149,7 +350,7 @@ public abstract class CommonFrame extends JFrame {
     }
 
     public Integer confirmation(String msg, Supplier<JComponent> supplier){
-       return JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+        return JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
     }
 
     public JComboBox<String> comboBox(List<String> data){

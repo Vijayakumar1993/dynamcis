@@ -1,5 +1,6 @@
 package org.dynamics.ui;
 
+import com.google.common.primitives.Ints;
 import org.dynamics.db.Db;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
@@ -28,7 +29,8 @@ public class EventListFrame extends CommonFrame{
 
     public void northPanel(Db db){
         JPanel jsp = new JPanel();
-        jsp.setLayout(new FlowLayout());
+        jsp.setLayout(new GridLayout(2,3));
+        jsp.setBorder(BorderFactory.createTitledBorder("Event List"));
 
         JTextField eventId = textField();
         eventId.setBorder(BorderFactory.createTitledBorder("Event ID"));
@@ -39,40 +41,31 @@ public class EventListFrame extends CommonFrame{
         teamName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         jsp.add(teamName);
 
-        JTextField eventName = textField();
-        eventName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
-        jsp.add(eventName);
+        JPanel roundOffRange = new JPanel();
+        roundOffRange.setBackground(Color.WHITE);
+        List<String> weightsList =  IntStream.rangeClosed(1, 20)
+                .mapToObj(i -> ((int) Math.pow(2, i))+"")
+                .collect(Collectors.toList());
+
+        JComboBox<String> rndFrom = comboBox(weightsList);
+        rndFrom.setBorder(BorderFactory.createTitledBorder("From"));
+        roundOffRange.add(rndFrom);
+
+        JComboBox<String> rndTo = comboBox(weightsList);
+        rndTo.setBorder(BorderFactory.createTitledBorder("To"));
+        roundOffRange.add(rndTo);
+
+        roundOffRange.setBorder(BorderFactory.createTitledBorder("Round off Range"));
+        jsp.add(roundOffRange);
 
         JTextField description = textField();
         description.setBorder(BorderFactory.createTitledBorder("Description"));
         jsp.add(description);
 
-        JPanel matchesRange = new JPanel();
-        List<String> weightsList = IntStream.rangeClosed(0,100).mapToObj(a->a+"").collect(Collectors.toList());
-        JComboBox<String> matchFrom = comboBox(weightsList);
-        matchFrom.setBorder(BorderFactory.createTitledBorder("From"));
-        matchesRange.add(matchFrom);
 
-        JComboBox<String> matchTo = comboBox(weightsList);
-        matchTo.setBorder(BorderFactory.createTitledBorder("To"));
-        matchesRange.add(matchTo);
-
-        matchesRange.setBorder(BorderFactory.createTitledBorder("Matches Range"));
-        jsp.add(matchesRange);
-
-
-        JPanel fixtures = new JPanel();
-        List<String> fixturesList = IntStream.rangeClosed(0,100).mapToObj(a->a+"").collect(Collectors.toList());
-        JComboBox<String> fixtursFrom = comboBox(fixturesList);
-        fixtursFrom.setBorder(BorderFactory.createTitledBorder("From"));
-        fixtures.add(fixtursFrom);
-
-        JComboBox<String> fixtursTo = comboBox(fixturesList);
-        fixtursTo.setBorder(BorderFactory.createTitledBorder("To"));
-        fixtures.add(fixtursTo);
-
-        fixtures.setBorder(BorderFactory.createTitledBorder("Fixtures Range"));
-        jsp.add(fixtures);
+        JTextField eventName = textField();
+        eventName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
+        jsp.add(eventName);
 
         find.addActionListener(e->{
             try{
@@ -80,10 +73,8 @@ public class EventListFrame extends CommonFrame{
                 String selectedEventName = eventName.getText().toString().toLowerCase();
                 String selectedTeamName = teamName.getText().toString().toLowerCase();
                 String selectedDescription = description.getText().toString().toLowerCase();
-                String selectedmatchesFrom = matchFrom.getSelectedItem().toString().toLowerCase();
-                String selectedmatchesTo = matchTo.getSelectedItem().toString().toLowerCase();
-                String selectedfixturesFrom = fixtursFrom.getSelectedItem().toString().toLowerCase();
-                String selectedfixturesTo = fixtursTo.getSelectedItem().toString().toLowerCase();
+                String selectedmatchesFrom = rndFrom.getSelectedItem().toString().toLowerCase();
+                String selectedmatchesTo = rndTo.getSelectedItem().toString().toLowerCase();
 
                 this.availableEvent = db.keyFilterBy("Event_").stream().map(avr->{
                     try {
@@ -115,14 +106,9 @@ public class EventListFrame extends CommonFrame{
                     }else
                         return true;
                 }).filter(event->{
-                    int matchSize =event.getMatcher().getMatches().size();
+                    int matchSize = event.getRoundOf();
                     int defaultFrom = selectedmatchesFrom.isEmpty()?0:Integer.parseInt(selectedmatchesFrom);
                     int defaultTo = selectedmatchesTo.isEmpty()?100:Integer.parseInt(selectedmatchesTo);
-                    return matchSize>=defaultFrom && matchSize<defaultTo;
-                }).filter(event->{
-                    int matchSize =event.getFixture().getPersons().size();
-                    int defaultFrom = selectedfixturesFrom.isEmpty()?0:Integer.parseInt(selectedfixturesFrom);
-                    int defaultTo = selectedfixturesTo.isEmpty()?100:Integer.parseInt(selectedfixturesTo);
                     return matchSize>=defaultFrom && matchSize<defaultTo;
                 }).collect(Collectors.toList());
                 this.eventTablePair.getDefaultTableModel().setRowCount(0);
@@ -135,8 +121,9 @@ public class EventListFrame extends CommonFrame{
                 alert(e1.getMessage());
             }
         });
+        find.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         jsp.add(find);
-        this.add(jsp, BorderLayout.NORTH);
+        this.add(new JScrollPane(jsp), BorderLayout.NORTH);
     }
     public void listEvents(Db db){
         this.events = db.keyFilterBy("Event_");
