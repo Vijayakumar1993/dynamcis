@@ -4,6 +4,7 @@ package org.dynamics.reports;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
 import org.dynamics.model.Match;
 
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class EventReport implements Report{
-
+    private Configuration configuration;
     private PdfWriter pdfWriter;
     private Document doc;
     private Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
@@ -26,7 +27,8 @@ public class EventReport implements Report{
     private Font H2 = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
     private Font H3 = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
     private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-    public EventReport(String fileName) throws IOException, DocumentException {
+    public EventReport(String fileName, Configuration configuration) throws IOException, DocumentException {
+        this.configuration = configuration;
         this.doc = new Document(PageSize.A4
                 ,3f,3f,3f,3f);
         this.doc.setMargins(30, 30, 20, 50);
@@ -43,15 +45,15 @@ public class EventReport implements Report{
                 PdfContentByte canvas = writer.getDirectContentUnder();
                 Image watermarkImage = null; // Path to your image
                 try {
-                    watermarkImage = Image.getInstance("watermark.png");
+                    watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                watermarkImage.setAbsolutePosition(50, 100); // Position of the watermark image
+                watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
                 watermarkImage.scaleToFit(400, 400); // Resize the image to fit
-                watermarkImage.setRotationDegrees(45); // Rotate image if needed
+//                watermarkImage.setRotationDegrees(45); // Rotate image if needed
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
@@ -64,111 +66,114 @@ public class EventReport implements Report{
     @Override
     public void generateReport( Event event) throws DocumentException {
         doc.open();
-            List<Match> matches = event.getMatcher().getMatches();
+        List<Match> matches = event.getMatcher().getMatches();
 
-            PdfPTable titleTable = new PdfPTable(3);
-            titleTable.setWidthPercentage(100);
-            Paragraph titleParagraph = new Paragraph();
-            try {
-                Image img = Image.getInstance("left-logo.jpeg");
-                img.scaleToFit(100, 100);
-                img.setAlignment(Image.ALIGN_LEFT); // Align image to center
+        PdfPTable titleTable = new PdfPTable(3);
+        titleTable.setWidthPercentage(100);
+        Paragraph titleParagraph = new Paragraph();
+        try {
+            Image img = Image.getInstance((String)configuration.get("left-logo"));
+            img.scaleToFit(100, 100);
+            img.setAlignment(Image.ALIGN_LEFT); // Align image to center
 
-                PdfPCell imageCell = new PdfPCell();
-                imageCell.addElement(img);
-                imageCell.setBorder(0);
-                titleTable.addCell(imageCell);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            PdfPCell imageCell = new PdfPCell();
+            imageCell.addElement(img);
+            imageCell.setBorder(0);
+            titleTable.addCell(imageCell);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        String title = (String)configuration.get("title");
+        Chunk titleName = new Chunk(title,H1);
+        titleParagraph.add(titleName);
+        titleParagraph.add("\n");
+        Chunk categoryName = new Chunk(event.getEventName(),H2);
+        titleParagraph.add(categoryName);
+        titleParagraph.add("\n");
+        Chunk teamName = new Chunk(event.getTeamName(),H2);
+        titleParagraph.add(teamName);
+        titleParagraph.add("\n");
+        Chunk drawSheet = new Chunk("Draw Sheet",H3);
+        titleParagraph.add(drawSheet);
+        titleParagraph.add("\n");
+        titleParagraph.add("\n");
+
+        titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
+
+
+        PdfPCell titleCell = new PdfPCell();
+        titleCell.addElement(titleParagraph);
+        titleCell.setBorder(0);
+        titleTable.addCell(titleCell);
+        try {
+            Image img1 = Image.getInstance((String)configuration.get("right-logo"));
+            img1.scaleToFit(100, 100);
+            img1.setAlignment(Image.ALIGN_RIGHT); // Align image to center
+            PdfPCell rightCell = new PdfPCell();
+            rightCell.addElement(img1);
+            rightCell.setBorder(0);
+            titleTable.addCell(rightCell);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        doc.add(titleTable);
+        doc.add(new LineSeparator());
+
+        Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(event.getEventDate()),H3);
+        asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
+        doc.add(asOfDate);
+
+
+        Paragraph noOfBoxers = new Paragraph("No of Boxers :"+noOFBoxers(event),H3);
+        noOfBoxers.setAlignment(Paragraph.ALIGN_CENTER);
+        doc.add(noOfBoxers);
+        doc.add(new Paragraph("\n"));
+        PdfPTable table = new PdfPTable(3);
+
+        class Content{
+            private String message;
+            private Integer border;
+            public Content(String message, Integer border){
+                this.message = message;
+                this.border = border;
             }
-
-
-            Chunk categoryName = new Chunk(event.getEventName(),H1);
-            titleParagraph.add(categoryName);
-            titleParagraph.add("\n");
-            Chunk teamName = new Chunk(event.getTeamName(),H2);
-            titleParagraph.add(teamName);
-            titleParagraph.add("\n");
-            Chunk drawSheet = new Chunk("Draw Sheet",H3);
-            titleParagraph.add(drawSheet);
-            titleParagraph.add("\n");
-            titleParagraph.add("\n");
-
-            titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
-
-
-            PdfPCell titleCell = new PdfPCell();
-            titleCell.addElement(titleParagraph);
-            titleCell.setBorder(0);
-            titleTable.addCell(titleCell);
-            try {
-                Image img1 = Image.getInstance("right-logo.png");
-                img1.scaleToFit(100, 100);
-                img1.setAlignment(Image.ALIGN_RIGHT); // Align image to center
-                PdfPCell rightCell = new PdfPCell();
-                rightCell.addElement(img1);
-                rightCell.setBorder(0);
-                titleTable.addCell(rightCell);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            doc.add(titleTable);
-            doc.add(new LineSeparator());
-
-            Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(event.getEventDate()),H3);
-            asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
-            doc.add(asOfDate);
-
-
-            Paragraph noOfBoxers = new Paragraph("No of Boxers :"+noOFBoxers(event),H3);
-            noOfBoxers.setAlignment(Paragraph.ALIGN_CENTER);
-            doc.add(noOfBoxers);
-            doc.add(new Paragraph("\n"));
-            PdfPTable table = new PdfPTable(3);
-
-            class Content{
-                private String message;
-                private Integer border;
-                public Content(String message, Integer border){
-                    this.message = message;
-                    this.border = border;
-                }
-            }
-            table.setWidthPercentage(100);
-            table.addCell(getPdfCell("Team"));
-            table.addCell(getPdfCell("Name"));
-            table.addCell(getPdfCell(" "));
-            List<List<Content>> options = new LinkedList<>();
-            matches.forEach(match->{
-                List<Content> innerList = new LinkedList<>();
+        }
+        table.setWidthPercentage(100);
+        table.addCell(getPdfCell("Team"));
+        table.addCell(getPdfCell("Name"));
+        table.addCell(getPdfCell(" "));
+        List<List<Content>> options = new LinkedList<>();
+        matches.forEach(match->{
+            List<Content> innerList = new LinkedList<>();
+            innerList.add(new Content(" ",Rectangle.NO_BORDER));
+            innerList.add(new Content(" ",Rectangle.NO_BORDER));
+            innerList.add(new Content(" ",Rectangle.NO_BORDER));
+            innerList.add(new Content(match.getFrom().getTeamName(),Rectangle.BOTTOM));
+            innerList.add(new Content(match.getFrom().getName(),Rectangle.BOTTOM));
+            if(!match.isPrimary()){
                 innerList.add(new Content(" ",Rectangle.NO_BORDER));
                 innerList.add(new Content(" ",Rectangle.NO_BORDER));
+                innerList.add(new Content(" ",Rectangle.RIGHT));
+                innerList.add(new Content(" ",Rectangle.BOTTOM));
+                innerList.add(new Content(match.getTo().getTeamName(),Rectangle.BOTTOM ));
+                innerList.add(new Content(match.getTo().getName(),Rectangle.BOTTOM | Rectangle.RIGHT));
                 innerList.add(new Content(" ",Rectangle.NO_BORDER));
-                innerList.add(new Content(match.getFrom().getTeamName(),Rectangle.BOTTOM));
-                innerList.add(new Content(match.getFrom().getName(),Rectangle.BOTTOM));
-                if(!match.isPrimary()){
-                    innerList.add(new Content(" ",Rectangle.NO_BORDER));
-                    innerList.add(new Content(" ",Rectangle.NO_BORDER));
-                    innerList.add(new Content(" ",Rectangle.RIGHT));
-                    innerList.add(new Content(" ",Rectangle.BOTTOM));
-                    innerList.add(new Content(match.getTo().getTeamName(),Rectangle.BOTTOM ));
-                    innerList.add(new Content(match.getTo().getName(),Rectangle.BOTTOM | Rectangle.RIGHT));
-                    innerList.add(new Content(" ",Rectangle.NO_BORDER));
-                }else{
-                    innerList.add(new Content(" Bye ",Rectangle.BOTTOM));
-                }
-                options.add(innerList);
+            }else{
+                innerList.add(new Content(" Bye ",Rectangle.BOTTOM));
+            }
+            options.add(innerList);
+        });
+
+        options.forEach(a->{
+            a.stream().filter(Objects::nonNull).forEach(c->{
+                PdfPCell cell = new PdfPCell();
+                cell.setBorder(c.border);
+                cell.addElement(new Phrase(c.message,NORMAL_FONT));
+                table.addCell(cell);
             });
-
-            options.forEach(a->{
-                a.stream().filter(Objects::nonNull).forEach(c->{
-                    PdfPCell cell = new PdfPCell();
-                    cell.setBorder(c.border);
-                    cell.addElement(new Phrase(c.message,NORMAL_FONT));
-                    table.addCell(cell);
-                });
-            });
-            doc.add(table);
+        });
+        doc.add(table);
 
 
         doc.close();

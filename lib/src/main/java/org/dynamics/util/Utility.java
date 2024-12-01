@@ -34,6 +34,7 @@ public class Utility {
         Map<String, Integer> keyPair = fixtureAndMatcher(persons.size());
         Integer fixtureSize = keyPair.get("fixture");
         Integer matcher = keyPair.get("matcher");
+        Integer roundOf = keyPair.get("roundOf");
 
         System.out.println("Matcher List "+matcher);
         System.out.println("Fixture List "+fixtureSize);
@@ -72,6 +73,7 @@ public class Utility {
         Fixture fixture = new Fixture();
         List<Person> fixtures = new LinkedList<>(persons.subList(matcher,persons.size()));
         fixture.setPersons(fixtures);
+        event.setRoundOf(roundOf);
         event.setMatcher(matches);
         event.setFixture(fixture);
     }
@@ -97,6 +99,7 @@ public class Utility {
         Integer matcher = size-fixture;
         keyPair.put("fixture",fixture);
         keyPair.put("matcher", matcher);
+        keyPair.put("roundOf", set);
         return keyPair;
     }
 

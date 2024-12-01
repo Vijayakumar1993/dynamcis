@@ -3,23 +3,19 @@ package org.dynamics.ui;
 import org.dynamics.db.Db;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.TablePair;
-import org.jdatepicker.impl.JDatePickerImpl;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ConfigureFrame extends CommonFrame{
     private JButton submit = new JButton("Find");
     private TablePair pair;
 
-    public ConfigureFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public ConfigureFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
     }
 
@@ -93,7 +89,7 @@ public class ConfigureFrame extends CommonFrame{
 
                     Map<String, Object> existing = configuration.getKeys();
 
-                    if(valueValue.contains(",")){
+                    if(valueValue.contains("|")){
                         List<String> da = Arrays.stream(valueValue.split(",")).collect(Collectors.toList());
                         existing.put(keyValue, da);
                     }else {

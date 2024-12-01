@@ -24,7 +24,7 @@ public class BouteFrame extends CommonFrame{
     private List<String> paired = new LinkedList<>();
     private JButton findButton;
     private JButton shuffle = new JButton("Shuffle");
-    public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
         this.db = db;
         this.paired = this.db.keyFilterBy("Event_");
@@ -116,7 +116,8 @@ public class BouteFrame extends CommonFrame{
                     if(ev!=null){
                         Optional<String> saveFile = fileSaver();
                         if(saveFile.isPresent()){
-                            report = new EventReport(saveFile.get().concat(".pdf"));
+                            Configuration configuration = db.findObject("configuration");
+                            report = new EventReport(saveFile.get().concat(".pdf"),configuration);
                             report.generateReport(ev);
                         }
                     }

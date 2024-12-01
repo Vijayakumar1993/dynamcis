@@ -17,6 +17,10 @@ public class Configuration implements Serializable {
         this.keys = keys;
     }
 
+    public Object get(String key){
+        return keys.get(key);
+    }
+
     public Vector<Object> toVector(){
         Vector<Object> vector = new Vector<>();
         this.keys.forEach((key,value)->{

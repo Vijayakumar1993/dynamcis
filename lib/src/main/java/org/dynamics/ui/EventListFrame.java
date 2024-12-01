@@ -1,6 +1,7 @@
 package org.dynamics.ui;
 
 import org.dynamics.db.Db;
+import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
 import org.dynamics.model.TablePair;
 import org.dynamics.reports.EventListReport;
@@ -21,7 +22,7 @@ public class EventListFrame extends CommonFrame{
     private TablePair eventTablePair = null;
     private List<Event> filterEvents = new LinkedList<>();
     private JButton find = new JButton("Find");
-    public EventListFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public EventListFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
     }
 
@@ -187,21 +188,22 @@ public class EventListFrame extends CommonFrame{
                 //lets order the filter events as per the table
                 int actualRowCount = this.eventTablePair.getjTable().getRowCount();
                 for(int i=0;i<actualRowCount;i++){
-                        System.out.println(this.eventTablePair.getjTable().getValueAt(i,0));
+                    System.out.println(this.eventTablePair.getjTable().getValueAt(i,0));
                 }
                 List<Long> compartor = IntStream.range(0,actualRowCount).mapToObj(i->Long.valueOf(this.eventTablePair.getjTable().getValueAt(i,0).toString())).collect(Collectors.toList());
 
                 this.filterEvents = this.filterEvents.stream().sorted(Comparator.comparingLong(a->compartor.indexOf(a.getId()))).collect(Collectors.toList());
                 Optional<String> saveFile = fileSaver();
                 if(saveFile.isPresent()){
-                    report = new EventListReport(saveFile.get()+".pdf");
-                    String titile = JOptionPane.showInputDialog("Please enter the title of the report");
-                    if(titile.length()>0){
-                        report.generateReport(this.filterEvents,titile);
-                    }else{
-                        alert("Title is required for the report, please provide valid title.");
+                    Configuration configuration = new Configuration();
+                    try {
+                        configuration =  db.findObject("configuration");
+                    } catch (Exception es) {
+                        es.printStackTrace();
+                        alert(es.getMessage());
                     }
-
+                    report = new EventListReport(saveFile.get()+".pdf",configuration);
+                    report.generateReport(this.filterEvents,"");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();

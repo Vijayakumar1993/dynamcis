@@ -15,6 +15,15 @@ public class Event implements Serializable {
     private Matcher matcher;
     private Event parentEvent;
     private LocalDate eventDate;
+    private Integer roundOf;
+
+    public Integer getRoundOf() {
+        return roundOf;
+    }
+
+    public void setRoundOf(Integer roundOf) {
+        this.roundOf = roundOf;
+    }
 
     public LocalDate getEventDate() {
         return eventDate;
@@ -112,6 +121,7 @@ public class Event implements Serializable {
         vector.add(this.getEventName());
         vector.add(this.getDescription());
         vector.add(this.getEventDate().toString());
+        vector.add(this.getRoundOf().toString());
         vector.add(this.matcher.getMatches().size());
         vector.add(this.getFixture().getPersons().size());
         if(this.matcher.getWinner()!=null){
@@ -129,6 +139,7 @@ public class Event implements Serializable {
         keys.add("Weight Category");
         keys.add("Description");
         keys.add("Event Date");
+        keys.add("Round off");
         keys.add("Total Matches");
         keys.add("Total Fixtures");
         keys.add("Winner");

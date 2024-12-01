@@ -28,7 +28,7 @@ public class FindFrame extends CommonFrame{
     private FileImport fileKey;
     private Gender eventGender;
     private Categories eventCateogory;
-    public FindFrame(String title, List<Person> persons, FileImport fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public FindFrame(String title, List<Person> persons, FileImport fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
         this.persons = persons;
         this.fileKey = fileKey;
@@ -188,19 +188,22 @@ public class FindFrame extends CommonFrame{
         report.addActionListener(e->{
             Optional<String> saveFile = fileSaver();
             if(saveFile.isPresent()){
+
                 FixturesPdf reporter = null;
                 try {
+                    final Configuration configuration = db.findObject("configuration");
+                    String title = (String)configuration.get("title");
                     List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
                     Event dummyEvent = new Event();
-                    dummyEvent.setEventName("");
-                    dummyEvent.setTeamName("");
+                    dummyEvent.setEventName(title);
+                    dummyEvent.setTeamName(title);
                     Matcher matcher = new Matcher();
                     matcher.setMatches(new LinkedList<>());
                     dummyEvent.setMatcher(matcher);
                     Fixture fixture = new Fixture();
                     fixture.setPersons(peoples);
                     dummyEvent.setFixture(fixture);
-                    reporter = new FixturesPdf(saveFile.get().concat(".pdf"));
+                    reporter = new FixturesPdf(saveFile.get().concat(".pdf"),configuration);
                     reporter.generateReport(dummyEvent);
                 } catch (Exception ex) {
                     ex.printStackTrace();

@@ -38,6 +38,7 @@ public abstract class CommonFrame extends JFrame {
 //        this.commonNorthPanel();
     }
 
+
     public void commonNorthPanel(){
         JPanel jsp = new JPanel();
         jsp.setBorder(BorderFactory.createTitledBorder("Welcome"));
