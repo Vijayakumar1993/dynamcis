@@ -1,6 +1,7 @@
 package org.dynamics.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Vector;
 
 public class Person implements Serializable {
@@ -83,6 +84,19 @@ public class Person implements Serializable {
 
     public Boolean isValid(){
         return  !this.teamName.isEmpty() && !this.name.isEmpty() && !this.gender.toString().isEmpty() && !this.categories.toString().isEmpty() && !this.weight.toString().isEmpty()  ;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return id == person.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public static Vector<String> keys(){

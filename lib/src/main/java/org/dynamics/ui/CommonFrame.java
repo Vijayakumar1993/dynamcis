@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 public abstract class CommonFrame extends JFrame {
 
     private TablePair pair;
+    private TablePair teamPair;
+    private TablePair eventPair;
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode("Fixtures List");
     private DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private JTree jtree = new JTree(treeModel);
@@ -86,31 +88,47 @@ public abstract class CommonFrame extends JFrame {
         columns.add("Total No of Match");
 
         Vector<Vector<Object>> rows = new Vector<>();
+        Vector<Vector<Object>> teamRows = new Vector<>();
+        Vector<Vector<Object>> eventRows = new Vector<>();
         List<String> eventKeys = db.keyFilterBy("Event_");
         if(eventKeys!=null && !eventKeys.isEmpty()){
             eventKeys.stream().sorted().forEach(event->{
                 try {
-                    Event ev = db.findObject(event);
-                    if(ev.getParentEvent()==null){
-                        List<Match> matches = ev.getMatcher().getMatches();
-                        Set<String> fromTeamNames = matches.stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
-                        Set<String> toTeamNames = matches.stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
-                        fromTeamNames.addAll(toTeamNames);
-                        Vector<Object> row = new Vector<>();
-                        row.add(ev.getId().toString());
-                        row.add(ev.getTeamName());
-                        row.add(ev.getEventName());
-                        row.add(fromTeamNames.size()+"");
-                        row.add(matches.size()+"");
-                        rows.add(row);
-                    }
+                    Vector<Object> row = Utility.getFixtureRow(db, event);
+                    if(!row.isEmpty()) rows.add(row);
+                    Utility.getTeamRow(db,event,teamRows);
+                    Utility.getEventRows(db,event,eventRows);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 
             });
         }
-        this.pair = this.createTable(this,rows, columns,()->new LinkedHashMap<>(),null);
+
+        //fixture details frame
+        JPanel fixturesDetails = new JPanel();
+        fixturesDetails.setLayout(new BorderLayout());
+        this.pair = this.createTable(fixturesDetails,rows, columns, LinkedHashMap::new,null);
+
+
+        //team based details
+        Vector<String> teamColumns = new Vector<>();
+        teamColumns.add("Event Id");
+        teamColumns.add("Event Name");
+        teamColumns.add("Team Name");
+        teamColumns.add("Total no of Players");
+        JPanel teamDetails = new JPanel();
+        teamDetails.setLayout(new BorderLayout());
+        this.teamPair = this.createTable(teamDetails,teamRows, teamColumns, LinkedHashMap::new,null);
+
+        JPanel eventDetail = new JPanel();
+        eventDetail.setLayout(new BorderLayout());
+        this.eventPair = this.createTable(eventDetail,eventRows,Event.keys(), LinkedHashMap::new,null);
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.add("Fixture Details",fixturesDetails);
+        tabs.add("Team Details",teamDetails);
+        tabs.add("Event Details",eventDetail);
+        add(tabs,BorderLayout.CENTER);
     }
 
     public void commonSouthPanal(Db db){
@@ -169,47 +187,48 @@ public abstract class CommonFrame extends JFrame {
                     Item item = (Item)node.getUserObject();
                     System.out.println(item);
                     this.pair.getDefaultTableModel().setRowCount(0);
+                    this.teamPair.getDefaultTableModel().setRowCount(0);
+                    this.eventPair.getDefaultTableModel().setRowCount(0);
                     try {
-                        Event ev = db.findObject("Event_"+item.getId());
-                        List<Match> matches = ev.getMatcher().getMatches();
-                        Set<String> fromTeamNames = matches.stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
-                        Set<String> toTeamNames = matches.stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
-                        fromTeamNames.addAll(toTeamNames);
-                        Vector<String> row = new Vector<>();
-                        row.add(ev.getId().toString());
-                        row.add(ev.getTeamName());
-                        row.add(ev.getEventName());
-                        row.add(fromTeamNames.size()+"");
-                        row.add(matches.size()+"");
-                        this.pair.getDefaultTableModel().addRow(row);
+                        Vector<Object> row = Utility.getFixtureRow(db,"Event_"+item.getId());
+                        if(!row.isEmpty()) this.pair.getDefaultTableModel().addRow(row);
+
+                        Vector<Vector<Object>> teamRows = new Vector<>();
+                        Utility.getTeamRow(db,"Event_"+item.getId(),teamRows);
+                        teamRows.forEach(teamRow->{
+                            this.teamPair.getDefaultTableModel().addRow(teamRow);
+                        });
+                        Vector<Vector<Object>> eventRows = new Vector<>();
+                        Utility.getEventRows(db,"Event_"+item.getId(),eventRows);
+                        eventRows.forEach(eventRow->{
+                            this.eventPair.getDefaultTableModel().addRow(eventRow);
+                        });
+
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
                 }else{
-                    Vector<Vector<Object>> rows = new Vector<>();
                     List<String> oldKeys = db.keyFilterBy("Event_");
                     if(oldKeys!=null && !oldKeys.isEmpty()){
                         this.pair.getDefaultTableModel().setRowCount(0);
                         oldKeys.stream().sorted().forEach(event->{
-                            try {
-                                Event ev = db.findObject(event);
-                                if(ev.getParentEvent()==null){
-                                    List<Match> matches = ev.getMatcher().getMatches();
-                                    Set<String> fromTeamNames = matches.stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
-                                    Set<String> toTeamNames = matches.stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
-                                    fromTeamNames.addAll(toTeamNames);
-                                    Vector<Object> row = new Vector<>();
-                                    row.add(ev.getId().toString());
-                                    row.add(ev.getTeamName());
-                                    row.add(ev.getEventName());
-                                    row.add(fromTeamNames.size()+"");
-                                    row.add(matches.size()+"");
-                                    this.pair.getDefaultTableModel().addRow(row);
-                                }
-                            } catch (Exception e1) {
-                                throw new RuntimeException(e1);
-                            }
+                            Vector<Object> row = Utility.getFixtureRow(db,event);
+                            if(!row.isEmpty()) this.pair.getDefaultTableModel().addRow(row);
 
+                            Vector<Vector<Object>> teamRows = new Vector<>();
+                            Utility.getTeamRow(db,event,teamRows);
+                            teamRows.forEach(teamRow->{
+                                this.teamPair.getDefaultTableModel().addRow(teamRow);
+                            });
+                            Vector<Vector<Object>> eventRows = new Vector<>();
+                            try {
+                                Utility.getEventRows(db,event,eventRows);
+                            } catch (Exception ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            eventRows.forEach(eventRow->{
+                                this.eventPair.getDefaultTableModel().addRow(eventRow);
+                            });
                         });
                     }
                 }

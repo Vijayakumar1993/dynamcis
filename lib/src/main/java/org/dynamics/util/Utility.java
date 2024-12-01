@@ -1,17 +1,16 @@
 package org.dynamics.util;
 
-import org.checkerframework.checker.units.qual.C;
+import org.dynamics.db.Db;
 import org.dynamics.model.*;
 import org.dynamics.model.Event;
 
 import javax.swing.*;
-import javax.swing.text.html.Option;
 import java.awt.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Utility {
 
@@ -146,5 +145,104 @@ public class Utility {
         popup.setSize(300, 100);
         popup.setLocationRelativeTo(null); // Center on screen
         return popup;
+    }
+
+    public static void getEventRows(Db db, String event, Vector<Vector<Object>> teamRows) throws IOException, ClassNotFoundException {
+        Event ev = db.findObject(event);
+        if(ev.getParentEvent()==null){
+            List<Event> events = toEventObject(db);
+            if(!events.isEmpty()){
+                List<Event> subEvents = new LinkedList<>();
+                collectSubEvents(ev,events,subEvents);
+                subEvents.forEach(s->{
+                    teamRows.add(s.toVector());
+                });
+            }
+        }
+    }
+
+    public static void getTeamRow(Db db, String event, Vector<Vector<Object>> teamRows){
+        try {
+            Event ev = db.findObject(event);
+            if(ev.getParentEvent()==null){
+
+
+                List<Match> matches = ev.getMatcher().getMatches();
+                List<Person> fromNames = matches.stream().map(Match::getFrom).collect(Collectors.toList());
+                List<Person> toNames = matches.stream().map(Match::getTo).collect(Collectors.toList());
+                fromNames.addAll(toNames);
+                List<Person> uniquePeople = fromNames.stream()
+                        .collect(Collectors.toMap(
+                                Person::getId,  // Key is the name
+                                person -> person, // Value is the person
+                                (existing, replacement) -> existing)) // In case of duplicates, keep the existing one
+                        .values()
+                        .stream()
+                        .collect(Collectors.toList());
+
+                if(!uniquePeople.isEmpty()){
+                    uniquePeople.stream().collect(Collectors.groupingBy(Person::getTeamName)).forEach((key,value)->{
+                        Vector<Object> teamRow = new Vector<>();
+                        teamRow.add(ev.getId());
+                        teamRow.add(ev.getEventName());
+                        teamRow.add(key);
+                        teamRow.add(value.size());
+                        teamRows.add(teamRow);
+                    });
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static Vector<Object> getFixtureRow(Db db, String event){
+        Vector<Object> row = new Vector<>();
+        try {
+            Event ev = db.findObject(event);
+            if(ev.getParentEvent()==null){
+                List<Match> matches = ev.getMatcher().getMatches().stream().filter(m->!m.isPrimary()).collect(Collectors.toList());
+                Set<String> fromTeamNames =  ev.getMatcher().getMatches().stream().map(a->a.getFrom().getTeamName()).collect(Collectors.toSet());
+                Set<String> toTeamNames =  ev.getMatcher().getMatches().stream().map(a->a.getTo().getTeamName()).collect(Collectors.toSet());
+                fromTeamNames.addAll(toTeamNames);
+
+                row.add(ev.getId().toString());
+                row.add(ev.getTeamName());
+                row.add(ev.getEventName());
+                row.add(fromTeamNames.size()+"");
+                row.add(matches.size()+"");
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return  row;
+    }
+
+    public static List<Event> toEventObject(Db db){
+        try {
+            List<String> keys = db.keyFilterBy("Event_");
+            if(!keys.isEmpty()){
+                List<Event> events = keys.stream().map(key->{
+                    try {
+                        return (Event)db.findObject(key);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                }).collect(Collectors.toList());
+                return events;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new LinkedList<>();
+    }
+
+    public static void collectSubEvents(Event parentEvent, List<Event> events, List<Event> subEvents) {
+        for (Event e : events) {
+            if (e.getParentEvent() != null && Objects.equals(e.getParentEvent().getId(), parentEvent.getId())) {
+                subEvents.add(e);
+                collectSubEvents(e, events, subEvents);
+            }
+        }
     }
 }

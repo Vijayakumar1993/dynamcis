@@ -108,10 +108,10 @@ public class FixturesPdf implements Report{
         doc.add(titleTable);
         LineSeparator lineSeparator =  new LineSeparator();
         doc.add(lineSeparator);
-        Paragraph headerTitle =new Paragraph("Fixtures",H3);
+        Paragraph headerTitle =new Paragraph("Players List",H3);
         headerTitle.setAlignment(Paragraph.ALIGN_CENTER);
         doc.add(headerTitle);
-        Paragraph totalFixtures =new Paragraph("Total No of Fixtures: "+persons.size(),H3);
+        Paragraph totalFixtures =new Paragraph("Total No of Players: "+persons.size(),H3);
         totalFixtures.setAlignment(Paragraph.ALIGN_CENTER);
         totalFixtures.setSpacingAfter(10);
         totalFixtures.setSpacingAfter(10);

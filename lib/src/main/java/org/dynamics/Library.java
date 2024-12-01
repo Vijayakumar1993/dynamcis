@@ -39,8 +39,6 @@ public class Library  extends CommonFrame {
         this.commonWestPanel(db);
         this.commonCenterPanel(db);
         this.commonSouthPanal(db);
-        this.westPanel(db)
-        ;
         contactUs.put("Contact",(ActionEvent e)->{
             JFrame jf = new JFrame("Contact Us");
             jf.setTitle("Contact Us");

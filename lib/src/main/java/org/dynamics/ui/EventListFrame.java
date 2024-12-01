@@ -41,22 +41,13 @@ public class EventListFrame extends CommonFrame{
         teamName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         jsp.add(teamName);
 
-        JPanel roundOffRange = new JPanel();
-        roundOffRange.setBackground(Color.WHITE);
         List<String> weightsList =  IntStream.rangeClosed(1, 20)
                 .mapToObj(i -> ((int) Math.pow(2, i))+"")
                 .collect(Collectors.toList());
 
         JComboBox<String> rndFrom = comboBox(weightsList);
-        rndFrom.setBorder(BorderFactory.createTitledBorder("From"));
-        roundOffRange.add(rndFrom);
-
-        JComboBox<String> rndTo = comboBox(weightsList);
-        rndTo.setBorder(BorderFactory.createTitledBorder("To"));
-        roundOffRange.add(rndTo);
-
-        roundOffRange.setBorder(BorderFactory.createTitledBorder("Round off Range"));
-        jsp.add(roundOffRange);
+        rndFrom.setBorder(BorderFactory.createTitledBorder("Round off"));
+        jsp.add(rndFrom);
 
         JTextField description = textField();
         description.setBorder(BorderFactory.createTitledBorder("Description"));
@@ -74,7 +65,6 @@ public class EventListFrame extends CommonFrame{
                 String selectedTeamName = teamName.getText().toString().toLowerCase();
                 String selectedDescription = description.getText().toString().toLowerCase();
                 String selectedmatchesFrom = rndFrom.getSelectedItem().toString().toLowerCase();
-                String selectedmatchesTo = rndTo.getSelectedItem().toString().toLowerCase();
 
                 this.availableEvent = db.keyFilterBy("Event_").stream().map(avr->{
                     try {
@@ -106,10 +96,12 @@ public class EventListFrame extends CommonFrame{
                     }else
                         return true;
                 }).filter(event->{
-                    int matchSize = event.getRoundOf();
-                    int defaultFrom = selectedmatchesFrom.isEmpty()?0:Integer.parseInt(selectedmatchesFrom);
-                    int defaultTo = selectedmatchesTo.isEmpty()?100:Integer.parseInt(selectedmatchesTo);
-                    return matchSize>=defaultFrom && matchSize<defaultTo;
+                    if(!selectedmatchesFrom.isEmpty()){
+                        int matchSize = event.getRoundOf();
+                        int defaultFrom = selectedmatchesFrom.isEmpty()?0:Integer.parseInt(selectedmatchesFrom);
+                        return matchSize==defaultFrom;
+                    }
+                    return true;
                 }).collect(Collectors.toList());
                 this.eventTablePair.getDefaultTableModel().setRowCount(0);
                 this.filterEvents.forEach(event->{

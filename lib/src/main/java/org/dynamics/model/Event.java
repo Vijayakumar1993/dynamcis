@@ -150,4 +150,21 @@ public class Event implements Serializable {
         keys.add("Winner");
         return keys;
     }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", selecetedEventCategory=" + selecetedEventCategory +
+                ", selectedGenderCategory=" + selectedGenderCategory +
+                ", eventName='" + eventName + '\'' +
+                ", teamName='" + teamName + '\'' +
+                ", description='" + description + '\'' +
+                ", fixture=" + fixture +
+                ", matcher=" + matcher +
+                ", parentEvent=" + parentEvent +
+                ", eventDate=" + eventDate +
+                ", roundOf=" + roundOf +
+                '}';
+    }
 }
