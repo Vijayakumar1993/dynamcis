@@ -5,6 +5,7 @@ import org.dynamics.db.Db;
 import org.dynamics.model.*;
 import org.dynamics.model.Event;
 import org.dynamics.reports.EventReport;
+import org.dynamics.reports.FixturesPdf;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -187,17 +188,19 @@ public class FindFrame extends CommonFrame{
         report.addActionListener(e->{
             Optional<String> saveFile = fileSaver();
             if(saveFile.isPresent()){
-                EventReport reporter = null;
+                FixturesPdf reporter = null;
                 try {
                     List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
                     Event dummyEvent = new Event();
+                    dummyEvent.setEventName("");
+                    dummyEvent.setTeamName("");
                     Matcher matcher = new Matcher();
                     matcher.setMatches(new LinkedList<>());
                     dummyEvent.setMatcher(matcher);
                     Fixture fixture = new Fixture();
                     fixture.setPersons(peoples);
                     dummyEvent.setFixture(fixture);
-                    reporter = new EventReport(saveFile.get().concat(".pdf"));
+                    reporter = new FixturesPdf(saveFile.get().concat(".pdf"));
                     reporter.generateReport(dummyEvent);
                 } catch (Exception ex) {
                     ex.printStackTrace();

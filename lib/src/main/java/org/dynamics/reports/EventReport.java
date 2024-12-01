@@ -86,7 +86,7 @@ public class EventReport implements Report{
             Chunk categoryName = new Chunk(event.getEventName(),H1);
             titleParagraph.add(categoryName);
             titleParagraph.add("\n");
-            Chunk teamName = new Chunk(event.getEventName(),H2);
+            Chunk teamName = new Chunk(event.getTeamName(),H2);
             titleParagraph.add(teamName);
             titleParagraph.add("\n");
             Chunk drawSheet = new Chunk("Draw Sheet",H3);
@@ -115,7 +115,7 @@ public class EventReport implements Report{
             doc.add(titleTable);
             doc.add(new LineSeparator());
 
-            Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(LocalDate.now()),H3);
+            Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(event.getEventDate()),H3);
             asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
             doc.add(asOfDate);
 

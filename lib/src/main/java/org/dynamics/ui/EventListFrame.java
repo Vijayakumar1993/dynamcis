@@ -5,6 +5,7 @@ import org.dynamics.model.Event;
 import org.dynamics.model.TablePair;
 import org.dynamics.reports.EventListReport;
 import org.dynamics.reports.Report;
+import org.jdatepicker.impl.JDatePickerImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +32,6 @@ public class EventListFrame extends CommonFrame{
         JTextField eventId = textField();
         eventId.setBorder(BorderFactory.createTitledBorder("Event ID"));
         jsp.add(eventId);
-
 
 
         JTextField teamName = textField();

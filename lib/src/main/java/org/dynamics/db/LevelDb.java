@@ -71,6 +71,9 @@ public class LevelDb implements Db {
     @Override
     public <T> T findObject(String key) throws IOException, ClassNotFoundException {
         byte[] result = db.get(key.getBytes());
+        if(result==null){
+            return null;
+        }
         return deserializeObject(result);
     }
 

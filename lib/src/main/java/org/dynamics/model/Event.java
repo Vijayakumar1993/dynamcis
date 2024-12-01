@@ -1,6 +1,7 @@
 package org.dynamics.model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Vector;
 
 public class Event implements Serializable {
@@ -13,6 +14,15 @@ public class Event implements Serializable {
     private Fixture fixture;
     private Matcher matcher;
     private Event parentEvent;
+    private LocalDate eventDate;
+
+    public LocalDate getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(LocalDate eventDate) {
+        this.eventDate = eventDate;
+    }
 
     public Categories getSelecetedEventCategory() {
         return selecetedEventCategory;
@@ -101,6 +111,7 @@ public class Event implements Serializable {
         vector.add(this.getTeamName());
         vector.add(this.getEventName());
         vector.add(this.getDescription());
+        vector.add(this.getEventDate().toString());
         vector.add(this.matcher.getMatches().size());
         vector.add(this.getFixture().getPersons().size());
         if(this.matcher.getWinner()!=null){
@@ -117,6 +128,7 @@ public class Event implements Serializable {
         keys.add("Category Name");
         keys.add("Weight Category");
         keys.add("Description");
+        keys.add("Event Date");
         keys.add("Total Matches");
         keys.add("Total Fixtures");
         keys.add("Winner");

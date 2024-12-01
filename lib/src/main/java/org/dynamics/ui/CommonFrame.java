@@ -4,6 +4,10 @@ import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
 import org.dynamics.util.Utility;
+import org.jdatepicker.JDatePanel;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -13,6 +17,10 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -84,12 +92,16 @@ public abstract class CommonFrame extends JFrame {
         teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         JTextField desciption = textField();
         desciption.setBorder(BorderFactory.createTitledBorder("Description"));
+        JDatePickerImpl datePicker = datePicker(DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now()));
+        datePicker.setBorder(BorderFactory.createTitledBorder("Event Date"));
 
         JPanel jsp = new JPanel();
-        jsp.setLayout(new GridLayout(3,1,10,10));
+        jsp.setLayout(new GridLayout(4,1,10,10));
         jsp.add(eventName);
         jsp.add(teamName);
         jsp.add(desciption);
+        jsp.add(datePicker);
+
 
         confirmation("Please enter the details.", ()->jsp);
         Event event1 = new Event();
@@ -101,7 +113,8 @@ public abstract class CommonFrame extends JFrame {
         event1.setSelectedGenderCategory(gender);
         event1.setSelecetedEventCategory(categories);
         if(event1.isValid()){
-
+            LocalDate eventDte = ZonedDateTime.parse(datePicker.getModel().getValue().toString(),DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)).toLocalDate();
+            event1.setEventDate(eventDte);
             Utility.createEvent(peoples,event1);
             db.insert("Event_"+event1.getId().toString(),event1);
             if(parentEvent!=null)
@@ -221,4 +234,33 @@ public abstract class CommonFrame extends JFrame {
         });
         return decimalField;
     }
+
+    public JDatePickerImpl datePicker(String defaultValue){
+        UtilDateModel model = new UtilDateModel();
+        model.setSelected(true);
+        Properties p = new Properties();
+        p.put("text.today", "Today");
+        p.put("text.month", "Month");
+        p.put("text.year", "Year");
+        JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+        return new JDatePickerImpl(datePanel, new JFormattedTextField.AbstractFormatter() {
+            private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            @Override
+            public Object stringToValue(String text) throws ParseException {
+                return java.sql.Date.valueOf(LocalDate.parse(text, dateFormatter));
+            }
+
+            @Override
+            public String valueToString(Object value) throws ParseException {
+                if (value instanceof GregorianCalendar) {
+                    GregorianCalendar calendar = (GregorianCalendar) value;
+                    LocalDate localDate = calendar.toZonedDateTime().toLocalDate();
+                    return localDate.toString(); // Format: yyyy-MM-dd
+                }
+                return defaultValue;
+            }
+        });
+    }
+
 }

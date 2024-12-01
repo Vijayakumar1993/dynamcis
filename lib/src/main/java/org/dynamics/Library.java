@@ -10,10 +10,7 @@ import org.dynamics.model.Item;
 import org.dynamics.model.Person;
 import org.dynamics.reader.CsvFileReader;
 import org.dynamics.reader.Reader;
-import org.dynamics.ui.BouteFrame;
-import org.dynamics.ui.CommonFrame;
-import org.dynamics.ui.EventListFrame;
-import org.dynamics.ui.FindFrame;
+import org.dynamics.ui.*;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
@@ -34,6 +31,7 @@ public class Library  extends CommonFrame {
     private Map<String, ActionListener> fileMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> bouteMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> contactUs = new LinkedHashMap<>();
+    private Map<String, ActionListener> configurationItems = new LinkedHashMap<>();
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
@@ -135,6 +133,18 @@ public class Library  extends CommonFrame {
         });
 
 
+        configurationItems.put("Configure",(ActionEvent e)->{
+            try {
+                ConfigureFrame frame = new ConfigureFrame("Configuration");
+                frame.northPanel(db);
+                frame.centerPanel(db);
+                frame.southPanel(db);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                alert(ex.getMessage());
+            }
+
+        });
         fileMenuItems.put("Import Players",(ActionEvent e)->{
             try {
                 fileChooser().ifPresent(filePath->{
@@ -165,6 +175,7 @@ public class Library  extends CommonFrame {
 
         men.put("Player List", fileMenuItems);
         men.put("Event", bouteMenuItems);
+        men.put("Configuration", configurationItems);
         men.put("Contact Us",contactUs);
         super.menuBar(men);
         setVisible(true);
