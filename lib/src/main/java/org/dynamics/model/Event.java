@@ -3,6 +3,7 @@ package org.dynamics.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 public class Event implements Serializable {
     private Long id;
@@ -127,7 +128,7 @@ public class Event implements Serializable {
         }
 
         vector.add(this.getRoundOf().toString());
-        vector.add(this.matcher.getMatches().size());
+        vector.add(this.matcher.getMatches().stream().filter(m->!m.isPrimary()).collect(Collectors.toList()).size());
         vector.add(this.getFixture().getPersons().size());
         if(this.matcher.getWinner()!=null){
             vector.add(this.matcher.getWinner().getName());

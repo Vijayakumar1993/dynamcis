@@ -84,6 +84,9 @@ public class FixturesPdf implements Report{
         Chunk teamName = new Chunk(event.getTeamName(),H2);
         titleParagraph.add(teamName);
         titleParagraph.add("\n");
+        Chunk headerTitle =new Chunk("Players List",H3);
+        titleParagraph.add(headerTitle);
+        titleParagraph.add("\n");
         titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
 
 
@@ -108,9 +111,7 @@ public class FixturesPdf implements Report{
         doc.add(titleTable);
         LineSeparator lineSeparator =  new LineSeparator();
         doc.add(lineSeparator);
-        Paragraph headerTitle =new Paragraph("Players List",H3);
-        headerTitle.setAlignment(Paragraph.ALIGN_CENTER);
-        doc.add(headerTitle);
+
         Paragraph totalFixtures =new Paragraph("Total No of Players: "+persons.size(),H3);
         totalFixtures.setAlignment(Paragraph.ALIGN_CENTER);
         totalFixtures.setSpacingAfter(10);
@@ -147,7 +148,8 @@ public class FixturesPdf implements Report{
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
         Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
         cell.addElement(new Phrase(msg, font)); // Add plain text
-        cell.setFixedHeight(30f);
+        cell.setFixedHeight(20f);
+        cell.setPadding(0);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(cell);
     }

@@ -5,6 +5,7 @@ import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
+import org.dynamics.model.Match;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -124,7 +125,7 @@ public class EventListReport implements Report{
             table.setWidths(new float[]{1f,2f,2f,2f});
             event.forEach(ev->{
                 try {
-                    ev.getMatcher().getMatches().forEach(a->{
+                    ev.getMatcher().getMatches().stream().filter(m->!m.isPrimary()).forEach(a->{
                         addStringCell(a.getMatchId().toString(),table,defaultCellOptions);
                         String eventNameDetailed = ev.getTeamName()+"\n"+ev.getEventName();
                         addStringCell(eventNameDetailed,table,defaultCellOptions);
@@ -179,6 +180,7 @@ public class EventListReport implements Report{
         Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
         cell.addElement(new Phrase(msg, font)); // Add plain text
         cell.setFixedHeight(20f);
+        cell.setPadding(0);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         cellOptions.accept(cell);
         table.addCell(cell);

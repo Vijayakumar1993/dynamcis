@@ -154,6 +154,7 @@ public class Utility {
             if(!events.isEmpty()){
                 List<Event> subEvents = new LinkedList<>();
                 collectSubEvents(ev,events,subEvents);
+                teamRows.add(ev.toVector());//parent event
                 subEvents.forEach(s->{
                     teamRows.add(s.toVector());
                 });

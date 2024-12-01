@@ -228,7 +228,8 @@ public class EventReport implements Report{
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
         Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
         cell.addElement(new Phrase(msg, font)); // Add plain text
-        cell.setFixedHeight(30f);
+        cell.setFixedHeight(10f);
+        cell.setPadding(0);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(cell);
     }
