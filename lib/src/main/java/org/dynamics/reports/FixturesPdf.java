@@ -17,6 +17,7 @@ public class FixturesPdf implements Report{
     private PdfWriter pdfWriter;
     private Document doc;
     private Configuration configuration;
+    private String fileName;
     private Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
     private Font H1 = new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD);
     private Font H2 = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
@@ -24,6 +25,7 @@ public class FixturesPdf implements Report{
     private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
     public FixturesPdf(String fileName, Configuration configuration) throws IOException, DocumentException {
         this.configuration = configuration;
+        this.fileName = fileName;
         this.doc = new Document(PageSize.A4
                 ,3f,3f,3f,3f);
         this.doc.setMargins(30, 30, 20, 50);
@@ -135,6 +137,11 @@ public class FixturesPdf implements Report{
         doc.add(table);
         doc.add(new LineSeparator());
         doc.close();
+        int output = JOptionPane.showConfirmDialog(null, "Do you want to show the PDF?");
+        if(output == JOptionPane.YES_OPTION){
+            PrintPdfViewer pdfViewer = new PrintPdfViewer(this.fileName);
+            pdfViewer.view();
+        }
         JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
     }
     public PdfPCell getPdfCell(String msg) {

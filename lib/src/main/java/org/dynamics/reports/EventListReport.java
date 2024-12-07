@@ -3,11 +3,13 @@ package org.dynamics.reports;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
 import org.dynamics.model.Match;
-
 import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,9 +28,10 @@ public class EventListReport implements Report{
     private Font H3 = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
     private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
     private Consumer<PdfPCell> defaultCellOptions = (a)->System.out.println("default Supplier");
-
+    private String fileName;
     public EventListReport(String fileName,Configuration configuration) throws IOException, DocumentException {
         this.configuration = configuration;
+        this.fileName = fileName;
         this.doc = new Document(PageSize.LETTER,1f,1f,1f,1f);
         this.doc.setMargins(30, 30, 20, 50);
         this.pdfWriter = PdfWriter.getInstance(doc, Files.newOutputStream(Paths.get(fileName)));
@@ -90,9 +93,8 @@ public class EventListReport implements Report{
 
             Chunk titleName = new Chunk((String)configuration.get("title"),H2);
             titleParagraph.add(titleName);
-            Chunk totalBouts = new Chunk("Total No of Bouts "+event.size(),H3);
-            titleParagraph.add(titleName);
             titleParagraph.add("\n");
+            Chunk totalBouts = new Chunk("Total No of Bouts "+event.size(),H3);
             titleParagraph.add(totalBouts);
             titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
 
@@ -123,10 +125,12 @@ public class EventListReport implements Report{
             table.addCell(getPdfCell("Corner"));
             table.addCell(getPdfCell("Team"));
             table.setWidths(new float[]{1f,2f,2f,2f});
+            final int[] index = {0};
             event.forEach(ev->{
                 try {
                     ev.getMatcher().getMatches().stream().filter(m->!m.isPrimary()).forEach(a->{
-                        addStringCell(a.getMatchId().toString(),table,defaultCellOptions);
+                        index[0] = index[0] +1;
+                        addStringCell((index[0])+"",table,defaultCellOptions);
                         String eventNameDetailed = ev.getTeamName()+"\n"+ev.getEventName();
                         addStringCell(eventNameDetailed,table,defaultCellOptions);
 
@@ -164,7 +168,12 @@ public class EventListReport implements Report{
             doc.add(table);
             doc.close();
             this.pdfWriter.close();
-            JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
+
+            int output = JOptionPane.showConfirmDialog(null, "Do you want to show the PDF?");
+            if(output == JOptionPane.YES_OPTION){
+                PrintPdfViewer pdfViewer = new PrintPdfViewer(this.fileName);
+                pdfViewer.view();
+            }
         }
     }
 

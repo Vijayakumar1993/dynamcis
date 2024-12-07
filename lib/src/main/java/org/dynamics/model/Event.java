@@ -147,7 +147,7 @@ public class Event implements Serializable {
         keys.add("Event Date");
         keys.add("Round off");
         keys.add("Total Matches");
-        keys.add("Total Fixtures");
+        keys.add("Total Bye");
         keys.add("Winner");
         return keys;
     }

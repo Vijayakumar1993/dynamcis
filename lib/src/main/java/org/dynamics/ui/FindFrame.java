@@ -125,13 +125,13 @@ public class FindFrame extends CommonFrame{
                         }
                     }).filter(weightFilter->{
                         if(selectedFrom.length()>0){
-                            return weightFilter.getWeight().compareTo(Double.parseDouble(selectedFrom))>=1;
+                            return weightFilter.getWeight().compareTo(Double.parseDouble(selectedFrom))>=0;
                         }else{
                             return true;
                         }
                     }).filter(weightFilter->{
                         if(selectedTo.length()>0){
-                            return weightFilter.getWeight().compareTo(Double.parseDouble(selectedTo)) < 0;
+                            return weightFilter.getWeight().compareTo(Double.parseDouble(selectedTo)) <= 0;
                         }else{
                             return true;
                         }

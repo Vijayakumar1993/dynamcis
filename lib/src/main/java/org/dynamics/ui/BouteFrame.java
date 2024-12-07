@@ -295,10 +295,8 @@ public class BouteFrame extends CommonFrame{
                         matches.forEach(match -> {
                             Person fromPerson = match.getFrom();
                             Person toPerson = match.getTo();
-                            String fromText = fromPerson.getName();
-                            if(fromPerson.getId()!=0) fromText.concat("("+fromPerson.getId()+")").concat(fromPerson.getTeamName());
-                            String toText = toPerson.getName();
-                            if(toPerson.getId()!=0) toText.concat("("+toPerson.getId()+")").concat(toPerson.getTeamName());
+                            String fromText = fromPerson.getName().concat(" ("+fromPerson.getTeamName()+")");
+                            String toText = toPerson.getName().concat(" ("+toPerson.getTeamName()+")");
 
                             System.out.println("from text "+fromText);
                             System.out.println("to text "+toText);

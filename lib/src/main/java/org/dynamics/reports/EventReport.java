@@ -27,8 +27,10 @@ public class EventReport implements Report{
     private Font H2 = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
     private Font H3 = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
     private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
+    private String fileName;
     public EventReport(String fileName, Configuration configuration) throws IOException, DocumentException {
         this.configuration = configuration;
+        this.fileName = fileName;
         this.doc = new Document(PageSize.A4
                 ,3f,3f,3f,3f);
         this.doc.setMargins(30, 30, 20, 50);
@@ -178,6 +180,11 @@ public class EventReport implements Report{
 
         doc.close();
         this.pdfWriter.close();
+        int output = JOptionPane.showConfirmDialog(null, "Do you want to show the PDF?");
+        if(output == JOptionPane.YES_OPTION){
+            PrintPdfViewer pdfViewer = new PrintPdfViewer(this.fileName);
+            pdfViewer.view();
+        }
         JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
 
     }
