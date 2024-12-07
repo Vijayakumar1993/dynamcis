@@ -82,8 +82,8 @@ public abstract class CommonFrame extends JFrame {
     public void commonCenterPanel(Db db){
         Vector<String> columns = new Vector<>();
         columns.add("Fixture Id");
-        columns.add("Category Name");
         columns.add("Weight Category");
+        columns.add("Category Name");
         columns.add("Total No of Teams");
         columns.add("Total No of Match");
 

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 public class BouteFrame extends CommonFrame{
     private Db db;
+    private  JPanel leftButtons ;
     private JLabel LOGGER = new JLabel();
     private Event event;
     private TablePair fixtureTableModel;
@@ -236,7 +237,7 @@ public class BouteFrame extends CommonFrame{
             }
         });
         JPanel rightButtons = new JPanel(new FlowLayout());
-        JPanel leftButtons = new JPanel(new FlowLayout());
+        leftButtons = new JPanel(new FlowLayout());
         leftButtons.add(clear);
         leftButtons.add(shuffle);
         leftButtons.add(boutReport);
@@ -381,6 +382,12 @@ public class BouteFrame extends CommonFrame{
                         });*/
                     }
                     jd.setVisible(false);
+                    if(this.event!=null && this.event.getParentEvent()==null){
+                        leftButtons.setVisible(true);
+                    }else
+                    {
+                        leftButtons.setVisible(false);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -67,7 +67,7 @@ goto fail
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\lib.jar;%APP_HOME%\lib\commons-math3-3.6.1.jar;%APP_HOME%\lib\leveldb-0.9.jar;%APP_HOME%\lib\guava-31.0.1-jre.jar;%APP_HOME%\lib\itextpdf-5.5.13.2.jar;%APP_HOME%\lib\jdatepicker-1.3.4.jar;%APP_HOME%\lib\failureaccess-1.0.1.jar;%APP_HOME%\lib\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;%APP_HOME%\lib\jsr305-3.0.2.jar;%APP_HOME%\lib\checker-qual-3.12.0.jar;%APP_HOME%\lib\error_prone_annotations-2.7.1.jar;%APP_HOME%\lib\j2objc-annotations-1.3.jar;%APP_HOME%\lib\leveldb-api-0.9.jar
+set CLASSPATH=%APP_HOME%\lib\lib.jar;%APP_HOME%\lib\commons-math3-3.6.1.jar;%APP_HOME%\lib\leveldb-0.9.jar;%APP_HOME%\lib\guava-31.0.1-jre.jar;%APP_HOME%\lib\itextpdf-5.5.13.2.jar;%APP_HOME%\lib\jdatepicker-1.3.4.jar;%APP_HOME%\lib\pdfbox-2.0.29.jar;%APP_HOME%\lib\failureaccess-1.0.1.jar;%APP_HOME%\lib\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;%APP_HOME%\lib\jsr305-3.0.2.jar;%APP_HOME%\lib\checker-qual-3.12.0.jar;%APP_HOME%\lib\error_prone_annotations-2.7.1.jar;%APP_HOME%\lib\j2objc-annotations-1.3.jar;%APP_HOME%\lib\leveldb-api-0.9.jar;%APP_HOME%\lib\fontbox-2.0.29.jar;%APP_HOME%\lib\commons-logging-1.2.jar
 
 
 @rem Execute lib
