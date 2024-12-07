@@ -40,6 +40,7 @@ public class FindFrame extends CommonFrame{
 
     public void northpanel(){
         JPanel jsp = new JPanel();
+        jsp.setLayout(new GridLayout(3,3));
         jsp.setBorder(BorderFactory.createTitledBorder("Find"));
         jsp.setBackground(Color.WHITE);
 

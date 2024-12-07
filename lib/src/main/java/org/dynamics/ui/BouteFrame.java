@@ -255,6 +255,7 @@ public class BouteFrame extends CommonFrame{
         JPanel jsp = new JPanel();
         jsp.setBorder(BorderFactory.createTitledBorder("Find"));
         jsp.setBackground(Color.WHITE);
+        jsp.setLayout(new GridLayout(2,2));
 
 
         this.findButton = new JButton("Find");

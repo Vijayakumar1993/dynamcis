@@ -22,6 +22,7 @@ public class ConfigureFrame extends CommonFrame{
     public void northPanel(Db db){
         JPanel jp = new JPanel();
         jp.setBorder(BorderFactory.createTitledBorder("Create Configuration"));
+        jp.setLayout(new GridLayout(1,2));
         JTextField key = textField();
         key.setBorder(BorderFactory.createTitledBorder("Key"));
         jp.add(key);
