@@ -44,9 +44,9 @@ public class FixturesPdf implements Report{
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
                 watermarkImage.scaleToFit(400, 400); // Resize the image to fit
@@ -54,7 +54,7 @@ public class FixturesPdf implements Report{
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -77,7 +77,7 @@ public class FixturesPdf implements Report{
             imageCell.setBorder(0);
             titleTable.addCell(imageCell);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         Chunk categoryName = new Chunk(event.getEventName(),H1);
@@ -105,7 +105,7 @@ public class FixturesPdf implements Report{
             rightCell.setBorder(0);
             titleTable.addCell(rightCell);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         List<Person> persons = event.getFixture().getPersons();

@@ -71,7 +71,7 @@ public class PrintPdfViewer {
                             try {
                                 printerJob.setPrintService(defaultService);
                             } catch (PrinterException ex) {
-                                throw new RuntimeException(ex);
+                                ex.printStackTrace();
                             }
                         } else {
                             System.out.println("No default print service found. Printing to the system's default.");
@@ -82,7 +82,7 @@ public class PrintPdfViewer {
                             try {
                                 printerJob.print();
                             } catch (PrinterException ex) {
-                                throw new RuntimeException(ex);
+                                ex.printStackTrace();
                             }
                             System.out.println("Printing initiated.");
                         } else {
@@ -103,7 +103,7 @@ public class PrintPdfViewer {
                             printFrame.setVisible(false);
                         }
                     } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 });
 

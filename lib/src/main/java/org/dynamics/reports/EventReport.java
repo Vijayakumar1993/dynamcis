@@ -49,9 +49,9 @@ public class EventReport implements Report{
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
                 watermarkImage.scaleToFit(400, 400); // Resize the image to fit
@@ -59,7 +59,7 @@ public class EventReport implements Report{
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -83,7 +83,7 @@ public class EventReport implements Report{
             imageCell.setBorder(0);
             titleTable.addCell(imageCell);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         String title = (String)configuration.get("title");
@@ -117,7 +117,7 @@ public class EventReport implements Report{
             rightCell.setBorder(0);
             titleTable.addCell(rightCell);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         doc.add(titleTable);
         doc.add(new LineSeparator());

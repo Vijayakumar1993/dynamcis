@@ -16,6 +16,8 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
 import java.io.IOException;
 import java.text.ParseException;
@@ -27,12 +29,14 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class CommonFrame extends JFrame {
 
     private TablePair pair;
     private TablePair teamPair;
     private TablePair eventPair;
+    private TablePair medels;
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode("Fixtures List");
     private DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private JTree jtree = new JTree(treeModel);
@@ -45,39 +49,6 @@ public abstract class CommonFrame extends JFrame {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         setVisible(true);
 //        this.commonNorthPanel();
-    }
-
-    public void westPanel(Db db){
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
-
-        List<Event> events = new LinkedList<>();
-        List<String> eventKeys = db.keyFilterBy("Event_");
-        if(eventKeys!=null && !eventKeys.isEmpty()){
-            eventKeys.stream().sorted().forEach(event->{
-                try {
-                    Event ev = db.findObject(event);
-                    events.add(ev);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-
-        events.forEach(a->{
-            System.out.println(a.getEventDate());
-            if(a.getEventDate()!=null){
-                if(LocalDate.now().isBefore(a.getEventDate()) || LocalDate.now().isEqual(a.getEventDate())){
-                    JLabel lab =new JLabel(a.getEventDate().toString()+": "+a.getEventName());
-                    lab.setFont(new Font("Serif",Font.BOLD,12));
-                    panel.add(lab);
-                    panel.add(new JLabel(" "));
-                }
-            }
-        });
-
-        panel.setBorder(BorderFactory.createTitledBorder("Upcoming Events"));
-        add(new JScrollPane(panel),BorderLayout.EAST);
     }
     public void commonCenterPanel(Db db){
         Vector<String> columns = new Vector<>();
@@ -99,7 +70,7 @@ public abstract class CommonFrame extends JFrame {
                     Utility.getTeamRow(db,event,teamRows);
                     Utility.getEventRows(db,event,eventRows);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
 
             });
@@ -124,10 +95,22 @@ public abstract class CommonFrame extends JFrame {
         JPanel eventDetail = new JPanel();
         eventDetail.setLayout(new BorderLayout());
         this.eventPair = this.createTable(eventDetail,eventRows,Event.keys(), LinkedHashMap::new,null);
+
+        JPanel medalDetails = new JPanel();
+        medalDetails.setLayout(new BorderLayout());
+
+        Vector<String> medals = new Vector<>();
+        medals.add("Event");
+        medals.add("Gold");
+        medals.add("Silver");
+        medals.add("Bronze 1");
+        medals.add("Bronze 2");
+        this.medels = this.createTable(medalDetails,new Vector<>(),medals, LinkedHashMap::new,null);
         JTabbedPane tabs = new JTabbedPane();
         tabs.add("Fixture Details",fixturesDetails);
         tabs.add("Team Details",teamDetails);
         tabs.add("Event Details",eventDetail);
+        tabs.add("Medals",medalDetails);
         add(tabs,BorderLayout.CENTER);
     }
 
@@ -150,7 +133,7 @@ public abstract class CommonFrame extends JFrame {
                             treeModel.reload();
                         }
                     } catch (Exception es) {
-                        throw new RuntimeException(es);
+                        es.printStackTrace();
                     }
 
                 });
@@ -173,7 +156,7 @@ public abstract class CommonFrame extends JFrame {
                         root.add(node);
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
 
             });
@@ -189,6 +172,7 @@ public abstract class CommonFrame extends JFrame {
                     this.pair.getDefaultTableModel().setRowCount(0);
                     this.teamPair.getDefaultTableModel().setRowCount(0);
                     this.eventPair.getDefaultTableModel().setRowCount(0);
+                    this.medels.getDefaultTableModel().setRowCount(0);
                     try {
                         Vector<Object> row = Utility.getFixtureRow(db,"Event_"+item.getId());
                         if(!row.isEmpty()) this.pair.getDefaultTableModel().addRow(row);
@@ -204,13 +188,45 @@ public abstract class CommonFrame extends JFrame {
                             this.eventPair.getDefaultTableModel().addRow(eventRow);
                         });
 
+                        List<Event> existingEvents = Utility.toEventObject(db);
+                        Event parEvent  = db.findObject("Event_"+item.getId()) ;
+                        List<Event> subEvents = new LinkedList<>();
+                        Utility.collectSubEvents(parEvent,existingEvents,subEvents);
+
+                        List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
+                        List<Event> goldEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=2).collect(Collectors.toList());
+
+                        Vector<String> medalRows = new Vector<>();
+                        medalRows.add(item.toString());
+                        if(!goldEvents.isEmpty()){
+                            //only one match will be available...!
+                            Match match= goldEvents.get(0).getMatcher().getMatches().get(0);
+                            Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
+                            Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
+                            medalRows.add(success.getName()+"("+success.getTeamName()+")");
+                            medalRows.add(silver.getName()+"("+success.getTeamName()+")");
+                        }
+                        if(!bronzeEvents.isEmpty()){
+                            //two match event
+                            List<Match> mtchs = bronzeEvents.get(0).getMatcher().getMatches();
+                            Person bronze1 = mtchs.get(0).getSuccessor().getId() != mtchs.get(0).getFrom().getId()?mtchs.get(0).getFrom(): mtchs.get(0).getTo();
+                            Person bronze2 = mtchs.get(1).getSuccessor().getId() != mtchs.get(1).getFrom().getId()?mtchs.get(1).getFrom(): mtchs.get(1).getTo();
+
+
+                            medalRows.add(bronze1.getName()+"("+bronze1.getTeamName()+")");
+                            medalRows.add(bronze2.getName()+"("+bronze2.getTeamName()+")");
+                        }
+                        this.medels.getDefaultTableModel().addRow(medalRows);
+
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }else{
                     List<String> oldKeys = db.keyFilterBy("Event_");
                     if(oldKeys!=null && !oldKeys.isEmpty()){
+                        List<Event> existingEvents = Utility.toEventObject(db);
                         this.pair.getDefaultTableModel().setRowCount(0);
+                        this.medels.getDefaultTableModel().setRowCount(0);
                         oldKeys.stream().sorted().forEach(event->{
                             Vector<Object> row = Utility.getFixtureRow(db,event);
                             if(!row.isEmpty()) this.pair.getDefaultTableModel().addRow(row);
@@ -224,11 +240,44 @@ public abstract class CommonFrame extends JFrame {
                             try {
                                 Utility.getEventRows(db,event,eventRows);
                             } catch (Exception ex) {
-                                throw new RuntimeException(ex);
+                                ex.printStackTrace();
                             }
                             eventRows.forEach(eventRow->{
                                 this.eventPair.getDefaultTableModel().addRow(eventRow);
                             });
+                            List<Event> subEvents = new LinkedList<>();
+                            Event parEvent  = null;
+                            try {
+                                parEvent = db.findObject(event);
+                            }  catch (Exception ex) {
+                                ex.printStackTrace();
+                                alert(ex.getMessage());
+                            }
+                            if(parEvent.getParentEvent()==null){
+                                Utility.collectSubEvents(parEvent,existingEvents,subEvents);
+                                List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
+                                List<Event> goldEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=2).collect(Collectors.toList());
+
+                                Vector<String> medalRows = new Vector<>();
+                                medalRows.add(parEvent.getEventName());
+                                if(!goldEvents.isEmpty()){
+                                    //only one match will be available...!
+                                    Match match= goldEvents.get(0).getMatcher().getMatches().get(0);
+                                    Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
+                                    Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
+                                    medalRows.add(success.getName()+"("+success.getTeamName()+")");
+                                    medalRows.add(silver.getName()+"("+success.getTeamName()+")");
+                                }
+                                if(!bronzeEvents.isEmpty()){
+                                    //two match event
+                                    List<Match> mtchs = bronzeEvents.get(0).getMatcher().getMatches();
+                                    Person bronze1 = mtchs.get(0).getSuccessor().getId() != mtchs.get(0).getFrom().getId()?mtchs.get(0).getFrom(): mtchs.get(0).getTo();
+                                    Person bronze2 = mtchs.get(1).getSuccessor().getId() != mtchs.get(1).getFrom().getId()?mtchs.get(1).getFrom(): mtchs.get(1).getTo();
+                                    medalRows.add(bronze1.getName()+"("+bronze1.getTeamName()+")");
+                                    medalRows.add(bronze2.getName()+"("+bronze2.getTeamName()+")");
+                                }
+                                this.medels.getDefaultTableModel().addRow(medalRows);
+                            }
                         });
                     }
                 }
@@ -356,6 +405,18 @@ public abstract class CommonFrame extends JFrame {
         table.setShowHorizontalLines(false);
         table.setShowVerticalLines(false);
         table.setRowSorter(new TableRowSorter<TableModel>(model));
+
+
+        // Enable row dragging
+        table.setDragEnabled(true);
+        table.setDropMode(DropMode.INSERT_ROWS);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Add drag-and-drop support
+        table.setTransferHandler(new TableRowTransferHandler(model));
+
+
+
         table.setRowHeight(30);
         JScrollPane jsp = new JScrollPane(table);
         jsp.setBorder(BorderFactory.createTitledBorder("Details"));
@@ -485,5 +546,50 @@ public abstract class CommonFrame extends JFrame {
             }
         });
     }
+    class TableRowTransferHandler extends TransferHandler {
+        private final DefaultTableModel model;
+        private int[] rows;
 
+        public TableRowTransferHandler(DefaultTableModel model) {
+            this.model = model;
+        }
+
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            JTable table = (JTable) c;
+            rows = table.getSelectedRows();
+            return new StringSelection("");
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return MOVE;
+        }
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+            return support.isDrop();
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            if (!canImport(support)) {
+                return false;
+            }
+
+            JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+            int dropRow = dropLocation.getRow();
+
+            for (int row : rows) {
+                Object[] rowData = new Object[model.getColumnCount()];
+                for (int col = 0; col < model.getColumnCount(); col++) {
+                    rowData[col] = model.getValueAt(row, col);
+                }
+                model.removeRow(row);
+                model.insertRow(dropRow++, rowData);
+            }
+
+            return true;
+        }
+    }
 }

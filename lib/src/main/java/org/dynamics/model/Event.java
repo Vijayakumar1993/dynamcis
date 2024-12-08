@@ -127,7 +127,7 @@ public class Event implements Serializable {
             vector.add("");
         }
 
-        vector.add(this.getRoundOf().toString());
+        vector.add(this.getRoundOf());
         vector.add(this.matcher.getMatches().stream().filter(m->!m.isPrimary()).collect(Collectors.toList()).size());
         vector.add(this.getFixture().getPersons().size());
         if(this.matcher.getWinner()!=null){

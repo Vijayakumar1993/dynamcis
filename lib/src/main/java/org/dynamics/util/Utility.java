@@ -193,7 +193,7 @@ public class Utility {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
     public static Vector<Object> getFixtureRow(Db db, String event){
@@ -214,7 +214,7 @@ public class Utility {
 
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         return  row;
     }

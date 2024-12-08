@@ -49,9 +49,9 @@ public class EventListReport implements Report{
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
                 watermarkImage.scaleToFit(400, 400); // Resize the image to fit
@@ -59,7 +59,7 @@ public class EventListReport implements Report{
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -87,7 +87,7 @@ public class EventListReport implements Report{
                 imageCell.setBorder(0);
                 titleTable.addCell(imageCell);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
 
 
@@ -112,7 +112,7 @@ public class EventListReport implements Report{
                 rightCell.setBorder(0);
                 titleTable.addCell(rightCell);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
             titleTable.setSpacingAfter(10);
             doc.add(titleTable);
@@ -139,7 +139,7 @@ public class EventListReport implements Report{
                         try {
                             innerTable.setWidths(new float[]{1f,2f});
                         } catch (DocumentException e) {
-                            throw new RuntimeException(e);
+                            e.printStackTrace();
                         }
                         Consumer<PdfPCell> borderBottomCellOptions = cell->{
                             cell.setBorder( Rectangle.BOTTOM);
