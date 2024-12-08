@@ -8,6 +8,7 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
@@ -40,8 +41,10 @@ public abstract class CommonFrame extends JFrame {
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode("Fixtures List");
     private DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private JTree jtree = new JTree(treeModel);
-    public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         setTitle(title);
+        Image icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
+        setIconImage(icon); // Set the icon for the JFrame
         getContentPane().setBackground(Color.WHITE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

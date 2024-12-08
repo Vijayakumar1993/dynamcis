@@ -5,6 +5,7 @@ package org.dynamics;
 
 import org.dynamics.db.Db;
 import org.dynamics.db.LevelDb;
+import org.dynamics.model.Configuration;
 import org.dynamics.model.FileImport;
 import org.dynamics.model.Item;
 import org.dynamics.model.Person;
@@ -13,6 +14,7 @@ import org.dynamics.reader.Reader;
 import org.dynamics.ui.*;
 import org.dynamics.util.Utility;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Library  extends CommonFrame {
@@ -43,15 +46,27 @@ public class Library  extends CommonFrame {
             JFrame jf = new JFrame("Contact Us");
             jf.setTitle("Contact Us");
             jf.setVisible(true);
+            Image icon = null;
+            try {
+                icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
+                final Configuration configuration = db.findObject("configuration");
+                JPanel j = new JPanel();
+                String ttle = (String)configuration.get("title");
+                JLabel cont = new JLabel(ttle);
+                cont.setFont(new Font("Serif",Font.BOLD,25));
+                j.add(cont);
+                jf.add(j);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+            jf.setIconImage(icon); // Set the icon for the JFrame
             jf.getContentPane().setBackground(Color.WHITE);
             jf.setSize(new Dimension(300,150));
             jf.setResizable(false);
             jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            JPanel j = new JPanel();
-            JLabel cont = new JLabel("<html>Dynamics 101 MMA");
-            cont.setFont(new Font("Serif",Font.BOLD,25));
-            j.add(cont);
-            jf.add(j);
+
+
+
         });
         fileMenuItems.put("New Players", (ActionEvent e)->{
             String reportTitle = JOptionPane.showInputDialog("Please Enter the Player list name");
