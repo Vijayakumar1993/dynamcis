@@ -23,6 +23,7 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -120,8 +121,8 @@ public abstract class CommonFrame extends JFrame {
     public void commonSouthPanal(Db db){
         JPanel jps = new JPanel();
         jps.setLayout(new BorderLayout());
-        JButton refresh = new JButton("Refresh");
-        refresh.setBackground(Color.GREEN);
+        JButton refresh = new JButton(Utility.getImageIcon("/refresh.png"));
+//        refresh.setBackground(Color.GREEN);
         refresh.addActionListener(e->{
             root.removeAllChildren();
             List<String> eventKeys = db.keyFilterBy("Event_");
@@ -142,7 +143,7 @@ public abstract class CommonFrame extends JFrame {
                 });
             }
         });
-        jps.add(refresh,BorderLayout.WEST);
+        jps.add(refresh,BorderLayout.EAST);
         jps.setBorder(BorderFactory.createTitledBorder("Logger"));
         add(jps,BorderLayout.SOUTH);
 
@@ -387,6 +388,9 @@ public abstract class CommonFrame extends JFrame {
         event1.setParentEvent(parentEvent);
         event1.setSelectedGenderCategory(gender);
         event1.setSelecetedEventCategory(categories);
+
+        java.util.Date normalDate = (Date) datePicker.getModel().getValue();
+        event1.setEventDate(normalDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         if(event1.isValid()){
             LocalDate eventDte = ZonedDateTime.parse(datePicker.getModel().getValue().toString(),DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)).toLocalDate();
             event1.setEventDate(eventDte);

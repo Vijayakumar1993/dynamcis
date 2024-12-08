@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class EventListReport implements Report{
     private PdfWriter pdfWriter;
@@ -94,7 +95,9 @@ public class EventListReport implements Report{
             Chunk titleName = new Chunk((String)configuration.get("title"),H2);
             titleParagraph.add(titleName);
             titleParagraph.add("\n");
-            Chunk totalBouts = new Chunk("Total No of Bouts "+event.size(),H3);
+
+            Long ttlBts = event.stream().map(ev->ev.getMatcher().getMatches().stream().filter(m->!m.isPrimary()).collect(Collectors.toList()).stream().count()).reduce(Long::sum).orElse(0L);
+            Chunk totalBouts = new Chunk("Total No of Bout: "+ttlBts,H3);
             titleParagraph.add(totalBouts);
             titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
 
@@ -118,19 +121,30 @@ public class EventListReport implements Report{
             doc.add(titleTable);
             doc.add(new LineSeparator());
             doc.add(new Paragraph("\n"));
-            PdfPTable table = new PdfPTable(4);
+            PdfPTable table = new PdfPTable(5);
             table.setWidthPercentage(100);
+            table.addCell(getPdfCell("Order"));
             table.addCell(getPdfCell("Bout"));
             table.addCell(getPdfCell("Category"));
             table.addCell(getPdfCell("Corner"));
             table.addCell(getPdfCell("Team"));
-            table.setWidths(new float[]{1f,2f,2f,2f});
+            table.setWidths(new float[]{1f,1f,2f,2f,2f});
+            final Integer[] boutIndex = {1};
+            try{
+                boutIndex[0] = Integer.parseInt(JOptionPane.showInputDialog("Please enter bout starting index"));
+            }catch (Exception e){
+                JOptionPane.showMessageDialog(null, "Invalid "+e.getMessage());
+                throw new IllegalArgumentException("Invalid, Please put number only");
+            }
+
             final int[] index = {0};
             event.forEach(ev->{
                 try {
                     ev.getMatcher().getMatches().stream().filter(m->!m.isPrimary()).forEach(a->{
                         index[0] = index[0] +1;
+                        boutIndex[0] = boutIndex[0] +1;
                         addStringCell((index[0])+"",table,defaultCellOptions);
+                        addStringCell((boutIndex[0])+"",table,defaultCellOptions);
                         String eventNameDetailed = ev.getTeamName()+"\n"+ev.getEventName();
                         addStringCell(eventNameDetailed,table,defaultCellOptions);
 

@@ -3,6 +3,7 @@ package org.dynamics.util;
 import org.dynamics.db.Db;
 import org.dynamics.model.*;
 import org.dynamics.model.Event;
+import org.dynamics.ui.CommonFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -245,5 +246,11 @@ public class Utility {
                 collectSubEvents(e, events, subEvents);
             }
         }
+    }
+
+    public static ImageIcon getImageIcon(String path){
+        ImageIcon refreshIcon = new ImageIcon(Objects.requireNonNull(CommonFrame.class.getResource(path)));
+        Image scaledImage = refreshIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage);
     }
 }
