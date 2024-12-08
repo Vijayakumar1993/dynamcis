@@ -38,6 +38,16 @@ public class Library  extends CommonFrame {
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
+        Configuration initialConfiguration = new Configuration();
+        try {
+            initialConfiguration =  db.findObject("configuration");
+            if(initialConfiguration==null){
+              alert("Configuration is missing, kindly add");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            alert(e.getMessage());
+        }
         this.commonNorthPanel(db);
         this.commonWestPanel(db);
         this.commonCenterPanel(db);

@@ -52,6 +52,7 @@ public abstract class CommonFrame extends JFrame {
         setLayout(new BorderLayout());
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         setVisible(true);
+
 //        this.commonNorthPanel();
     }
     public void commonCenterPanel(Db db){
@@ -230,7 +231,9 @@ public abstract class CommonFrame extends JFrame {
                     if(oldKeys!=null && !oldKeys.isEmpty()){
                         List<Event> existingEvents = Utility.toEventObject(db);
                         this.pair.getDefaultTableModel().setRowCount(0);
+                        this.eventPair.getDefaultTableModel().setRowCount(0);
                         this.medels.getDefaultTableModel().setRowCount(0);
+                        this.teamPair.getDefaultTableModel().setRowCount(0);
                         oldKeys.stream().sorted().forEach(event->{
                             Vector<Object> row = Utility.getFixtureRow(db,event);
                             if(!row.isEmpty()) this.pair.getDefaultTableModel().addRow(row);

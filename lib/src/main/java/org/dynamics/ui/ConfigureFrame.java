@@ -3,6 +3,7 @@ package org.dynamics.ui;
 import org.dynamics.db.Db;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.TablePair;
+import org.dynamics.util.Utility;
 
 import javax.swing.*;
 import java.awt.*;
@@ -106,7 +107,21 @@ public class ConfigureFrame extends CommonFrame{
 
             }
         });
+
+        JButton help = new JButton(Utility.getImageIcon("/help.png"));
+        help.addActionListener(e->{
+            JPanel jsp = new JPanel();
+            jsp.setLayout(new GridLayout(4,1,10,10));
+            jsp.add(new JLabel("left-logo -> Logo to be placed in pdf left side and Left side of the dashboard screen "));
+            jsp.add(new JLabel("right-logo -> Logo to be placed in pdf right side"));
+            jsp.add(new JLabel("watermark-logo -> Watermark for the pdf"));
+            jsp.add(new JLabel("title -> Title will be placed in the dashboard and PDF."));
+            confirmation("Configuration Help", ()->jsp);
+        });
+
+
         JPanel rightButtons = new JPanel(new FlowLayout());
+        rightButtons.add(help);
         rightButtons.add(createConfiguration);
         add(rightButtons,BorderLayout.SOUTH);
     }
