@@ -1,6 +1,5 @@
 package org.dynamics.ui;
 
-import jdk.nashorn.internal.scripts.JD;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -44,9 +43,11 @@ public class BouteFrame extends CommonFrame{
         JButton clear = new JButton("Clear");
         clear.setPreferredSize(new Dimension(100,20));
         clear.setBackground(Color.RED);
+        clear.setForeground(Color.WHITE);
         JButton boutReport = new JButton("Generate Bout PDF");
         shuffle.setPreferredSize(new Dimension(100,20));
         shuffle.setBackground(Color.RED);
+        shuffle.setForeground(Color.WHITE);
 
         clear.addActionListener(a->{
             this.event.getMatcher().getMatches().forEach(match->{
@@ -169,9 +170,9 @@ public class BouteFrame extends CommonFrame{
                             JLabel wins = new JLabel(winner.getName());
 
                             if(successorCorner==Corner.RED){
-                                wins.setForeground(Color.YELLOW);
+                                wins.setForeground(Color.WHITE);
                             }else{
-                                wins.setForeground(Color.BLUE);
+                                wins.setForeground(Color.WHITE);
                             }
                             wins.setFont(new Font("Serif",Font.BOLD,12));
                             panel.add(wins);
@@ -306,13 +307,13 @@ public class BouteFrame extends CommonFrame{
                             JButton toButton = new JButton(toText);
                             toButton.setMaximumSize(new Dimension(300,50));
                             toButton.setBackground(match.getToCorner().getColor());
-                            toButton.setForeground(match.getToCorner().getColor());
+                            toButton.setForeground(Color.WHITE);
 
 
                             JButton fromButton = new JButton(fromText);
                             fromButton.setMaximumSize(new Dimension(300,50));
                             fromButton.setBackground(match.getFromCorner().getColor());
-                            fromButton.setForeground(match.getFromCorner().getColor());
+                            fromButton.setForeground(Color.WHITE);
 
                             JButton successorButton = new JButton("NA");
                             if(isLastEvent){
@@ -323,11 +324,11 @@ public class BouteFrame extends CommonFrame{
                                 }
                                 if(successor.getId()==fromPerson.getId()){
                                     successorButton.setText(fromText);
-                                    successorButton.setForeground(match.getFromCorner().getColor());
+                                    successorButton.setForeground(Color.WHITE);
                                     successorButton.setBackground(match.getFromCorner().getColor());
                                 }else if(successor.getId()==toPerson.getId()){
                                     successorButton.setText(toText);
-                                    successorButton.setForeground(match.getToCorner().getColor());
+                                    successorButton.setForeground(Color.WHITE);
                                     successorButton.setBackground(match.getToCorner().getColor());
                                 }
                             }else{
@@ -355,20 +356,20 @@ public class BouteFrame extends CommonFrame{
                                 System.out.println("updated ");
                                 match.setSuccessor(fromPerson);
                                 successorButton.setText(fromText);
-                                successorButton.setForeground(match.getFromCorner().getColor());
+                                successorButton.setForeground(Color.WHITE);
                                 successorButton.setBackground(match.getFromCorner().getColor());
                             });
                             toButton.addActionListener(e->{
                                 System.out.println("updated ");
                                 match.setSuccessor(toPerson);
                                 successorButton.setText(toText);
-                                successorButton.setForeground(match.getToCorner().getColor());
+                                successorButton.setForeground(Color.WHITE);
                                 successorButton.setBackground(match.getToCorner().getColor());
                             });
                             successorButton.addActionListener(e->{
                                 match.setSuccessor(new Person());
                                 successorButton.setText("NA");
-                                successorButton.setForeground(Color.BLACK);
+                                successorButton.setForeground(Color.WHITE);
                                 successorButton.setBackground(Color.BLACK);
                             });
                             if(match.isPrimary() && isLastEvent && match.getSuccessor().getId()==0){

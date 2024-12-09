@@ -137,6 +137,7 @@ public class EventListFrame extends CommonFrame{
     public void southPanel(Db db){
         JButton eventReport = new JButton("Generate Bout List");
         JButton deleteEvent = new JButton("Delete Event");
+        deleteEvent.setForeground(Color.WHITE);
         deleteEvent.setBackground(Color.RED);
         JPanel jsp = new JPanel();
         jsp.setLayout(new BorderLayout());

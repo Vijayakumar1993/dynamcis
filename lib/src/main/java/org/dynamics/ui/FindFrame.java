@@ -155,6 +155,7 @@ public class FindFrame extends CommonFrame{
         JButton deletePlayer = new JButton("Delete Players");
         JButton report = new JButton("Generate PDF");
         deletePlayer.setBackground(Color.RED);
+        deletePlayer.setForeground(Color.WHITE);
         deletePlayer.addActionListener(e->{
 
             Integer result = JOptionPane.showConfirmDialog(this, "Are you sure?");
