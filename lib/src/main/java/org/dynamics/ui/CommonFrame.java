@@ -304,7 +304,7 @@ public abstract class CommonFrame extends JFrame {
         jsp.setLayout(new BorderLayout());
         jsp.setBackground(Color.WHITE);
         jsp.setFont(new Font("Serif",Font.BOLD,12));
-        JLabel welcomeLable =new JLabel("Welcome "+System.getProperty("user.name"));
+        JLabel welcomeLable = new JLabel(System.getProperty("user.name"), Utility.getImageIcon("/user.png"), JLabel.CENTER);
         welcomeLable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         jsp.add(welcomeLable,BorderLayout.EAST);
         try {
