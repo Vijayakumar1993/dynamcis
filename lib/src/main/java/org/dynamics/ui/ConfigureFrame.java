@@ -22,6 +22,7 @@ public class ConfigureFrame extends CommonFrame{
 
     public void northPanel(Db db){
         JPanel jp = new JPanel();
+        jp.setPreferredSize(new Dimension(20,100));
         jp.setBorder(BorderFactory.createTitledBorder("Create Configuration"));
         jp.setLayout(new GridLayout(1,2));
         JTextField key = textField();
@@ -67,7 +68,7 @@ public class ConfigureFrame extends CommonFrame{
         pair = this.createTable(this,new Vector<>(), Configuration.keys(), LinkedHashMap::new,null);
     }
     public void southPanel(Db db){
-        JButton createConfiguration = new JButton("Create Configuration");
+        JButton createConfiguration = new JButton(Utility.getImageIcon("/settings.png"));
         createConfiguration.addActionListener(e->{
             JTextField key = textField();
             key.setBorder(BorderFactory.createTitledBorder("Key"));

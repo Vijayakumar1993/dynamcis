@@ -253,4 +253,15 @@ public class Utility {
         Image scaledImage = refreshIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);
     }
+
+    public static void setBackgroundWhite(Component component) {
+        if (component instanceof JComponent) {
+            component.setBackground(Color.WHITE);
+        }
+        if (component instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                setBackgroundWhite(child); // Recursive call for child components
+            }
+        }
+    }
 }

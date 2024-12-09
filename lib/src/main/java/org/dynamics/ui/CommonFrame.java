@@ -1,5 +1,6 @@
 package org.dynamics.ui;
 
+import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -112,6 +113,7 @@ public abstract class CommonFrame extends JFrame {
         medals.add("Bronze 2");
         this.medels = this.createTable(medalDetails,new Vector<>(),medals, LinkedHashMap::new,null);
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setBackground(Color.WHITE);
         tabs.add("Fixture Details",fixturesDetails);
         tabs.add("Team Details",teamDetails);
         tabs.add("Event Details",eventDetail);
@@ -292,6 +294,7 @@ public abstract class CommonFrame extends JFrame {
         });
         JPanel jsp = new JPanel();
         jsp.add(jtree);
+        jsp.setBackground(Color.WHITE);
         jsp.setBorder(BorderFactory.createTitledBorder("Event Tree"));
         jsp.setMinimumSize(new Dimension(300,300));
         add(jsp, BorderLayout.WEST);
@@ -367,10 +370,22 @@ public abstract class CommonFrame extends JFrame {
         }
         JTextField eventName = textField();
         eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
+        if(parentEvent!=null){
+            eventName.setText(parentEvent.getEventName());
+        }
+
         JTextField teamName = textField();
         teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
+        if(parentEvent!=null){
+            teamName.setText(parentEvent.getTeamName());
+        }
+
         JTextField desciption = textField();
         desciption.setBorder(BorderFactory.createTitledBorder("Description"));
+        if(parentEvent!=null){
+            desciption.setText(parentEvent.getDescription());
+        }
+
         JDatePickerImpl datePicker = datePicker(DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now()));
         datePicker.setBorder(BorderFactory.createTitledBorder("Event Date"));
 
@@ -457,7 +472,7 @@ public abstract class CommonFrame extends JFrame {
         paired.forEach(s->{
             try {
                 Event event = db.findObject(s);
-                String description = event.getEventName().concat("("+event.getTeamName()+")");
+                String description = event.getEventName().concat("("+event.getTeamName()+")("+event.getRoundOf()+")");
                 sortedItems.add(new Item(event.getId(), description));
             } catch (Exception e) {
                 alert(e.getMessage());

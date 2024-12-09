@@ -192,7 +192,7 @@ public class BouteFrame extends CommonFrame{
                             paired.forEach(s->{
                                 try {
                                     Event event = db.findObject(s);
-                                    String description = event.getEventName().concat("("+event.getTeamName()+")");
+                                    String description = event.getEventName().concat("("+event.getTeamName()+")("+event.getRoundOf()+")");
                                     sortedItems.add(new Item(event.getId(), description));
                                 } catch (Exception e) {
                                     alert(e.getMessage());
@@ -458,7 +458,7 @@ public class BouteFrame extends CommonFrame{
 
             existingPairs.forEach(es->{
                 try {
-                    String description = es.getEventName().concat("("+es.getTeamName()+")");
+                    String description = es.getEventName().concat("("+es.getTeamName()+")("+es.getRoundOf()+")");
                     this.pairedOptions.addItem(new Item(es.getId(),description));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -484,11 +484,13 @@ public class BouteFrame extends CommonFrame{
         matcherColumn.add("Winner");
         this.fixtureTableModel= createTable(fixterPanel, new Vector<>(),Person.keys(),()->new LinkedHashMap<>(),null);
         JTabbedPane pane = new JTabbedPane();
+        pane.setBackground(Color.WHITE);
         JScrollPane sc = new JScrollPane(jscrollPanle);
         sc.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         sc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         sc.getVerticalScrollBar().setUnitIncrement(50);
         sc.getHorizontalScrollBar().setUnitIncrement(50);
+        sc.setBackground(Color.WHITE);
         pane.add("Matcher List", sc);
         this.add(pane, BorderLayout.CENTER);
     }
