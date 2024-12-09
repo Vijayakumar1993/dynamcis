@@ -433,7 +433,7 @@ public abstract class CommonFrame extends JFrame {
         table.getTableHeader().setFont(new Font("Serif",Font.BOLD,12));
         table.setShowHorizontalLines(false);
         table.setShowVerticalLines(false);
-        table.setRowSorter(new TableRowSorter<TableModel>(model));
+//        table.setRowSorter(new TableRowSorter<TableModel>(model));
 
 
         // Enable row dragging

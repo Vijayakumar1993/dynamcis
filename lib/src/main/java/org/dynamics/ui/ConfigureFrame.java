@@ -115,6 +115,7 @@ public class ConfigureFrame extends CommonFrame{
 
                     db.insert("configuration",configuration);
                     this.submit.doClick();
+                    SwingUtilities.updateComponentTreeUI(this);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     alert(ex.getMessage());

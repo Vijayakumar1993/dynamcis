@@ -269,14 +269,14 @@ public class Utility {
     public static void themes(){
         try {
             String[] themes = {
-                    "Aero", "Aluminium", "Bernstein", "Fast",
+                    "","Aero", "Aluminium", "Bernstein", "Fast",
                     "Graphite", "HiFi", "Luna", "McWin",
                     "Mint", "Noire", "Smart", "Texture"
             };
             String selectedTheme = (String) JOptionPane.showInputDialog(
                     null,
                     "Select a theme:",
-                    "JTattoo Themes",
+                    "Select Themes",
                     JOptionPane.QUESTION_MESSAGE,
                     null,
                     themes,
