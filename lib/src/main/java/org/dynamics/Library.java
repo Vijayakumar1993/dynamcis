@@ -61,6 +61,7 @@ public class Library  extends CommonFrame {
                 icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
                 final Configuration configuration = db.findObject("configuration");
                 JPanel j = new JPanel();
+                j.setBackground(Color.WHITE);
                 String ttle = (String)configuration.get("title");
                 JLabel cont = new JLabel(ttle);
                 cont.setFont(new Font("Serif",Font.BOLD,25));

@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utility {
 
@@ -262,6 +263,43 @@ public class Utility {
             for (Component child : ((Container) component).getComponents()) {
                 setBackgroundWhite(child); // Recursive call for child components
             }
+        }
+    }
+
+    public static void themes(){
+        try {
+            String[] themes = {
+                    "Aero", "Aluminium", "Bernstein", "Fast",
+                    "Graphite", "HiFi", "Luna", "McWin",
+                    "Mint", "Noire", "Smart", "Texture"
+            };
+            String selectedTheme = (String) JOptionPane.showInputDialog(
+                    null,
+                    "Select a theme:",
+                    "JTattoo Themes",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    themes,
+                    themes[0]
+            );
+
+            switch (selectedTheme) {
+                case "Aero": UIManager.setLookAndFeel("com.jtattoo.plaf.aero.AeroLookAndFeel"); break;
+                case "Aluminium": UIManager.setLookAndFeel("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel"); break;
+                case "Bernstein": UIManager.setLookAndFeel("com.jtattoo.plaf.bernstein.BernsteinLookAndFeel"); break;
+                case "Fast": UIManager.setLookAndFeel("com.jtattoo.plaf.fast.FastLookAndFeel"); break;
+                case "Graphite": UIManager.setLookAndFeel("com.jtattoo.plaf.graphite.GraphiteLookAndFeel"); break;
+                case "HiFi": UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel"); break;
+                case "Luna": UIManager.setLookAndFeel("com.jtattoo.plaf.luna.LunaLookAndFeel"); break;
+                case "McWin": UIManager.setLookAndFeel("com.jtattoo.plaf.mcwin.McWinLookAndFeel"); break;
+                case "Mint": UIManager.setLookAndFeel("com.jtattoo.plaf.mint.MintLookAndFeel"); break;
+                case "Noire": UIManager.setLookAndFeel("com.jtattoo.plaf.noire.NoireLookAndFeel"); break;
+                case "Smart": UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel"); break;
+                case "Texture": UIManager.setLookAndFeel("com.jtattoo.plaf.texture.TextureLookAndFeel"); break;
+                default: UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

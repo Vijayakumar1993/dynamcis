@@ -5,12 +5,14 @@ import org.dynamics.model.Configuration;
 import org.dynamics.model.TablePair;
 import org.dynamics.util.Utility;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ConfigureFrame extends CommonFrame{
     private JButton submit = new JButton("Find");
@@ -70,18 +72,30 @@ public class ConfigureFrame extends CommonFrame{
     public void southPanel(Db db){
         JButton createConfiguration = new JButton(Utility.getImageIcon("/settings.png"));
         createConfiguration.addActionListener(e->{
-            JTextField key = textField();
+            JComboBox<String> key = comboBox(Stream.of("left-logo","right-logo","watermark-logo","title").collect(Collectors.toList()));
             key.setBorder(BorderFactory.createTitledBorder("Key"));
+            JPanel jprs = new JPanel();
+            jprs.setLayout(new FlowLayout());
             JTextField value = textField();
             value.setBorder(BorderFactory.createTitledBorder("Value"));
             JPanel jsp = new JPanel();
             jsp.setLayout(new GridLayout(2,1,10,10));
             jsp.add(key);
-            jsp.add(value);
+
+            jprs.add(value);
+            ImageIcon imageIcon = Utility.getImageIcon("/import.png");
+            Image scaledImage = imageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+            JButton upload = new JButton(new ImageIcon(scaledImage));
+            jprs.add(upload);
+            jsp.add(jprs);
+
+            upload.addActionListener(up->{
+                fileChooser().ifPresent(value::setText);
+            });
 
             int result = confirmation("Please enter the details.", ()->jsp);
             if(JOptionPane.YES_OPTION == result){
-                String keyValue = key.getText();
+                String keyValue = key.getSelectedItem().toString();
                 String valueValue = value.getText();
                 try {
                     Configuration configuration = db.findObject("configuration");
@@ -112,12 +126,48 @@ public class ConfigureFrame extends CommonFrame{
         JButton help = new JButton(Utility.getImageIcon("/help.png"));
         help.addActionListener(e->{
             JPanel jsp = new JPanel();
-            jsp.setLayout(new GridLayout(4,1,10,10));
-            jsp.add(new JLabel("left-logo -> Logo to be placed in pdf left side and Left side of the dashboard screen "));
-            jsp.add(new JLabel("right-logo -> Logo to be placed in pdf right side"));
-            jsp.add(new JLabel("watermark-logo -> Watermark for the pdf"));
-            jsp.add(new JLabel("title -> Title will be placed in the dashboard and PDF."));
-            confirmation("Configuration Help", ()->jsp);
+            jsp.setLayout(new FlowLayout());
+            jsp.setSize(new Dimension(1000,1000));
+            Vector<Vector<Object>> rows = new Vector<>();
+
+            Vector r1 = new Vector();
+            r1.add("left-logo");
+            r1.add("Select the image path for the log at pdf left side and Dashboard left side");
+            rows.add(r1);
+
+            Vector r2 = new Vector();
+            r2.add("right-logo");
+            r2.add("Select the image path for the log at pdf right side.");
+            rows.add(r2);
+
+            Vector r3 = new Vector();
+            r3.add("watermark-logo");
+            r3.add("Pdf Watermark logo");
+            rows.add(r3);
+
+            Vector r4 = new Vector();
+            r4.add("title");
+            r4.add("Title of the pdf and the Dasboard.");
+            rows.add(r4);
+
+
+            Vector<String> cols = new Vector<>();
+            cols.add("Key");
+            cols.add("Description");
+            createTable(jsp,rows,cols, LinkedHashMap::new,null);
+            JFrame jf = new JFrame("Help");
+            jf.setSize(new Dimension(500,500));
+            jf.setResizable(false);
+            jsp.setBackground(Color.WHITE);
+            jf.add(new JScrollPane(jsp));
+            jf.setVisible(true);
+            jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            jf.setBackground(Color.WHITE);
+            try {
+                jf.setIconImage(ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg"))));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
 

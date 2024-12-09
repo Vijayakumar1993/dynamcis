@@ -1,6 +1,5 @@
 package org.dynamics.ui;
 
-import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -32,7 +31,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class CommonFrame extends JFrame {
 
@@ -45,15 +43,15 @@ public abstract class CommonFrame extends JFrame {
     private JTree jtree = new JTree(treeModel);
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         setTitle(title);
+        UIManager.put("JTattoo.noText", true);
         Image icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
         setIconImage(icon); // Set the icon for the JFrame
         getContentPane().setBackground(Color.WHITE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         setVisible(true);
-
+        UIManager.setLookAndFeel("com.jtattoo.plaf.texture.TextureLookAndFeel");
 //        this.commonNorthPanel();
     }
     public void commonCenterPanel(Db db){
@@ -125,6 +123,11 @@ public abstract class CommonFrame extends JFrame {
         JPanel jps = new JPanel();
         jps.setLayout(new BorderLayout());
         JButton refresh = new JButton(Utility.getImageIcon("/refresh.png"));
+        JButton theme = new JButton(Utility.getImageIcon("/settings.png"));
+        theme.addActionListener(e->{
+            Utility.themes();
+            SwingUtilities.updateComponentTreeUI(this);
+        });
 //        refresh.setBackground(Color.GREEN);
         refresh.addActionListener(e->{
             root.removeAllChildren();
@@ -147,6 +150,7 @@ public abstract class CommonFrame extends JFrame {
             }
         });
         jps.add(refresh,BorderLayout.EAST);
+        jps.add(theme,BorderLayout.WEST);
         jps.setBorder(BorderFactory.createTitledBorder("Logger"));
         add(jps,BorderLayout.SOUTH);
 
