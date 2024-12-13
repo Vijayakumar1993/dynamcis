@@ -7,6 +7,7 @@ import org.dynamics.reports.EventReport;
 import org.dynamics.util.Utility;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
@@ -336,10 +337,17 @@ public class BouteFrame extends CommonFrame{
                             }
 
                             JPanel matcherPanel = new JPanel();
+
                             if(match.isPrimary()){
-                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Bye #"+match.getMatchId()));
+                                TitledBorder titledBorder = BorderFactory.createTitledBorder("Bye #"+match.getMatchId());
+                                titledBorder.setTitleFont(new Font("Comic Sans MS", Font.ITALIC | Font.BOLD, 12));
+                                titledBorder.setTitleColor(new Color(204, 85, 51));
+                                matcherPanel.setBorder(titledBorder);
                             }else{
-                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Match #"+match.getMatchId()));
+                                TitledBorder titledBorder = BorderFactory.createTitledBorder("Match #"+match.getMatchId());
+                                titledBorder.setTitleFont(new Font("Comic Sans MS", Font.ITALIC | Font.BOLD, 12));
+                                titledBorder.setTitleColor(new Color(204, 85, 51));
+                                matcherPanel.setBorder(titledBorder);
                             }
                             matcherPanel.setLayout(new GridLayout(3,2,0,0));
                             matcherPanel.add(fromButton);
