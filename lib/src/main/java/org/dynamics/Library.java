@@ -190,7 +190,7 @@ public class Library  extends CommonFrame {
                         alert("Total : "+persons.size()+" Uploaded Successfully...!");
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        alert(ex.getMessage());
+                        alert("File import failed, Please verify the file.");
                     }
                 });
 

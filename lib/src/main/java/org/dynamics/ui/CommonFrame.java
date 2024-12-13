@@ -41,6 +41,8 @@ public abstract class CommonFrame extends JFrame {
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode("Fixtures List");
     private DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private JTree jtree = new JTree(treeModel);
+    private JLabel titleLable;
+    private JLabel imageLable;
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         setTitle(title);
         UIManager.put("JTattoo.noText", true);
@@ -131,6 +133,28 @@ public abstract class CommonFrame extends JFrame {
 //        refresh.setBackground(Color.GREEN);
         refresh.addActionListener(e->{
             root.removeAllChildren();
+
+            //lets update the image and title
+            Configuration initialConfiguration = new Configuration();
+            try {
+                initialConfiguration =  db.findObject("configuration");
+                if(initialConfiguration==null){
+                    alert("Configuration is missing, kindly add");
+                    return;
+                }
+                ImageIcon icon = new ImageIcon((String)initialConfiguration.get("right-logo"));
+                if(icon!=null){
+                    imageLable.setIcon(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
+                }
+                String titl = (String)initialConfiguration.get("title");
+                titleLable.setText(titl);
+
+            } catch (Exception ess) {
+                ess.printStackTrace();
+                alert(ess.getMessage());
+            }
+
+
             List<String> eventKeys = db.keyFilterBy("Event_");
             if(eventKeys!=null && !eventKeys.isEmpty()){
                 eventKeys.stream().sorted().forEach(event->{
@@ -315,13 +339,13 @@ public abstract class CommonFrame extends JFrame {
             Configuration configuration =  db.findObject("configuration");
             if(configuration!=null){
                 ImageIcon icon = new ImageIcon((String)configuration.get("right-logo"));
-                JLabel imageLable = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
+                imageLable = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 jsp.add(imageLable,BorderLayout.WEST);
-                JLabel titlelable = new JLabel((String)configuration.get("title"));
-                titlelable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
-                titlelable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
-                titlelable.setFont(new Font("Serif",Font.BOLD,30));
-                jsp.add(titlelable,BorderLayout.CENTER);
+                titleLable = new JLabel((String)configuration.get("title"));
+                titleLable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
+                titleLable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
+                titleLable.setFont(new Font("Serif",Font.BOLD,30));
+                jsp.add(titleLable,BorderLayout.CENTER);
             }
         } catch (Exception es) {
             es.printStackTrace();
@@ -609,12 +633,28 @@ public abstract class CommonFrame extends JFrame {
             JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
             int dropRow = dropLocation.getRow();
 
+            // Collect row data first
+            List<Object[]> rowDataList = new ArrayList<>();
             for (int row : rows) {
                 Object[] rowData = new Object[model.getColumnCount()];
                 for (int col = 0; col < model.getColumnCount(); col++) {
                     rowData[col] = model.getValueAt(row, col);
                 }
-                model.removeRow(row);
+                rowDataList.add(rowData);
+            }
+
+            // Remove rows from the bottom to the top to prevent index shifts
+            for (int i = rows.length - 1; i >= 0; i--) {
+                model.removeRow(rows[i]);
+            }
+
+            // Adjust dropRow index if rows are moved upward
+            if (dropRow > rows[0]) {
+                dropRow -= rows.length;
+            }
+
+            // Insert the collected rows at the drop location
+            for (Object[] rowData : rowDataList) {
                 model.insertRow(dropRow++, rowData);
             }
 

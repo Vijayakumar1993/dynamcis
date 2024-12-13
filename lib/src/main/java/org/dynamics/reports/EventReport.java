@@ -122,10 +122,11 @@ public class EventReport implements Report{
         doc.add(titleTable);
         doc.add(new LineSeparator());
 
-        Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(event.getEventDate()),H3);
-        asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
-        doc.add(asOfDate);
-
+        if(event.getEventDate()!=null){
+            Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(event.getEventDate()),H3);
+            asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(asOfDate);
+        }
 
         Paragraph noOfBoxers = new Paragraph("No of Boxers :"+noOFBoxers(event),H3);
         noOfBoxers.setAlignment(Paragraph.ALIGN_CENTER);

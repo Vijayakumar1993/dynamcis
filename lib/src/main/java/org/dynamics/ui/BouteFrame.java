@@ -337,7 +337,7 @@ public class BouteFrame extends CommonFrame{
 
                             JPanel matcherPanel = new JPanel();
                             if(match.isPrimary()){
-                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Fixture #"+match.getMatchId()));
+                                matcherPanel.setBorder(BorderFactory.createTitledBorder("Bye #"+match.getMatchId()));
                             }else{
                                 matcherPanel.setBorder(BorderFactory.createTitledBorder("Match #"+match.getMatchId()));
                             }
@@ -373,7 +373,16 @@ public class BouteFrame extends CommonFrame{
                                 successorButton.setBackground(Color.BLACK);
                             });
                             if(match.isPrimary() && isLastEvent && match.getSuccessor().getId()==0){
-                                fromButton.doClick();
+                                successorButton.setText(fromText);
+                                successorButton.setForeground(Color.WHITE);
+                                match.setSuccessor(fromPerson);
+                                if(matches.indexOf(match)%2==0){
+                                    successorButton.setBackground(match.getToCorner().getColor());
+                                }else{
+                                    successorButton.setBackground(match.getFromCorner().getColor());
+                                }
+
+//                                fromButton.doClick();
                             }
                             //end of listeners
                         });
