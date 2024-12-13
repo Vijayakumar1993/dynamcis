@@ -144,6 +144,7 @@ public abstract class CommonFrame extends JFrame {
                 }
                 ImageIcon icon = new ImageIcon((String)initialConfiguration.get("right-logo"));
                 if(icon!=null){
+
                     imageLable.setIcon(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 }
                 String titl = (String)initialConfiguration.get("title");
@@ -342,6 +343,16 @@ public abstract class CommonFrame extends JFrame {
                 imageLable = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 jsp.add(imageLable,BorderLayout.WEST);
                 titleLable = new JLabel((String)configuration.get("title"));
+                titleLable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
+                titleLable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
+                titleLable.setFont(new Font("Serif",Font.BOLD,30));
+                jsp.add(titleLable,BorderLayout.CENTER);
+            }else{
+                ImageIcon icon = new ImageIcon();
+                imageLable = new JLabel(new ImageIcon(Utility.getImageIcon("/logo.jpeg").getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
+                jsp.add(imageLable,BorderLayout.WEST);
+
+                titleLable = new JLabel("");
                 titleLable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
                 titleLable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
                 titleLable.setFont(new Font("Serif",Font.BOLD,30));
