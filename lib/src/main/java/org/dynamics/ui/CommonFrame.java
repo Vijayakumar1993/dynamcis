@@ -240,7 +240,7 @@ public abstract class CommonFrame extends JFrame {
                             Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
                             Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
                             medalRows.add(success.getName()+"("+success.getTeamName()+")");
-                            medalRows.add(silver.getName()+"("+success.getTeamName()+")");
+                            medalRows.add(silver.getName()+"("+silver.getTeamName()+")");
                         }
                         if(!bronzeEvents.isEmpty()){
                             //two match event
@@ -304,7 +304,7 @@ public abstract class CommonFrame extends JFrame {
                                     Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
                                     Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
                                     medalRows.add(success.getName()+"("+success.getTeamName()+")");
-                                    medalRows.add(silver.getName()+"("+success.getTeamName()+")");
+                                    medalRows.add(silver.getName()+"("+silver.getTeamName()+")");
                                 }
                                 if(!bronzeEvents.isEmpty()){
                                     //two match event
