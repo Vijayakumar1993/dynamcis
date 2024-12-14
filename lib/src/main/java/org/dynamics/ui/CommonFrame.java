@@ -1,5 +1,6 @@
 package org.dynamics.ui;
 
+import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -10,6 +11,7 @@ import org.jdatepicker.impl.UtilDateModel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -29,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -147,7 +150,7 @@ public abstract class CommonFrame extends JFrame {
 
                     imageLable.setIcon(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 }
-                String titl = (String)initialConfiguration.get("title");
+                String titl = (String)initialConfiguration.get("club-title");
                 titleLable.setText(titl);
 
             } catch (Exception ess) {
@@ -175,6 +178,24 @@ public abstract class CommonFrame extends JFrame {
             }
         });
         jps.add(refresh,BorderLayout.EAST);
+
+        try {
+            Consumer<JLabel> bottomLable = lab ->{
+                lab.setFont(new Font("Serif",Font.ITALIC,20));
+                lab.setForeground(Color.BLUE);
+            };
+
+            Configuration configuration = (Configuration) db.findObject("configuration");
+           JPanel centerPan = new JPanel();
+           centerPan.setLayout(new BoxLayout(centerPan,BoxLayout.Y_AXIS));
+            centerPan.add(Utility.getBasicLable(configuration,"website",bottomLable));
+            centerPan.add(Utility.getBasicLable(configuration,"phone-number",bottomLable));
+           jps.add(centerPan,BorderLayout.CENTER);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         jps.add(theme,BorderLayout.WEST);
         jps.setBorder(BorderFactory.createTitledBorder("Logger"));
         add(jps,BorderLayout.SOUTH);
@@ -333,19 +354,35 @@ public abstract class CommonFrame extends JFrame {
         jsp.setLayout(new BorderLayout());
         jsp.setBackground(Color.WHITE);
         jsp.setFont(new Font("Serif",Font.BOLD,12));
-        JLabel welcomeLable = new JLabel(System.getProperty("user.name"), Utility.getImageIcon("/user.png"), JLabel.CENTER);
-        welcomeLable.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-        jsp.add(welcomeLable,BorderLayout.EAST);
+
+        JPanel timerPanel = new JPanel();
+        timerPanel.setBackground(Color.WHITE);
+        timerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        timerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        ImageIcon logoicon = Utility.getImageIcon("/user.png");
+        JLabel welcomeLable = new JLabel("<html>"+System.getProperty("user.name")+"<br />"+Utility.getCurrentDateTime()+"</html>", logoicon, JLabel.CENTER);
+        welcomeLable.setFont(new Font("Serif",Font.BOLD,12));
+        welcomeLable.setForeground(new Color(54, 69, 79));
+        Timer timer = new Timer(1000, e -> {
+            welcomeLable.setText("<html>"+System.getProperty("user.name")+"<br />"+Utility.getCurrentDateTime()+"</html>"); // Update the label with current date/time
+        });
+        timer.start();
+
+
+        timerPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        timerPanel.add(welcomeLable);
+        jsp.add(timerPanel,BorderLayout.EAST);
         try {
             Configuration configuration =  db.findObject("configuration");
             if(configuration!=null){
                 ImageIcon icon = new ImageIcon((String)configuration.get("right-logo"));
                 imageLable = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 jsp.add(imageLable,BorderLayout.WEST);
-                titleLable = new JLabel((String)configuration.get("title"));
+                titleLable = new JLabel("<html><center>"+Utility.getOrDefaultConfiguration(configuration,"club-title")+"<br />"+Utility.getOrDefaultConfiguration(configuration,"title")+"</center></html>");
                 titleLable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
                 titleLable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
-                titleLable.setFont(new Font("Serif",Font.BOLD,30));
+                titleLable.setFont(new Font("Serif",Font.BOLD,25));
+                titleLable.setForeground(new Color(54, 69, 79));
                 jsp.add(titleLable,BorderLayout.CENTER);
             }else{
                 ImageIcon icon = new ImageIcon();
@@ -436,7 +473,8 @@ public abstract class CommonFrame extends JFrame {
         jsp.add(datePicker);
 
 
-        confirmation("Please enter the details.", ()->jsp);
+        int res  = confirmation("Please enter the details.", ()->jsp);
+        if(res!=JOptionPane.YES_OPTION) return null;
         Event event1 = new Event();
         event1.setId(Utility.getRandom());
         event1.setEventName(eventName.getText());
@@ -479,7 +517,8 @@ public abstract class CommonFrame extends JFrame {
         // Add drag-and-drop support
         table.setTransferHandler(new TableRowTransferHandler(model));
 
-
+        table.setBackground(Color.WHITE);
+        table.setForeground(new Color(0, 0, 139));
 
         table.setRowHeight(30);
         JScrollPane jsp = new JScrollPane(table);
@@ -496,7 +535,7 @@ public abstract class CommonFrame extends JFrame {
     }
 
     public Integer confirmation(String msg, Supplier<JComponent> supplier){
-        return JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+        return JOptionPane.showConfirmDialog(this,supplier.get(),msg,JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE);
     }
 
     public JComboBox<String> comboBox(List<String> data){

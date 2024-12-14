@@ -197,10 +197,11 @@ public class BouteFrame extends CommonFrame{
                     }else{
                         try {
                             Event nEvent = eventPanel(succesors,db,dbEvent,dbEvent.getSelectedGenderCategory(),dbEvent.getSelecetedEventCategory());
+                            if(nEvent==null) return;
                             List<String> paired = this.db.keyFilterBy("Event_");
                             DefaultComboBoxModel<Item> comboBoxModel = new DefaultComboBoxModel<Item>();
                             List<Item> sortedItems = new LinkedList<>();
-                            sortedItems.add(new Item(0L, "description"));
+                            sortedItems.add(new Item(0L, ""));
                             paired.forEach(s->{
                                 try {
                                     Event event = db.findObject(s);
@@ -367,7 +368,7 @@ public class BouteFrame extends CommonFrame{
 
                             if(isLastEvent ){
                                 ImageIcon imageIcon = Utility.getImageIcon("/edit.png");
-                                Image scaledImage = imageIcon.getImage().getScaledInstance(10, 10, Image.SCALE_SMOOTH);
+                                Image scaledImage = imageIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
                                 JButton editButton = new JButton(new ImageIcon(scaledImage));
                                 editButton.setPreferredSize(new Dimension(20,20));
                                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT)); // Use FlowLayout for button control

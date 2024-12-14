@@ -36,6 +36,8 @@ public class Library  extends CommonFrame {
     private Db db = new LevelDb();
     public Library(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
+        JWindow loadingWindow = Utility.createLoadingWindow();
+        loadingWindow.setVisible(true);
         Configuration initialConfiguration = new Configuration();
         try {
             initialConfiguration =  db.findObject("configuration");
@@ -59,19 +61,19 @@ public class Library  extends CommonFrame {
                 icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
                 final Configuration configuration = db.findObject("configuration");
                 JPanel j = new JPanel();
-                j.setBackground(Color.WHITE);
-                String ttle = (String)configuration.get("title");
-                JLabel cont = new JLabel(ttle);
-                cont.setFont(new Font("Serif",Font.BOLD,25));
-                j.add(cont);
+                j.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
+                j.setBackground(new Color(54, 69, 79));
+                j.setLayout(new BoxLayout(j,BoxLayout.Y_AXIS));
+                j.add(Utility.getBasicLable(configuration,"club-title",Utility.CONSUMER_DEFAULT));
+                j.add(Utility.getBasicLable(configuration,"address",Utility.CONSUMER_DEFAULT));
+                j.add(Utility.getBasicLable(configuration,"phone-number",Utility.CONSUMER_DEFAULT));
+                j.add(Utility.getBasicLable(configuration,"website",Utility.CONSUMER_DEFAULT));
                 jf.add(j);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
             jf.setIconImage(icon); // Set the icon for the JFrame
-            jf.getContentPane().setBackground(Color.WHITE);
-            jf.setSize(new Dimension(300,150));
-            jf.setResizable(false);
+            jf.pack();
             jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 
@@ -205,7 +207,9 @@ public class Library  extends CommonFrame {
         men.put("Configuration", configurationItems);
         men.put("Contact Us",contactUs);
         super.menuBar(men);
+        loadingWindow.dispose();
         setVisible(true);
+
     }
     public static void main(String args[]) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         Library library = new Library("Dynamcis 101 MMA");

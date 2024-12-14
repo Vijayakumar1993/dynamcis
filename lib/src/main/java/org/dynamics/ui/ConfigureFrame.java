@@ -71,8 +71,9 @@ public class ConfigureFrame extends CommonFrame{
     }
     public void southPanel(Db db){
         JButton createConfiguration = new JButton(Utility.getImageIcon("/settings.png"));
+        JComboBox<String> key = comboBox(Utility.CONFIGURATIONS);
         createConfiguration.addActionListener(e->{
-            JComboBox<String> key = comboBox(Stream.of("left-logo","right-logo","watermark-logo","title").collect(Collectors.toList()));
+
             key.setBorder(BorderFactory.createTitledBorder("Key"));
             JPanel jprs = new JPanel();
             jprs.setLayout(new FlowLayout());
@@ -116,12 +117,14 @@ public class ConfigureFrame extends CommonFrame{
                     db.insert("configuration",configuration);
                     this.submit.doClick();
                     SwingUtilities.updateComponentTreeUI(this);
+                    createConfiguration.doClick();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     alert(ex.getMessage());
                 }
 
             }
+
         });
 
         JButton help = new JButton(Utility.getImageIcon("/help.png"));
@@ -148,8 +151,28 @@ public class ConfigureFrame extends CommonFrame{
 
             Vector r4 = new Vector();
             r4.add("title");
-            r4.add("Title of the pdf and the Dasboard.");
+            r4.add("Title of the PDF.");
             rows.add(r4);
+            Vector r5 = new Vector();
+            r5.add("club-title");
+            r5.add("Title of the Dashboard.");
+            rows.add(r5);
+
+
+            Vector r6 = new Vector();
+            r6.add("address");
+            r6.add("Address of the Club.");
+            rows.add(r6);
+
+            Vector r7 = new Vector();
+            r7.add("website");
+            r7.add("Website of the Club.");
+            rows.add(r7);
+
+            Vector r8 = new Vector();
+            r8.add("phone-number");
+            r8.add("Phone Number of the Club.");
+            rows.add(r8);
 
 
             Vector<String> cols = new Vector<>();

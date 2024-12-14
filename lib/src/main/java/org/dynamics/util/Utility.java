@@ -8,19 +8,30 @@ import org.dynamics.ui.CommonFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utility {
 
+    public static List<String> CONFIGURATIONS = Stream.of("club-title","left-logo","right-logo","watermark-logo","title","website","address","phone-number").collect(Collectors.toList());
     public static Long getRandom(){
         Random random = new Random();
         return Math.abs(Long.valueOf(random.nextInt()));
     }
-
+    public static String getCurrentDateTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+    public static final Consumer<JLabel> CONSUMER_DEFAULT = t -> {
+        // No operation performed
+    };
     public Optional<List<Person>> filter(List<Person> persons){
         return Optional.of(persons);
     }
@@ -306,5 +317,44 @@ public class Utility {
 
     public static Person getPesonById(List<Person> person, Long id){
         return person.stream().filter(p->p.getId() == id).collect(Collectors.toList()).get(0);
+    }
+
+    public static String getOrDefaultConfiguration(Configuration configuration,String key){
+        if(configuration==null)
+        {
+            return "";
+        }else{
+            try{
+                return (String) configuration.get(key);
+            }catch (Exception e){
+                e.printStackTrace()
+                ;
+                return "";
+            }
+        }
+    }
+
+    public static JLabel getBasicLable(Configuration configuration, String key, Consumer<JLabel> labelConsumer){
+        JLabel cont = new JLabel(getOrDefaultConfiguration(configuration,key));
+        cont.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cont.setFont(new Font("Serif",Font.BOLD,25));
+        cont.setForeground(Color.WHITE);
+        labelConsumer.accept(cont);
+        return cont;
+    }
+    public static JWindow createLoadingWindow() {
+        // Create a JWindow to display loading image
+        JWindow window = new JWindow();
+        window.setSize(300, 50);
+        window.setLocationRelativeTo(null); // Center the window on the screen
+        window.setBackground(Color.WHITE);
+        // Set the content of the window
+        JLabel label = new JLabel("Loading...!");
+        label.setForeground(Color.BLUE);
+        label.setFont(new Font("Serif",Font.BOLD,25));
+        label.setAlignmentX(JFrame.CENTER_ALIGNMENT);
+        window.getContentPane().add(label, BorderLayout.CENTER);
+        window.getContentPane().setBackground(Color.WHITE);
+        return window;
     }
 }
