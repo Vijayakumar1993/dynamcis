@@ -248,6 +248,7 @@ public abstract class CommonFrame extends JFrame {
                         List<Event> existingEvents = Utility.toEventObject(db);
                         Event parEvent  = db.findObject("Event_"+item.getId()) ;
                         List<Event> subEvents = new LinkedList<>();
+                        subEvents.add(parEvent);
                         Utility.collectSubEvents(parEvent,existingEvents,subEvents);
 
                         List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
