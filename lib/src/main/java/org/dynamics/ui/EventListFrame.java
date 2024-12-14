@@ -38,7 +38,7 @@ public class EventListFrame extends CommonFrame{
 
 
         JTextField teamName = textField();
-        teamName.setBorder(BorderFactory.createTitledBorder("Category Name"));
+        teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         jsp.add(teamName);
 
         List<String> weightsList =  IntStream.rangeClosed(1, 20)
@@ -55,7 +55,7 @@ public class EventListFrame extends CommonFrame{
 
 
         JTextField eventName = textField();
-        eventName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
+        eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         jsp.add(eventName);
 
         find.addActionListener(e->{
@@ -136,6 +136,8 @@ public class EventListFrame extends CommonFrame{
 
     public void southPanel(Db db){
         JButton eventReport = new JButton("Generate Bout List");
+        eventReport.setBackground(new Color(0, 0, 139));
+        eventReport.setForeground(Color.WHITE);
         JButton deleteEvent = new JButton("Delete Event");
         deleteEvent.setForeground(Color.WHITE);
         deleteEvent.setBackground(Color.RED);

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BouteFrame extends CommonFrame{
     private Db db;
@@ -24,6 +25,7 @@ public class BouteFrame extends CommonFrame{
     private JComboBox<Item> pairedOptions = new JComboBox<>();
     private List<String> paired = new LinkedList<>();
     private JButton findButton;
+    private JButton updateMatch;
     private JButton shuffle = new JButton("Shuffle");
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
@@ -35,22 +37,30 @@ public class BouteFrame extends CommonFrame{
     public void southPanel(){
         JPanel panle = new JPanel();
         panle.setLayout(new BorderLayout());
-        JButton updateMatch = new JButton("Save");
-        updateMatch.setBackground(Color.GREEN);
+        updateMatch = new JButton("Save");
+        updateMatch.setBackground(new Color(0, 64, 0));
+        updateMatch.setForeground(Color.WHITE);
 
         JButton mergeWithFixture = new JButton("Next Match");
-        mergeWithFixture.setBackground(Color.GREEN);
+        mergeWithFixture.setBackground(new Color(0, 64, 0));
+        mergeWithFixture.setForeground(Color.WHITE);
 
         JButton clear = new JButton("Clear");
         clear.setPreferredSize(new Dimension(100,20));
         clear.setBackground(Color.RED);
         clear.setForeground(Color.WHITE);
         JButton boutReport = new JButton("Generate Bout PDF");
+        boutReport.setBackground(new Color(0, 0, 139));
+        boutReport.setForeground(Color.WHITE);
         shuffle.setPreferredSize(new Dimension(100,20));
         shuffle.setBackground(Color.RED);
         shuffle.setForeground(Color.WHITE);
 
         clear.addActionListener(a->{
+            if(this.event==null){
+                alert("Event Not selected. Please select.");
+                return;
+            }
             this.event.getMatcher().getMatches().forEach(match->{
                 match.setSuccessor(new Person());
             });
@@ -296,6 +306,8 @@ public class BouteFrame extends CommonFrame{
                         JPanel innerPanle = new JPanel();
                         innerPanle.setLayout(new GridLayout(matches.size(),events.size(),2,2));
 
+                        List<Person> completePlayers = matcher.getInitialPlayersList();
+
                         matches.forEach(match -> {
                             Person fromPerson = match.getFrom();
                             Person toPerson = match.getTo();
@@ -351,7 +363,75 @@ public class BouteFrame extends CommonFrame{
                             }
                             matcherPanel.setLayout(new GridLayout(3,2,0,0));
                             matcherPanel.add(fromButton);
-                            matcherPanel.add(new JLabel(" "));
+
+
+                            if(isLastEvent ){
+                                ImageIcon imageIcon = Utility.getImageIcon("/edit.png");
+                                Image scaledImage = imageIcon.getImage().getScaledInstance(10, 10, Image.SCALE_SMOOTH);
+                                JButton editButton = new JButton(new ImageIcon(scaledImage));
+                                editButton.setPreferredSize(new Dimension(20,20));
+                                JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT)); // Use FlowLayout for button control
+                                panel.add(editButton);
+                                matcherPanel.add(panel);
+                                editButton.addActionListener(e->{
+                                    JPanel editPanle = new JPanel();
+                                    editPanle.setLayout(new GridLayout(3,1));
+                                    JComboBox<Item> fromComboBox = new JComboBox<>();
+                                    comboxBoxForGenericItem("Blue Corner",completePlayers,fromComboBox,fromPerson);
+                                    editPanle.add(fromComboBox);
+                                    JComboBox<Item> toComboBox = new JComboBox<>();
+                                    comboxBoxForGenericItem("Red Corner",completePlayers,toComboBox,toPerson);
+                                    editPanle.add(toComboBox);
+                                    JLabel alertOptins = new JLabel("<html>Manual allocations are not recommended<br/> due to Manual errors.</html>");
+                                    alertOptins.setFont(new Font("Serif",Font.BOLD,15));
+                                    alertOptins.setForeground(Color.RED);
+                                    editPanle.add(alertOptins);
+                                    int resul = confirmation("Manual Allocation for Match  #"+match.getMatchId(),()->editPanle);
+                                    if(resul == JOptionPane.YES_OPTION){
+                                        Vector<Vector<Object>> rows = new Vector<>();
+                                        try {
+                                            Utility.getEventRows(db,"Event_"+ev.getId(),rows);
+                                            if(rows.size()>1){
+                                                alert("Sub events are already exists, Manual Allocations won't support once sub events are generated.");
+                                                return;
+                                            }
+                                        } catch (Exception ex) {
+                                            alert(ex.getMessage());
+                                            ex.printStackTrace();
+                                        }
+
+
+                                        if(match.getSuccessor().getId()!=0){
+                                            int result = JOptionPane.showConfirmDialog(null, "Already Winner chosen, Do you want re-allocate?");
+                                            if(result == JOptionPane.YES_OPTION){
+                                                Long fromId = ((Item) Objects.requireNonNull(fromComboBox.getSelectedItem())).getId();
+                                                Long toId = ((Item) Objects.requireNonNull(toComboBox.getSelectedItem())).getId();
+                                                match.setFrom(Utility.getPesonById(completePlayers,fromId));
+                                                match.setTo(Utility.getPesonById(completePlayers,toId));
+                                                match.setSuccessor(new Person());
+                                                successorButton.doClick();
+                                                this.updateMatch.doClick();
+                                                this.findButton.doClick();
+                                            }
+                                        }else{
+                                            Long fromId = ((Item) Objects.requireNonNull(fromComboBox.getSelectedItem())).getId();
+                                            Long toId = ((Item) Objects.requireNonNull(toComboBox.getSelectedItem())).getId();
+                                            if(fromId!=0){
+                                                match.setFrom(Utility.getPesonById(completePlayers,fromId));
+                                            }
+                                            if(toId!=0){
+                                                match.setTo(Utility.getPesonById(completePlayers,toId));
+                                            }
+                                            this.updateMatch.doClick();
+                                            this.findButton.doClick();
+                                        }
+                                    }
+                                });
+                            }
+                            else{
+                                matcherPanel.add(new JLabel(" "));
+                            }
+
                             matcherPanel.add(new JLabel(" "));
                             matcherPanel.add(successorButton);
                             matcherPanel.add(toButton);

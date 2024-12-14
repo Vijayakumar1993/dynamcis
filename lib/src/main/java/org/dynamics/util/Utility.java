@@ -84,6 +84,7 @@ public class Utility {
             matchList.add(match);
         }
         matches.setMatches(matchList);
+        matches.setInitialPlayersList(persons);
         Fixture fixture = new Fixture();
         List<Person> fixtures = new LinkedList<>(persons.subList(matcher,persons.size()));
         fixture.setPersons(fixtures);
@@ -301,5 +302,9 @@ public class Utility {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Person getPesonById(List<Person> person, Long id){
+        return person.stream().filter(p->p.getId() == id).collect(Collectors.toList()).get(0);
     }
 }

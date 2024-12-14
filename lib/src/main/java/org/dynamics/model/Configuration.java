@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Vector;
 
 public class Configuration implements Serializable {
+
+
     private Map<String, Object> keys = new LinkedHashMap<>();
 
     public Map<String, Object> getKeys() {

@@ -170,8 +170,8 @@ public class EventListReport implements Report{
 
                         //team table
                         PdfPTable teamTable = new PdfPTable(1);
-                        addStringCell(a.getFrom().getTeamName(),teamTable,borderBottomCellOptions);
-                        addStringCell(a.getTo().getTeamName(),teamTable,noBorder);
+                        addStringCell(a.getTo().getTeamName(),teamTable,borderBottomCellOptions);
+                        addStringCell(a.getFrom().getTeamName(),teamTable,noBorder);
                         table.addCell(teamTable);
                     });
                 } catch (Exception e) {

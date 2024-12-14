@@ -6,6 +6,15 @@ import java.util.List;
 
 public class Matcher  implements Serializable {
     private List<Match> matches = new LinkedList<>();
+    private List<Person> initialPlayersList = new LinkedList<>();
+
+    public List<Person> getInitialPlayersList() {
+        return initialPlayersList;
+    }
+
+    public void setInitialPlayersList(List<Person> initialPlayersList) {
+        this.initialPlayersList = initialPlayersList;
+    }
 
     private Person winner;
     private Corner winnerCorder;

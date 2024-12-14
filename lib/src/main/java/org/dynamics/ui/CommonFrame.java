@@ -524,6 +524,25 @@ public abstract class CommonFrame extends JFrame {
         return pairedOptions;
     }
 
+    public JComboBox<Item> comboxBoxForGenericItem(String title,List<Person> persons, JComboBox<Item> pairedOptions, Person selected){
+        pairedOptions.addItem(new Item(0l,""));
+        List<Item> sortedItems = new LinkedList<>();
+        persons.forEach(s->{
+            try {
+                String description = s.getName()+"("+s.getTeamName()+")";
+                sortedItems.add(new Item(s.getId(), description));
+            } catch (Exception e) {
+                alert(e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        sortedItems.sort(Comparator.comparing(Item::getDescription));
+        sortedItems.forEach(pairedOptions::addItem);
+        pairedOptions.setBorder(BorderFactory.createTitledBorder(title));
+        pairedOptions.setSelectedItem(selected);
+        return pairedOptions;
+    }
+
     public JTextField textField(){
         JTextField textField  = new JTextField();
         textField.setPreferredSize(new Dimension(300,50));
