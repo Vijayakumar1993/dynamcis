@@ -188,7 +188,7 @@ public class ConfigureFrame extends CommonFrame{
             jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             jf.setBackground(Color.WHITE);
             try {
-                jf.setIconImage(ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg"))));
+                jf.setIconImage(ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.png"))));
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

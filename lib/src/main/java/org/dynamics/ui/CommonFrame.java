@@ -49,7 +49,7 @@ public abstract class CommonFrame extends JFrame {
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         setTitle(title);
         UIManager.put("JTattoo.noText", true);
-        Image icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
+        Image icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.png")));
         setIconImage(icon); // Set the icon for the JFrame
         getContentPane().setBackground(Color.WHITE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -387,7 +387,7 @@ public abstract class CommonFrame extends JFrame {
                 jsp.add(titleLable,BorderLayout.CENTER);
             }else{
                 ImageIcon icon = new ImageIcon();
-                imageLable = new JLabel(new ImageIcon(Utility.getImageIcon("/logo.jpeg").getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
+                imageLable = new JLabel(new ImageIcon(Utility.getImageIcon("/logo.png").getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 jsp.add(imageLable,BorderLayout.WEST);
 
                 titleLable = new JLabel("");

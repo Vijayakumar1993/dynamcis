@@ -58,7 +58,7 @@ public class Library  extends CommonFrame {
             jf.setVisible(true);
             Image icon = null;
             try {
-                icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.jpeg")));
+                icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.png")));
                 final Configuration configuration = db.findObject("configuration");
                 JPanel j = new JPanel();
                 j.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
