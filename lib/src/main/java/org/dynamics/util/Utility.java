@@ -385,6 +385,9 @@ public class Utility {
     }
 
     public static JLabel gradiantLable(String name){
+        if(name==null){
+            name = "";
+        }
        return new JLabel(name, SwingConstants.CENTER) {
             @Override
             protected void paintComponent(Graphics g) {

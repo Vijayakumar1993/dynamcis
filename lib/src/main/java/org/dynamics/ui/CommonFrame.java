@@ -324,6 +324,7 @@ public abstract class CommonFrame extends JFrame {
                                 alert(ex.getMessage());
                             }
                             if(parEvent.getParentEvent()==null){
+                                subEvents.add(parEvent);
                                 Utility.collectSubEvents(parEvent,existingEvents,subEvents);
                                 List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
                                 List<Event> goldEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=2).collect(Collectors.toList());
