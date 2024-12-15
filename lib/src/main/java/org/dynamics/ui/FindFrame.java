@@ -259,6 +259,8 @@ public class FindFrame extends CommonFrame{
                 if(person.isValid()){
                     this.persons.add(person);
                     fileKey.setPerson(this.persons);
+                    fileKey.setTotalCount(fileKey.getTotalCount()+1);
+                    fileKey.setStatus(Status.FINISHED);
                     db.insert("File_"+fileKey.getId(),fileKey);
                     alert("Person "+person.getName()+" created successfully....!");
                     this.find.doClick();

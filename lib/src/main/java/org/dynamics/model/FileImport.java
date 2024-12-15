@@ -4,15 +4,26 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 public class FileImport<T> implements Serializable {
     private Long id;
     private String name;
+
     private String filePath;
-    private  String importedBy;
+    private String importedBy;
     private LocalDateTime importedTime;
-    private Integer totalCount;
+    private int totalCount;
     private List<T> person = new LinkedList<>();
+    private Status status;
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public String getFilePath() {
         return filePath;
@@ -68,5 +79,16 @@ public class FileImport<T> implements Serializable {
 
     public void setTotalCount(Integer totalCount) {
         this.totalCount = totalCount;
+    }
+
+    public static Vector<String> keys(){
+        Vector<String> keys = new Vector<>();
+        keys.add("Id");
+        keys.add("File Path");
+        keys.add("Imported By");
+        keys.add("Total Count");
+        keys.add("Name");
+        keys.add("Status");
+        return keys;
     }
 }

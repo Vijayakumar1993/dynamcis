@@ -45,6 +45,8 @@ public abstract class CommonFrame extends JFrame {
     private DefaultTreeModel treeModel = new DefaultTreeModel(root);
     private JTree jtree = new JTree(treeModel);
     private JLabel titleLable;
+    private JLabel website;
+    private JLabel phoneNumber;
     private JLabel imageLable;
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         setTitle(title);
@@ -56,7 +58,7 @@ public abstract class CommonFrame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         setVisible(true);
-        UIManager.setLookAndFeel("com.jtattoo.plaf.texture.TextureLookAndFeel");
+        UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
 //        this.commonNorthPanel();
     }
     public void commonCenterPanel(Db db){
@@ -127,6 +129,7 @@ public abstract class CommonFrame extends JFrame {
     public void commonSouthPanal(Db db){
         JPanel jps = new JPanel();
         jps.setLayout(new BorderLayout());
+        jps.setBackground(Color.WHITE);
         JButton refresh = new JButton(Utility.getImageIcon("/refresh.png"));
         JButton theme = new JButton(Utility.getImageIcon("/settings.png"));
         theme.addActionListener(e->{
@@ -150,9 +153,13 @@ public abstract class CommonFrame extends JFrame {
 
                     imageLable.setIcon(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 }
-                String titl = (String)initialConfiguration.get("club-title");
+                String titl = Utility.getOrDefaultConfiguration(initialConfiguration,"club-title");
                 titleLable.setText(titl);
-
+                this.setTitle(Utility.getOrDefaultConfiguration(initialConfiguration,"club-title"));
+                String web = (String)initialConfiguration.get("website");
+                website.setText(web);
+                String phone = (String)initialConfiguration.get("phone-number");
+                phoneNumber.setText(phone);
             } catch (Exception ess) {
                 ess.printStackTrace();
                 alert(ess.getMessage());
@@ -187,9 +194,12 @@ public abstract class CommonFrame extends JFrame {
 
             Configuration configuration = (Configuration) db.findObject("configuration");
            JPanel centerPan = new JPanel();
+           centerPan.setBackground(Color.WHITE);
            centerPan.setLayout(new BoxLayout(centerPan,BoxLayout.Y_AXIS));
-            centerPan.add(Utility.getBasicLable(configuration,"website",bottomLable));
-            centerPan.add(Utility.getBasicLable(configuration,"phone-number",bottomLable));
+             website = Utility.getBasicLable(configuration, "website", bottomLable);
+            centerPan.add(website);
+             phoneNumber = Utility.getBasicLable(configuration, "phone-number", bottomLable);
+            centerPan.add(phoneNumber);
            jps.add(centerPan,BorderLayout.CENTER);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -379,7 +389,7 @@ public abstract class CommonFrame extends JFrame {
                 ImageIcon icon = new ImageIcon((String)configuration.get("right-logo"));
                 imageLable = new JLabel(new ImageIcon(icon.getImage().getScaledInstance(200,100,Image.SCALE_SMOOTH)));
                 jsp.add(imageLable,BorderLayout.WEST);
-                titleLable = new JLabel("<html><center>"+Utility.getOrDefaultConfiguration(configuration,"club-title")+"<br />"+Utility.getOrDefaultConfiguration(configuration,"title")+"</center></html>");
+                titleLable = Utility.gradiantLable(Utility.getOrDefaultConfiguration(configuration,"club-title"));
                 titleLable.setHorizontalAlignment(SwingConstants.CENTER); // Align horizontally
                 titleLable.setVerticalAlignment(SwingConstants.CENTER);   // Align vertically
                 titleLable.setFont(new Font("Serif",Font.BOLD,25));
@@ -411,7 +421,10 @@ public abstract class CommonFrame extends JFrame {
             JMenu menu = new JMenu(key);
             value.forEach((subMenu, listener)->{
                 JMenuItem menuItem = new JMenuItem(subMenu);
-                menuItem.setIcon(UIManager.getIcon("FileView.hardDriveIcon"));
+                //UIManager.getIcon("FileView.hardDriveIcon")
+                ImageIcon imageIcon = Utility.getImageIcon(Utility.CONSTANT_MAP.get(subMenu));
+                Image scaledImage = imageIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                menuItem.setIcon(new ImageIcon(scaledImage));
                 menuItem.addActionListener(listener);
                 menu.add(menuItem);
             });
@@ -421,7 +434,7 @@ public abstract class CommonFrame extends JFrame {
     }
 
     protected void alert(String message){
-        JOptionPane.showMessageDialog(this,message);
+        JOptionPane.showMessageDialog(this,message,"Alert!",JOptionPane.WARNING_MESSAGE);
     }
 
     protected Optional<String> fileChooser(){
@@ -442,8 +455,8 @@ public abstract class CommonFrame extends JFrame {
     }
 
     public Event eventPanel(List<Person> peoples, Db db, Event parentEvent, Gender gender, Categories categories) throws IOException {
-        if(peoples.size()<=0){
-            throw new IOException("Unable to create event for the peoples");
+        if(peoples.size()<=1){
+            throw new IOException("Unable to create event for the players, Minimum 2 players are required.");
         }
         JTextField eventName = textField();
         eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));

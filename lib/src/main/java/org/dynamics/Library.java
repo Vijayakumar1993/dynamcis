@@ -5,10 +5,7 @@ package org.dynamics;
 
 import org.dynamics.db.Db;
 import org.dynamics.db.LevelDb;
-import org.dynamics.model.Configuration;
-import org.dynamics.model.FileImport;
-import org.dynamics.model.Item;
-import org.dynamics.model.Person;
+import org.dynamics.model.*;
 import org.dynamics.reader.CsvFileReader;
 import org.dynamics.reader.Reader;
 import org.dynamics.ui.*;
@@ -19,6 +16,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -76,8 +74,15 @@ public class Library  extends CommonFrame {
             jf.pack();
             jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-
-
+        });
+        fileMenuItems.put("Imports",(ActionEvent e)->{
+            try {
+                ImportFrame importFrame = new ImportFrame("Imports");
+                importFrame.showList(db);
+            } catch (Exception ex) {
+                alert(ex.getMessage());
+                ex.printStackTrace();
+            }
         });
         fileMenuItems.put("New Players", (ActionEvent e)->{
             String reportTitle = JOptionPane.showInputDialog("Please Enter the Player list name");
@@ -177,6 +182,12 @@ public class Library  extends CommonFrame {
         fileMenuItems.put("Import Players",(ActionEvent e)->{
             try {
                 fileChooser().ifPresent(filePath->{
+
+                    String fileType = Utility.getFileType(filePath);
+                    if(!fileType.contains(Utility.CSV)){
+                        alert("Invalid file format, Expected "+Utility.CSV+", Actual "+fileType);
+                        return;
+                    }
                     Reader<Person> reader = null;
                     try {
                         FileImport fileImport = new FileImport();
@@ -186,6 +197,7 @@ public class Library  extends CommonFrame {
                             return;
                         }
                         fileImport.setName(reportTitle);
+                        fileImport.setStatus(Status.FINISHED);
                         reader = new CsvFileReader(filePath,fileImport);
                         List<Person> persons =  reader.read();
                         db.insert("File_"+fileImport.getId(),fileImport);
@@ -208,6 +220,10 @@ public class Library  extends CommonFrame {
         men.put("Contact Us",contactUs);
         super.menuBar(men);
         loadingWindow.dispose();
+        if(initialConfiguration!=null){
+            String titl = (String)initialConfiguration.get("club-title");
+            setTitle(titl);
+        }
         setVisible(true);
 
     }

@@ -1,5 +1,6 @@
 package org.dynamics.util;
 
+import org.apache.tika.Tika;
 import org.dynamics.db.Db;
 import org.dynamics.model.*;
 import org.dynamics.model.Event;
@@ -18,6 +19,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utility {
+
+    public static String CSV="csv";
+    public static List<String> IMAGE_EXTENSION = Arrays.asList(
+            "jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp", "ico", "svg", "heic"
+    );
+
+    public static  Map<String, String> CONSTANT_MAP;
+    static {
+        Map<String, String> tempMap = new HashMap<>();
+        tempMap.put("Contact", "/contactus.png");
+        tempMap.put("Imports", "/list.png");
+        tempMap.put("New Players", "/newplayer.png");
+        tempMap.put("Search Players", "/searchplayer.png");
+        tempMap.put("Search Events", "/searchevents.png");
+        tempMap.put("List Events", "/listevents.png");
+        tempMap.put("Configure", "/settings.png");
+        tempMap.put("Import Players", "/import.png");
+        CONSTANT_MAP = Collections.unmodifiableMap(tempMap);
+    }
 
     public static List<String> CONFIGURATIONS = Stream.of("club-title","left-logo","right-logo","watermark-logo","title","website","address","phone-number").collect(Collectors.toList());
     public static Long getRandom(){
@@ -327,8 +347,7 @@ public class Utility {
             try{
                 return (String) configuration.get(key);
             }catch (Exception e){
-                e.printStackTrace()
-                ;
+                e.printStackTrace();
                 return "";
             }
         }
@@ -356,5 +375,34 @@ public class Utility {
         window.getContentPane().add(label, BorderLayout.CENTER);
         window.getContentPane().setBackground(Color.WHITE);
         return window;
+    }
+
+    public static String getFileType(String file){
+        Tika tika = new Tika();
+        String fileType = tika.detect(file);
+        System.out.println(fileType);
+        return fileType;
+    }
+
+    public static JLabel gradiantLable(String name){
+       return new JLabel(name, SwingConstants.CENTER) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Create a gradient for the text
+                GradientPaint gradientPaint = new GradientPaint(
+                        0, 0, Color.BLACK, getWidth(), 0, Color.YELLOW
+                );
+                g2d.setPaint(gradientPaint);
+
+                // Draw the gradient text
+                FontMetrics fontMetrics = g2d.getFontMetrics(getFont());
+                int x = (getWidth() - fontMetrics.stringWidth(getText())) / 2;
+                int y = (getHeight() + fontMetrics.getAscent()) / 2 - fontMetrics.getDescent();
+                g2d.drawString(getText(), x, y);
+            }
+        };
     }
 }

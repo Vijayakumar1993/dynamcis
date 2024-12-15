@@ -3,7 +3,10 @@ package org.dynamics.reports;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.printing.PDFPageable;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.dynamics.ui.CommonFrame;
+import org.dynamics.util.Utility;
 
+import javax.imageio.ImageIO;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.swing.*;
@@ -15,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 public class PrintPdfViewer {
     private String fileName ;
@@ -44,6 +48,8 @@ public class PrintPdfViewer {
 
                 // Create the main JFrame
                 JFrame printFrame = new JFrame("PDF Viewer");
+                Image icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.png")));
+                printFrame.setIconImage(icon); // Set the icon for the JFrame
                 printFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 printFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
