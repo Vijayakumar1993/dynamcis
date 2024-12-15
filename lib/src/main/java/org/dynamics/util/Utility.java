@@ -364,16 +364,23 @@ public class Utility {
     public static JWindow createLoadingWindow() {
         // Create a JWindow to display loading image
         JWindow window = new JWindow();
-        window.setSize(300, 50);
+        window.setSize(300, 300);
         window.setLocationRelativeTo(null); // Center the window on the screen
         window.setBackground(Color.WHITE);
         // Set the content of the window
-        JLabel label = new JLabel("Loading...!");
+        JLabel label = Utility.gradiantLable("Loading...!");
         label.setForeground(Color.BLUE);
         label.setFont(new Font("Serif",Font.BOLD,25));
         label.setAlignmentX(JFrame.CENTER_ALIGNMENT);
-        window.getContentPane().add(label, BorderLayout.CENTER);
-        window.getContentPane().setBackground(Color.WHITE);
+        JPanel ps = new JPanel();
+        ps.setBackground(Color.WHITE);
+        ps.setLayout(new FlowLayout(FlowLayout.CENTER));
+        ps.add(new JLabel(Utility.getImageIcon("/logo.png")));
+        ps.add(Box.createVerticalStrut(10)); // Add some space between the image and text
+
+        ps.add(label);
+        window.getContentPane().add(ps, BorderLayout.CENTER);
+//        window.getContentPane().setBackground(Color.WHITE);
         return window;
     }
 
