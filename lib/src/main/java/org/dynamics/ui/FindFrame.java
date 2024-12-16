@@ -152,8 +152,15 @@ public class FindFrame extends CommonFrame{
 
     public void southPanel(Db db){
         JButton createPerson = new JButton("Create Player");
+        createPerson.setBackground(new Color(0, 64, 0));
+        createPerson.setForeground(Color.WHITE);
+
         JButton deletePlayer = new JButton("Delete Players");
         JButton report = new JButton("Generate PDF");
+        report.setBackground(new Color(0, 0, 139));
+        report.setForeground(Color.WHITE);
+
+
         deletePlayer.setBackground(Color.RED);
         deletePlayer.setForeground(Color.WHITE);
         deletePlayer.addActionListener(e->{

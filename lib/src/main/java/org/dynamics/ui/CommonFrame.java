@@ -609,6 +609,9 @@ public abstract class CommonFrame extends JFrame {
                 events.forEach((key,value)->{
                     JMenuItem jm = new JMenuItem(key);
                     jm.setIcon(UIManager.getIcon("FileView.hardDriveIcon"));
+                    jm.setBackground(new Color(0, 0, 139));
+                    jm.setForeground(Color.WHITE);
+                    jm.setOpaque(true);
                     jm.addActionListener(value);
                     add(jm);
                 });
