@@ -1,13 +1,12 @@
 package org.dynamics.ui;
 
-import com.google.common.primitives.Ints;
 import org.dynamics.db.Db;
+import org.dynamics.model.Categories;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
 import org.dynamics.model.TablePair;
 import org.dynamics.reports.EventListReport;
 import org.dynamics.reports.Report;
-import org.jdatepicker.impl.JDatePickerImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -54,14 +53,14 @@ public class EventListFrame extends CommonFrame{
         jsp.add(description);
 
 
-        JTextField eventName = textField();
+        JComboBox<String> eventName = comboBox(Arrays.stream(Categories.values()).map(Enum::toString).collect(Collectors.toList()));
         eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         jsp.add(eventName);
 
         find.addActionListener(e->{
             try{
                 String selectedEventId = eventId.getText().toString().toLowerCase();
-                String selectedEventName = eventName.getText().toString().toLowerCase();
+                String selectedEventName = eventName.getSelectedItem().toString().toLowerCase();
                 String selectedTeamName = teamName.getText().toString().toLowerCase();
                 String selectedDescription = description.getText().toString().toLowerCase();
                 String selectedmatchesFrom = rndFrom.getSelectedItem().toString().toLowerCase();

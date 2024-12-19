@@ -17,6 +17,15 @@ public class Event implements Serializable {
     private Event parentEvent;
     private LocalDate eventDate;
     private Integer roundOf;
+    private Status status;
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public Integer getRoundOf() {
         return roundOf;
@@ -130,6 +139,7 @@ public class Event implements Serializable {
         vector.add(this.getRoundOf());
         vector.add(this.matcher.getMatches().stream().filter(m->!m.isPrimary()).collect(Collectors.toList()).size());
         vector.add(this.getFixture().getPersons().size());
+        vector.add(this.getStatus().toString());
         if(this.matcher.getWinner()!=null){
             vector.add(this.matcher.getWinner().getName());
         }else{
@@ -148,6 +158,7 @@ public class Event implements Serializable {
         keys.add("Round off");
         keys.add("Total Matches");
         keys.add("Total Bye");
+        keys.add("Status");
         keys.add("Winner");
         return keys;
     }

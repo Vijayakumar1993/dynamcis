@@ -1,9 +1,11 @@
 package org.dynamics.ui;
 
+import com.itextpdf.text.DocumentException;
 import org.checkerframework.checker.units.qual.C;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
+import org.dynamics.reports.MedalReport;
 import org.dynamics.util.Utility;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -116,7 +118,58 @@ public abstract class CommonFrame extends JFrame {
         medals.add("Silver");
         medals.add("Bronze 1");
         medals.add("Bronze 2");
-        this.medels = this.createTable(medalDetails,new Vector<>(),medals, LinkedHashMap::new,null);
+
+
+        Map<String,ActionListener> actions = new LinkedHashMap<>();
+
+        actions.put("Export",(event)->{
+            JPanel jsp = new JPanel();
+            JComboBox<String> comboBox = comboBox(Arrays.stream(Categories.values()).map(Enum::toString).collect(Collectors.toList()));
+            jsp.add(comboBox);
+            int result = confirmation("Select category.", ()->jsp);
+            if(JOptionPane.YES_OPTION == result){
+                MedalReport report = null;
+                try {
+                    Optional<String> saveFile = fileSaver();
+                    if(saveFile.isPresent()){
+                        Configuration configuration = db.findObject("configuration");
+                        report = new MedalReport(saveFile.get(), Objects.requireNonNull(comboBox.getSelectedItem()).toString(),configuration);
+
+                        int rowCount = this.medels.getjTable().getRowCount();
+                        int columnCount = this.medels.getjTable().getColumnCount();
+                        List<List<String>> rowsList = new LinkedList<>();
+                        String selectedItem = comboBox.getSelectedItem().toString();
+                        for(int i=0;i<rowCount;i++){
+                            Vector<String> row = new Vector<>();
+                            for(int j=0;j<columnCount;j++){
+                                row.add(this.medels.getjTable().getValueAt(i,j).toString());
+                            }
+                            if(selectedItem!=null){
+                                if(row.get(0).contains(comboBox.getSelectedItem().toString())){
+                                    rowsList.add(row);
+                                }
+                            }else {
+                                rowsList.add(row);
+                            }
+                        }
+
+                        if(!rowsList.isEmpty()){
+                            report.generateReport(medals, rowsList);
+                        }else {
+                            alert("Nothing to print for the selected "+selectedItem);
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        });
+        this.medels = this.createTable(medalDetails,new Vector<>(),medals, ()->actions,null);
         JTabbedPane tabs = new JTabbedPane();
         tabs.setBackground(Color.WHITE);
         tabs.add("Fixture Details",fixturesDetails);
@@ -193,14 +246,14 @@ public abstract class CommonFrame extends JFrame {
             };
 
             Configuration configuration = (Configuration) db.findObject("configuration");
-           JPanel centerPan = new JPanel();
-           centerPan.setBackground(Color.WHITE);
-           centerPan.setLayout(new BoxLayout(centerPan,BoxLayout.Y_AXIS));
-             website = Utility.getBasicLable(configuration, "website", bottomLable);
+            JPanel centerPan = new JPanel();
+            centerPan.setBackground(Color.WHITE);
+            centerPan.setLayout(new BoxLayout(centerPan,BoxLayout.Y_AXIS));
+            website = Utility.getBasicLable(configuration, "website", bottomLable);
             centerPan.add(website);
-             phoneNumber = Utility.getBasicLable(configuration, "phone-number", bottomLable);
+            phoneNumber = Utility.getBasicLable(configuration, "phone-number", bottomLable);
             centerPan.add(phoneNumber);
-           jps.add(centerPan,BorderLayout.CENTER);
+            jps.add(centerPan,BorderLayout.CENTER);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
@@ -462,8 +515,14 @@ public abstract class CommonFrame extends JFrame {
         JTextField eventName = textField();
         eventName.setBorder(BorderFactory.createTitledBorder("Category Name"));
         if(parentEvent!=null){
+            parentEvent.setStatus(Status.FINISHED);
             eventName.setText(parentEvent.getEventName());
+        }else{
+            if(categories!=null){
+                eventName.setText(categories.name());
+            }
         }
+        eventName.setEnabled(false);
 
         JTextField teamName = textField();
         teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
@@ -498,6 +557,7 @@ public abstract class CommonFrame extends JFrame {
         event1.setParentEvent(parentEvent);
         event1.setSelectedGenderCategory(gender);
         event1.setSelecetedEventCategory(categories);
+        event1.setStatus(Status.STARTED);
 
         java.util.Date normalDate = (Date) datePicker.getModel().getValue();
         event1.setEventDate(normalDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
@@ -565,7 +625,7 @@ public abstract class CommonFrame extends JFrame {
         paired.forEach(s->{
             try {
                 Event event = db.findObject(s);
-                String description = event.getEventName().concat("("+event.getTeamName()+")("+event.getRoundOf()+")");
+                String description = event.getEventName().concat("("+event.getTeamName()+") ("+event.getRoundOf()+")"+" ("+event.getStatus()+")");
                 sortedItems.add(new Item(event.getId(), description));
             } catch (Exception e) {
                 alert(e.getMessage());

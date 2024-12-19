@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class BouteFrame extends CommonFrame{
@@ -27,6 +28,11 @@ public class BouteFrame extends CommonFrame{
     private JButton findButton;
     private JButton updateMatch;
     private JButton shuffle = new JButton("Shuffle");
+    private JComboBox<String> rndFrom;
+    private JComboBox<String> eventStatus;
+    private JComboBox<String> gender;
+    private JComboBox<String> category;
+
     public BouteFrame(String title, Db db) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
         this.db = db;
@@ -173,6 +179,7 @@ public class BouteFrame extends CommonFrame{
                         Person winner = succesors.get(0);
                         dbEvent.getMatcher().setWinner(winner);
                         dbEvent.getMatcher().setWinnerCorder(successorCorner);
+                        dbEvent.setStatus(Status.FINISHED);
                         try {
                             this.db.insert("Event_"+dbEvent.getId(), dbEvent);
 
@@ -205,7 +212,7 @@ public class BouteFrame extends CommonFrame{
                             paired.forEach(s->{
                                 try {
                                     Event event = db.findObject(s);
-                                    String description = event.getEventName().concat("("+event.getTeamName()+")("+event.getRoundOf()+")");
+                                    String description = event.getEventName().concat("("+event.getTeamName()+") ("+event.getRoundOf()+")"+" ("+event.getStatus()+")");
                                     sortedItems.add(new Item(event.getId(), description));
                                 } catch (Exception e) {
                                     alert(e.getMessage());
@@ -223,6 +230,11 @@ public class BouteFrame extends CommonFrame{
                             });
                             pairedOptions.setModel(comboBoxModel);
                             this.findButton.doClick();
+                            String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
+                            String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
+                            String roundOffSelectedItem = rndFrom.getSelectedItem()!=""?rndFrom.getSelectedItem().toString():"";
+                            String statusItem = eventStatus.getSelectedItem()!=""?eventStatus.getSelectedItem().toString():"";
+                            findActions(genderSelectedItems,categorySelectedItem,roundOffSelectedItem,statusItem);
                         } catch (IOException e) {
                             alert(e.getMessage());
                             e.printStackTrace();
@@ -497,25 +509,56 @@ public class BouteFrame extends CommonFrame{
         });
 
 
-        JComboBox<String> category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
+        category = comboBox(Arrays.stream(Categories.values()).map(as->as.toString()).collect(Collectors.toList()));
         category.setBorder(BorderFactory.createTitledBorder("Category"));
 
-        JComboBox<String> gender =  comboBox(Arrays.stream(Gender.values()).map(as->as.toString()).collect(Collectors.toList()));
+        gender =  comboBox(Arrays.stream(Gender.values()).map(as->as.toString()).collect(Collectors.toList()));
         gender.setBorder(BorderFactory.createTitledBorder("Gender"));
+
+        List<String> roundOffList =  IntStream.rangeClosed(1, 20)
+                .mapToObj(i -> ((int) Math.pow(2, i))+"")
+                .collect(Collectors.toList());
+
+        rndFrom = comboBox(roundOffList);
+        rndFrom.setBorder(BorderFactory.createTitledBorder("Round off"));
+
+        eventStatus = comboBox(Arrays.stream(Status.values()).map(Enum::toString).collect(Collectors.toList()));
+        eventStatus.setBorder(BorderFactory.createTitledBorder("Status"));
 
         category.addActionListener(a->{
             String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
             String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
-            findActions(genderSelectedItems,categorySelectedItem);
+            String roundOffSelectedItem = rndFrom.getSelectedItem()!=""?rndFrom.getSelectedItem().toString():"";
+            String statusItem = eventStatus.getSelectedItem()!=""?eventStatus.getSelectedItem().toString():"";
+            findActions(genderSelectedItems,categorySelectedItem,roundOffSelectedItem,statusItem);
         });
 
         gender.addActionListener(a->{
             String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
             String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
-            findActions(genderSelectedItems,categorySelectedItem);
+            String roundOffSelectedItem = rndFrom.getSelectedItem()!=""?rndFrom.getSelectedItem().toString():"";
+            String statusItem = eventStatus.getSelectedItem()!=""?eventStatus.getSelectedItem().toString():"";
+            findActions(genderSelectedItems,categorySelectedItem,roundOffSelectedItem,statusItem);
+        });
+
+        rndFrom.addActionListener(a->{
+            String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
+            String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
+            String roundOffSelectedItem = rndFrom.getSelectedItem()!=""?rndFrom.getSelectedItem().toString():"";
+            String statusItem = eventStatus.getSelectedItem()!=""?eventStatus.getSelectedItem().toString():"";
+            findActions(genderSelectedItems,categorySelectedItem,roundOffSelectedItem,statusItem);
+        });
+        eventStatus.addActionListener(a->{
+            String categorySelectedItem = category.getSelectedItem()!=null? category.getSelectedItem().toString():"";
+            String genderSelectedItems = gender.getSelectedItem()!=""?gender.getSelectedItem().toString():"";
+            String roundOffSelectedItem = rndFrom.getSelectedItem()!=""?rndFrom.getSelectedItem().toString():"";
+            String statusItem = eventStatus.getSelectedItem()!=""?eventStatus.getSelectedItem().toString():"";
+            findActions(genderSelectedItems,categorySelectedItem,roundOffSelectedItem,statusItem);
         });
         jsp.add(category);
         jsp.add(gender);
+        jsp.add(rndFrom);
+        jsp.add(eventStatus);
         jsp.add(pairedOptions);
 
 
@@ -524,31 +567,44 @@ public class BouteFrame extends CommonFrame{
     }
 
 
-    public void findActions(String genderSelectedItem, String categorySelectedItem){
-        if(!genderSelectedItem.isEmpty() || !categorySelectedItem.isEmpty()){
+    public void findActions(String genderSelectedItem, String categorySelectedItem, String roundOff, String eventStatus){
+        if(!genderSelectedItem.isEmpty() || !categorySelectedItem.isEmpty()|| !roundOff.isEmpty() || !eventStatus.isEmpty()){
+            int roundOffValue = roundOff.isEmpty()?0:Integer.parseInt(roundOff);
             this.pairedOptions.removeAllItems();
             this.pairedOptions.addItem(new Item(0L,""));
             this.paired = this.db.keyFilterBy("Event_");
-            List<Event> existingPairs = this.paired.stream().map(pair-> {
+            List<Event> existingPairs = this.paired.stream().map(pair -> {
                         try {
-                            return (Event)db.findObject(pair);
+                            return (Event) db.findObject(pair);
                         } catch (Exception e) {
                             e.printStackTrace();
                             alert(e.getMessage());
                         }
-                        return  null;
+                        return null;
                     })
-                    .filter(genderFilter->{
-                        if(!genderSelectedItem.isEmpty() ){
-                            String gnCat = genderFilter.getSelectedGenderCategory()!=null?genderFilter.getSelectedGenderCategory().toString():"";
-                            return  gnCat.equalsIgnoreCase(genderSelectedItem);
+                    .filter(genderFilter -> {
+                        if (!genderSelectedItem.isEmpty()) {
+                            String gnCat = genderFilter.getSelectedGenderCategory() != null ? genderFilter.getSelectedGenderCategory().toString() : "";
+                            return gnCat.equalsIgnoreCase(genderSelectedItem);
+                        } else {
+                            return true;
+                        }
+                    }).filter(categoryFilter -> {
+                        if (!categorySelectedItem.isEmpty()) {
+                            String gnCat = categoryFilter.getSelecetedEventCategory() != null ? categoryFilter.getSelecetedEventCategory().toString() : "";
+                            return gnCat.equalsIgnoreCase(categorySelectedItem);
+                        } else {
+                            return true;
+                        }
+                    }).filter(Objects::nonNull).filter(roundOffFilter->{
+                        if(roundOffValue!=0){
+                            return Objects.equals(roundOffFilter.getRoundOf(), roundOffValue);
                         }else{
                             return true;
                         }
-                    }).filter(categoryFilter->{
-                        if(!categorySelectedItem.isEmpty() ){
-                            String gnCat = categoryFilter.getSelecetedEventCategory()!=null?categoryFilter.getSelecetedEventCategory().toString():"";
-                            return  gnCat.equalsIgnoreCase(categorySelectedItem);
+                    }).filter(Objects::nonNull).filter(eventFilter->{
+                        if(!Objects.equals(eventStatus, "")){
+                            return Objects.equals(eventFilter.getStatus().toString(), eventStatus);
                         }else{
                             return true;
                         }
@@ -557,7 +613,7 @@ public class BouteFrame extends CommonFrame{
 
             existingPairs.forEach(es->{
                 try {
-                    String description = es.getEventName().concat("("+es.getTeamName()+")("+es.getRoundOf()+")");
+                    String description = es.getEventName().concat("("+es.getTeamName()+") ("+es.getRoundOf()+")"+" ("+es.getStatus()+")");
                     this.pairedOptions.addItem(new Item(es.getId(),description));
                 } catch (Exception e) {
                     e.printStackTrace();
