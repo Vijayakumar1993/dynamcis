@@ -144,7 +144,8 @@ public abstract class CommonFrame extends JFrame {
                         for(int i=0;i<rowCount;i++){
                             Vector<String> row = new Vector<>();
                             for(int j=0;j<columnCount;j++){
-                                row.add(this.medels.getjTable().getValueAt(i,j).toString());
+                                String data = this.medels.getjTable().getValueAt(i,j)!=null?this.medels.getjTable().getValueAt(i,j).toString():"";
+                                row.add(data);
                             }
                             if(selectedItem!=null){
                                 if(row.get(0).contains(comboBox.getSelectedItem().toString())){
@@ -382,7 +383,7 @@ public abstract class CommonFrame extends JFrame {
                                 Map<String, Person> goldAndSilver = Utility.goldEvents(subEvents);
                                 Map<String, Person> bronzeEvents = Utility.bronzeEvents(subEvents);
                                 Vector<String> medalRows = new Vector<>();
-                                medalRows.add(parEvent.getEventName());
+                                medalRows.add(parEvent.getEventName()+"("+parEvent.getTeamName()+")");
                                 Person success = goldAndSilver.get("gold");
                                 Person silver = goldAndSilver.get("silver");
                                 Person bronze1 = bronzeEvents.get("bronze1");
