@@ -395,7 +395,7 @@ public class Utility {
         if(name==null){
             name = "";
         }
-       return new JLabel(name, SwingConstants.CENTER) {
+        return new JLabel(name, SwingConstants.CENTER) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
@@ -415,4 +415,33 @@ public class Utility {
             }
         };
     }
+
+    public static Map<String, Person> goldEvents(List<Event> subEvents){
+        Map<String, Person> map = new LinkedHashMap<>();
+        List<Event> goldEvents=  subEvents.stream().filter(esp->esp.getRoundOf()<=2).collect(Collectors.toList());
+        if(!goldEvents.isEmpty()){
+            Match match= goldEvents.get(0).getMatcher().getMatches().get(0);
+            Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
+            Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
+            map.put("gold",success);
+            map.put("silver",silver);
+        }
+        return map;
+    }
+    public  static Map<String, Person>  bronzeEvents(List<Event> subEvents){
+        Map<String, Person> map = new LinkedHashMap<>();
+        List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
+        if(!bronzeEvents.isEmpty()){
+            //two match event
+            List<Match> mtchs = bronzeEvents.get(0).getMatcher().getMatches().stream().filter(m->!m.isPrimary()).collect(Collectors.toList());
+            Person bronze1 = mtchs.get(0).getSuccessor().getId() != mtchs.get(0).getFrom().getId()?mtchs.get(0).getFrom(): mtchs.get(0).getTo();
+            map.put("bronze1",bronze1);
+            if(mtchs.size()>=2){
+                Person bronze2 = mtchs.get(1).getSuccessor().getId() != mtchs.get(1).getFrom().getId()?mtchs.get(1).getFrom(): mtchs.get(1).getTo();
+                map.put("bronze2",bronze2);
+            }
+        }
+        return map;
+    }
+
 }

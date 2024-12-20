@@ -10,6 +10,8 @@ import org.dynamics.util.Utility;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+import org.jfree.chart.ChartPanel;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -63,7 +65,7 @@ public abstract class CommonFrame extends JFrame {
         UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
 //        this.commonNorthPanel();
     }
-    public void commonCenterPanel(Db db){
+    public void commonCenterPanel(Db db) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         Vector<String> columns = new Vector<>();
         columns.add("Fixture Id");
         columns.add("Weight Category");
@@ -173,9 +175,9 @@ public abstract class CommonFrame extends JFrame {
         JTabbedPane tabs = new JTabbedPane();
         tabs.setBackground(Color.WHITE);
         tabs.add("Fixture Details",fixturesDetails);
-        tabs.add("Team Details",teamDetails);
+        tabs.add("Team List",teamDetails);
         tabs.add("Event Details",eventDetail);
-        tabs.add("Medals",medalDetails);
+        tabs.add("Player Medals",medalDetails);
         add(tabs,BorderLayout.CENTER);
     }
 
@@ -314,31 +316,28 @@ public abstract class CommonFrame extends JFrame {
                         subEvents.add(parEvent);
                         Utility.collectSubEvents(parEvent,existingEvents,subEvents);
 
-                        List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
-                        List<Event> goldEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=2).collect(Collectors.toList());
+                        Map<String, Person> goldAndSilver = Utility.goldEvents(subEvents);
+                        Map<String, Person> bronzeEvents = Utility.bronzeEvents(subEvents);
 
                         Vector<String> medalRows = new Vector<>();
                         medalRows.add(item.toString());
-                        if(!goldEvents.isEmpty()){
-                            //only one match will be available...!
-                            Match match= goldEvents.get(0).getMatcher().getMatches().get(0);
-                            Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
-                            Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
+                        Person success = goldAndSilver.get("gold");
+                        Person silver = goldAndSilver.get("silver");
+                        Person bronze1 = bronzeEvents.get("bronze1");
+                        Person bronze2 = bronzeEvents.get("bronze2");
+                        if(success!=null){
                             medalRows.add(success.getName()+"("+success.getTeamName()+")");
+                        }
+                        if(silver!=null){
                             medalRows.add(silver.getName()+"("+silver.getTeamName()+")");
                         }
-                        if(!bronzeEvents.isEmpty()){
-                            //two match event
-                            List<Match> mtchs = bronzeEvents.get(0).getMatcher().getMatches();
-                            Person bronze1 = mtchs.get(0).getSuccessor().getId() != mtchs.get(0).getFrom().getId()?mtchs.get(0).getFrom(): mtchs.get(0).getTo();
-                            Person bronze2 = mtchs.get(1).getSuccessor().getId() != mtchs.get(1).getFrom().getId()?mtchs.get(1).getFrom(): mtchs.get(1).getTo();
-
-
+                        if(bronze1!=null){
                             medalRows.add(bronze1.getName()+"("+bronze1.getTeamName()+")");
+                        }
+                        if(bronze2!=null){
                             medalRows.add(bronze2.getName()+"("+bronze2.getTeamName()+")");
                         }
                         this.medels.getDefaultTableModel().addRow(medalRows);
-
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -379,25 +378,25 @@ public abstract class CommonFrame extends JFrame {
                             if(parEvent.getParentEvent()==null){
                                 subEvents.add(parEvent);
                                 Utility.collectSubEvents(parEvent,existingEvents,subEvents);
-                                List<Event> bronzeEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=4 && esp.getRoundOf()>2).collect(Collectors.toList());
-                                List<Event> goldEvents = subEvents.stream().filter(esp->esp.getRoundOf()<=2).collect(Collectors.toList());
 
+                                Map<String, Person> goldAndSilver = Utility.goldEvents(subEvents);
+                                Map<String, Person> bronzeEvents = Utility.bronzeEvents(subEvents);
                                 Vector<String> medalRows = new Vector<>();
                                 medalRows.add(parEvent.getEventName());
-                                if(!goldEvents.isEmpty()){
-                                    //only one match will be available...!
-                                    Match match= goldEvents.get(0).getMatcher().getMatches().get(0);
-                                    Person success = match.getSuccessor().getId() == match.getFrom().getId()?match.getFrom(): match.getTo();
-                                    Person silver = match.getSuccessor().getId() != match.getFrom().getId()?match.getFrom(): match.getTo();
+                                Person success = goldAndSilver.get("gold");
+                                Person silver = goldAndSilver.get("silver");
+                                Person bronze1 = bronzeEvents.get("bronze1");
+                                Person bronze2 = bronzeEvents.get("bronze2");
+                                if(success!=null){
                                     medalRows.add(success.getName()+"("+success.getTeamName()+")");
+                                }
+                                if(silver!=null){
                                     medalRows.add(silver.getName()+"("+silver.getTeamName()+")");
                                 }
-                                if(!bronzeEvents.isEmpty()){
-                                    //two match event
-                                    List<Match> mtchs = bronzeEvents.get(0).getMatcher().getMatches();
-                                    Person bronze1 = mtchs.get(0).getSuccessor().getId() != mtchs.get(0).getFrom().getId()?mtchs.get(0).getFrom(): mtchs.get(0).getTo();
-                                    Person bronze2 = mtchs.get(1).getSuccessor().getId() != mtchs.get(1).getFrom().getId()?mtchs.get(1).getFrom(): mtchs.get(1).getTo();
+                                if(bronze1!=null){
                                     medalRows.add(bronze1.getName()+"("+bronze1.getTeamName()+")");
+                                }
+                                if(bronze2!=null){
                                     medalRows.add(bronze2.getName()+"("+bronze2.getTeamName()+")");
                                 }
                                 this.medels.getDefaultTableModel().addRow(medalRows);

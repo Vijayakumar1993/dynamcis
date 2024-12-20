@@ -39,4 +39,5 @@ dependencies {
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
     implementation group: 'com.jtattoo', name: 'JTattoo', version: '1.6.7'
     implementation group: 'org.apache.tika', name:'tika-core', version:'2.9.0'
+    implementation 'org.jfree:jfreechart:1.5.3'
 }
