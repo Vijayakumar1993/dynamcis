@@ -60,7 +60,7 @@ public class Library  extends CommonFrame {
                 final Configuration configuration = db.findObject("configuration");
                 JPanel j = new JPanel();
                 j.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
-                j.setBackground(new Color(54, 69, 79));
+                j.setBackground(new Color(70, 130, 180));
                 j.setLayout(new BoxLayout(j,BoxLayout.Y_AXIS));
                 j.add(Utility.getBasicLable(configuration,"club-title",Utility.CONSUMER_DEFAULT));
                 j.add(Utility.getBasicLable(configuration,"address",Utility.CONSUMER_DEFAULT));

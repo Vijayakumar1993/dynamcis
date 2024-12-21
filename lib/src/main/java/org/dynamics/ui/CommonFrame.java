@@ -172,6 +172,8 @@ public abstract class CommonFrame extends JFrame {
 
             }
         });
+
+
         this.medels = this.createTable(medalDetails,new Vector<>(),medals, ()->actions,null);
         JTabbedPane tabs = new JTabbedPane();
         tabs.setBackground(Color.WHITE);
