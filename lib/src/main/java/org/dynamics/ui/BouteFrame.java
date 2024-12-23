@@ -203,7 +203,7 @@ public class BouteFrame extends CommonFrame{
                         }
                     }else{
                         try {
-                            Event nEvent = eventPanel(succesors,db,dbEvent,dbEvent.getSelectedGenderCategory(),dbEvent.getSelecetedEventCategory());
+                            Event nEvent = eventPanel(succesors,db,dbEvent,dbEvent.getSelectedGenderCategory(),dbEvent.getSelecetedEventCategory(),dbEvent.getTeamName());
                             if(nEvent==null) return;
                             List<String> paired = this.db.keyFilterBy("Event_");
                             DefaultComboBoxModel<Item> comboBoxModel = new DefaultComboBoxModel<Item>();

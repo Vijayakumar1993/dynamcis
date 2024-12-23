@@ -510,7 +510,7 @@ public abstract class CommonFrame extends JFrame {
         return Optional.empty();
     }
 
-    public Event eventPanel(List<Person> peoples, Db db, Event parentEvent, Gender gender, Categories categories) throws IOException {
+    public Event eventPanel(List<Person> peoples, Db db, Event parentEvent, Gender gender, Categories categories, String weightText) throws IOException {
         if(peoples.size()<=1){
             throw new IOException("Unable to create event for the players, Minimum 2 players are required.");
         }
@@ -530,6 +530,10 @@ public abstract class CommonFrame extends JFrame {
         teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         if(parentEvent!=null){
             teamName.setText(parentEvent.getTeamName());
+        }else{
+            if(!weightText.isEmpty()){
+                teamName.setText(weightText);
+            }
         }
 
         JTextField desciption = textField();

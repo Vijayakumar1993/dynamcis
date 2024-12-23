@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class FindFrame extends CommonFrame{
     private List<Person> persons;
@@ -28,6 +29,8 @@ public class FindFrame extends CommonFrame{
     private FileImport fileKey;
     private Gender eventGender;
     private Categories eventCateogory;
+    private String weightFrom = "";
+    private String weightTo = "";;
     public FindFrame(String title, List<Person> persons, FileImport fileKey) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
         this.persons = persons;
@@ -126,14 +129,18 @@ public class FindFrame extends CommonFrame{
                         }
                     }).filter(weightFilter->{
                         if(selectedFrom.length()>0){
+                            this.weightFrom = "+".concat(selectedFrom);
                             return weightFilter.getWeight().compareTo(Double.parseDouble(selectedFrom))>=0;
                         }else{
+                            this.weightFrom = "";
                             return true;
                         }
                     }).filter(weightFilter->{
                         if(selectedTo.length()>0){
+                            this.weightTo = "-".concat(selectedTo);
                             return weightFilter.getWeight().compareTo(Double.parseDouble(selectedTo)) <= 0;
                         }else{
+                            this.weightTo = "";
                             return true;
                         }
                     })
@@ -365,7 +372,8 @@ public class FindFrame extends CommonFrame{
         actions.put("Create Fixtures",(event)->{
             List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
             try {
-                eventPanel(peoples,db,null,eventGender,eventCateogory);
+                String eventWeight = Stream.of(this.weightFrom,this.weightTo).filter(a-> !Objects.equals(a, "")).collect(Collectors.joining(""));
+                eventPanel(peoples,db,null,eventGender,eventCateogory,eventWeight);
             } catch (Exception e) {
                 e.printStackTrace();
                 alert(e.getMessage());
