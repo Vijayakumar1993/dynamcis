@@ -1,10 +1,11 @@
 package org.dynamics.reports;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.printing.PDFPageable;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.dynamics.ui.CommonFrame;
-import org.dynamics.util.Utility;
 
 import javax.imageio.ImageIO;
 import javax.print.PrintService;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public class PrintPdfViewer {
+    private static final Logger logger = LogManager.getLogger(PrintPdfViewer.class);
     private String fileName ;
     public PrintPdfViewer(String fileName){
         this.fileName = fileName;
@@ -80,7 +82,7 @@ public class PrintPdfViewer {
                                 ex.printStackTrace();
                             }
                         } else {
-                            System.out.println("No default print service found. Printing to the system's default.");
+                            logger.info("No default print service found. Printing to the system's default.");
                         }
 
                         // Display a print dialog and print the document
@@ -90,11 +92,12 @@ public class PrintPdfViewer {
                             } catch (PrinterException ex) {
                                 ex.printStackTrace();
                             }
-                            System.out.println("Printing initiated.");
+                            logger.info("Printing initiated.");
                         } else {
-                            System.out.println("Print job cancelled.");
+                            logger.info("Print job cancelled.");
                         }
                     } catch (Exception e11) {
+                        logger.error("An error occurred", e11);
                         System.err.println("Failed to load the PDF file: " + e11.getMessage());
                     }
 
@@ -109,6 +112,7 @@ public class PrintPdfViewer {
                             printFrame.setVisible(false);
                         }
                     } catch (IOException ex) {
+                        logger.error("An error occurred", ex);
                         ex.printStackTrace();
                     }
                 });
@@ -117,6 +121,7 @@ public class PrintPdfViewer {
                 printFrame.setVisible(true);
 
             } catch (IOException e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Error loading PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }

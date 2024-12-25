@@ -3,23 +3,22 @@ package org.dynamics.reports;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
-import org.dynamics.model.Match;
+import org.dynamics.reader.Reader;
+
 import javax.swing.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class EventListReport implements Report{
+    private static final Logger logger = LogManager.getLogger(Reader.class);
     private PdfWriter pdfWriter;
     private Document doc;
     private Configuration configuration;
@@ -28,7 +27,7 @@ public class EventListReport implements Report{
     private Font H2 = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
     private Font H3 = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
     private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
-    private Consumer<PdfPCell> defaultCellOptions = (a)->System.out.println("default Supplier");
+    private Consumer<PdfPCell> defaultCellOptions = (a)->logger.info("default Supplier");
     private String fileName;
     public EventListReport(String fileName,Configuration configuration) throws IOException, DocumentException {
         this.configuration = configuration;
@@ -50,8 +49,10 @@ public class EventListReport implements Report{
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 } catch (IOException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
@@ -60,11 +61,12 @@ public class EventListReport implements Report{
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
             }
         });
-        System.out.println("PDF Document created successfully...!");
+        logger.info("PDF Document created successfully...!");
     }
     @Override
     public void generateReport(Event event) throws DocumentException {
@@ -88,6 +90,7 @@ public class EventListReport implements Report{
                 imageCell.setBorder(0);
                 titleTable.addCell(imageCell);
             } catch (IOException e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
             }
 
@@ -115,6 +118,7 @@ public class EventListReport implements Report{
                 rightCell.setBorder(0);
                 titleTable.addCell(rightCell);
             } catch (IOException e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
             }
             titleTable.setSpacingAfter(10);
@@ -133,6 +137,7 @@ public class EventListReport implements Report{
             try{
                 boutIndex[0] = Integer.parseInt(JOptionPane.showInputDialog("Please enter bout starting index"));
             }catch (Exception e){
+                logger.error("An error occurred", e);
                 JOptionPane.showMessageDialog(null, "Invalid "+e.getMessage());
                 throw new IllegalArgumentException("Invalid, Please put number only");
             }
@@ -153,6 +158,7 @@ public class EventListReport implements Report{
                         try {
                             innerTable.setWidths(new float[]{1f,2f});
                         } catch (DocumentException e) {
+                            logger.error("An error occurred", e);
                             e.printStackTrace();
                         }
                         Consumer<PdfPCell> borderBottomCellOptions = cell->{
@@ -175,6 +181,7 @@ public class EventListReport implements Report{
                         table.addCell(teamTable);
                     });
                 } catch (Exception e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(null,e.getMessage());
                 }

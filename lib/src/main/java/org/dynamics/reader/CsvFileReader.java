@@ -19,6 +19,7 @@ public class CsvFileReader extends Constant implements Reader<Person> {
     private FileReader reader;
     private FileImport fileImport;
     public CsvFileReader(String fileName,FileImport fileImport) throws FileNotFoundException {
+        logger.info("Csv File reader starts...!");
         this.fileImport = fileImport;
         fileImport.setId(Utility.getRandom());
         fileImport.setFilePath(fileName);

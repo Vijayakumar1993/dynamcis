@@ -3,6 +3,8 @@ package org.dynamics.reports;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
 import org.dynamics.model.Person;
@@ -14,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class FixturesPdf implements Report{
+    private static final Logger logger = LogManager.getLogger(FixturesPdf.class);
     private PdfWriter pdfWriter;
     private Document doc;
     private Configuration configuration;
@@ -44,8 +47,10 @@ public class FixturesPdf implements Report{
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 } catch (IOException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
@@ -54,11 +59,12 @@ public class FixturesPdf implements Report{
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
             }
         });
-        System.out.println("PDF Document created successfully...!");
+        logger.info("PDF Document created successfully...!");
     }
 
     @Override
@@ -77,6 +83,7 @@ public class FixturesPdf implements Report{
             imageCell.setBorder(0);
             titleTable.addCell(imageCell);
         } catch (IOException e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
 
@@ -105,6 +112,7 @@ public class FixturesPdf implements Report{
             rightCell.setBorder(0);
             titleTable.addCell(rightCell);
         } catch (IOException e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
 

@@ -1,5 +1,7 @@
 package org.dynamics.ui;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -14,9 +16,9 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class BouteFrame extends CommonFrame{
+    private static final Logger logger = LogManager.getLogger(BouteFrame.class);
     private Db db;
     private  JPanel leftButtons ;
     private JLabel LOGGER = new JLabel();
@@ -64,6 +66,7 @@ public class BouteFrame extends CommonFrame{
 
         clear.addActionListener(a->{
             if(this.event==null){
+                logger.info("Event Not selected. Please select.");
                 alert("Event Not selected. Please select.");
                 return;
             }
@@ -73,6 +76,7 @@ public class BouteFrame extends CommonFrame{
             try {
                 db.insert("Event_"+this.event.getId(),this.event);
             } catch (IOException e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -80,6 +84,7 @@ public class BouteFrame extends CommonFrame{
         });
         shuffle.addActionListener(e->{
             if(this.event==null){
+                logger.info("Event Not selected. Please select.");
                 alert("Event Not selected. Please select.");
                 return;
             }
@@ -87,10 +92,12 @@ public class BouteFrame extends CommonFrame{
             try {
                 this.event =  db.findObject("Event_"+this.event.getId());
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
             if(this.event.getMatcher().getMatches().stream().anyMatch(a->a.getSuccessor().getId()!=0)){
+                logger.info("Match Started, You can't shuffle.");
                 alert("Match Started, You can't shuffle.");
                 return;
             }
@@ -112,7 +119,7 @@ public class BouteFrame extends CommonFrame{
             from.addAll(matches.stream().filter(Match::isPrimary).map(Match::getFrom).collect(Collectors.toList()));
 //            from.addAll(fixtures);
 
-            System.out.println("From size is "+from.size());
+            logger.info("From size is "+from.size());
             from = from.stream().distinct().collect(Collectors.toList());
             Collections.shuffle(from);
             db.delete("Event_"+this.event.getId());
@@ -120,6 +127,7 @@ public class BouteFrame extends CommonFrame{
             try {
                 db.insert("Event_"+newEvent.getId().toString(),newEvent);
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
@@ -141,9 +149,11 @@ public class BouteFrame extends CommonFrame{
                         }
                     }
                 }else {
+                    logger.info("Match Started, You can't shuffle.");
                     alert("Event Not selected. Please select.");
                 }
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -153,10 +163,11 @@ public class BouteFrame extends CommonFrame{
         });
         mergeWithFixture.addActionListener(a->{
             if(this.event==null){
+                logger.info("Event Not selected. Please select.");
                 alert("Event Not selected. Please select.");
                 return;
             }
-            System.out.println("Next Match Event is "+this.event.getTeamName());
+            logger.info("Next Match Event is "+this.event.getTeamName());
             try {
                 Event dbEvent = db.findObject("Event_"+this.event.getId());
                 String eventName = dbEvent.getEventName().concat("(").concat(dbEvent.getId().toString()).concat(")");
@@ -169,6 +180,7 @@ public class BouteFrame extends CommonFrame{
                 boolean isSuccssorNotPrepared = succesors.stream().anyMatch(s->s.getId()==0);
 
                 if(isSuccssorNotPrepared){
+                    logger.info("Event Not selected. Please select.");
                     alert("Kindly finish the event ("+eventName+") to move next.");
                 }else{
                     if(succesors.size()<=1){
@@ -196,8 +208,10 @@ public class BouteFrame extends CommonFrame{
                             panel.add(wins);
 
                             confirmation("Winner",()->panel);
+                            logger.info("No More matches for the event("+this.event.getEventName()+")");
                             alert("No More matches for the event("+this.event.getEventName()+")");
                         } catch (IOException e) {
+                            logger.error("An error occurred", e);
                             alert(e.getMessage());
                             e.printStackTrace();
                         }
@@ -215,6 +229,7 @@ public class BouteFrame extends CommonFrame{
                                     String description = event.getEventName().concat("("+event.getTeamName()+") ("+event.getRoundOf()+")"+" ("+event.getStatus()+")");
                                     sortedItems.add(new Item(event.getId(), description));
                                 } catch (Exception e) {
+                                    logger.error("An error occurred ",e);
                                     alert(e.getMessage());
                                     e.printStackTrace();
                                 }
@@ -222,9 +237,9 @@ public class BouteFrame extends CommonFrame{
                             sortedItems.sort(Comparator.comparing(Item::getDescription));
                             sortedItems.forEach(model->{
                                 comboBoxModel.addElement(model);
-                                System.out.println(model.getId()+" ------- "+nEvent.getId());
+                                logger.info(model.getId()+" ------- "+nEvent.getId());
                                 if(model.getId().equals(nEvent.getId())){
-                                    System.out.println("Equal id found to select");
+                                    logger.info("Equal id found to select");
                                     comboBoxModel.setSelectedItem(model);
                                 }
                             });
@@ -236,6 +251,7 @@ public class BouteFrame extends CommonFrame{
                             String statusItem = eventStatus.getSelectedItem()!=""?eventStatus.getSelectedItem().toString():"";
                             findActions(genderSelectedItems,categorySelectedItem,roundOffSelectedItem,statusItem);
                         } catch (IOException e) {
+                            logger.error("An error occurred", e);
                             alert(e.getMessage());
                             e.printStackTrace();
                         }
@@ -243,6 +259,7 @@ public class BouteFrame extends CommonFrame{
 
                 }
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -252,11 +269,14 @@ public class BouteFrame extends CommonFrame{
             try {
                 if(this.event!=null){
                     db.insert("Event_"+this.event.getId().toString(),this.event);
+                    logger.info("Event("+this.event.getEventName()+") updated successfully.");
                     alert("Event("+this.event.getEventName()+") updated successfully.");
                 }else{
+                    logger.info("Event Not selected. Please select.");
                     alert("Event Not selected. Please select.");
                 }
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -291,6 +311,7 @@ public class BouteFrame extends CommonFrame{
 
                 Item selectedItem = (Item)pairedOptions.getSelectedItem();
                 if(selectedItem == null || selectedItem.getId()==0){
+                    logger.info("Kindly select the event.");
                     alert("Kindly select the event.");
                     return;
                 }
@@ -307,12 +328,12 @@ public class BouteFrame extends CommonFrame{
 
                     JDialog jd = Utility.jDialog("Loading, Please wait....!");
                     jd.setVisible(true);
-                    System.out.println("List of events "+events);
+                    logger.info("List of events "+events);
                     for(Event ev: events){
-                        System.out.println(ev.getEventName());
+                        logger.info(ev.getEventName());
                         Matcher matcher = ev.getMatcher();
                         boolean isLastEvent = events.indexOf(ev)==events.size()-1;
-                        System.out.println("Is Last Event "+isLastEvent);
+                        logger.info("Is Last Event "+isLastEvent);
 
 
                         List<Match> matches = matcher.getMatches();
@@ -327,8 +348,8 @@ public class BouteFrame extends CommonFrame{
                             String fromText = fromPerson.getName().concat(" ("+fromPerson.getTeamName()+")");
                             String toText = toPerson.getName().concat(" ("+toPerson.getTeamName()+")");
 
-                            System.out.println("from text "+fromText);
-                            System.out.println("to text "+toText);
+                            logger.info("from text "+fromText);
+                            logger.info("to text "+toText);
 
                             JButton toButton = new JButton(toText);
                             toButton.setMaximumSize(new Dimension(300,50));
@@ -405,10 +426,12 @@ public class BouteFrame extends CommonFrame{
                                         try {
                                             Utility.getEventRows(db,"Event_"+ev.getId(),rows);
                                             if(rows.size()>1){
+                                                logger.info("Sub events are already exists, Manual Allocations won't support once sub events are generated.");
                                                 alert("Sub events are already exists, Manual Allocations won't support once sub events are generated.");
                                                 return;
                                             }
                                         } catch (Exception ex) {
+                                            logger.info(ex.getMessage());
                                             alert(ex.getMessage());
                                             ex.printStackTrace();
                                         }
@@ -454,14 +477,14 @@ public class BouteFrame extends CommonFrame{
 
                             //listeners
                             fromButton.addActionListener(e->{
-                                System.out.println("updated ");
+                                logger.info("updated ");
                                 match.setSuccessor(fromPerson);
                                 successorButton.setText(fromText);
                                 successorButton.setForeground(Color.WHITE);
                                 successorButton.setBackground(match.getFromCorner().getColor());
                             });
                             toButton.addActionListener(e->{
-                                System.out.println("updated ");
+                                logger.info("updated ");
                                 match.setSuccessor(toPerson);
                                 successorButton.setText(toText);
                                 successorButton.setForeground(Color.WHITE);
@@ -502,6 +525,7 @@ public class BouteFrame extends CommonFrame{
                     }
                 }
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -577,6 +601,7 @@ public class BouteFrame extends CommonFrame{
                         try {
                             return (Event) db.findObject(pair);
                         } catch (Exception e) {
+                            logger.error("An Error occurred ",e);
                             e.printStackTrace();
                             alert(e.getMessage());
                         }
@@ -616,6 +641,7 @@ public class BouteFrame extends CommonFrame{
                     String description = es.getEventName().concat("("+es.getTeamName()+") ("+es.getRoundOf()+")"+" ("+es.getStatus()+")");
                     this.pairedOptions.addItem(new Item(es.getId(),description));
                 } catch (Exception e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                     alert(e.getMessage());
                 }

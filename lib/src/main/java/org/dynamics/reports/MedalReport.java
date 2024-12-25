@@ -3,18 +3,18 @@ package org.dynamics.reports;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.model.Configuration;
-import org.dynamics.model.Match;
-import org.dynamics.model.Person;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Vector;
 
 public class MedalReport {
+    private static final Logger logger = LogManager.getLogger(MedalReport.class);
     private String fileName;
     private String categoryName;
     private Configuration configuration;
@@ -47,8 +47,10 @@ public class MedalReport {
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 } catch (IOException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
@@ -57,11 +59,12 @@ public class MedalReport {
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
             }
         });
-        System.out.println("PDF Document created successfully...!");
+        logger.info("PDF Document created successfully...!");
     }
 
     public void generateReport(List<String> columns, List<List<String>> rows)  throws DocumentException {
@@ -80,6 +83,7 @@ public class MedalReport {
             imageCell.setBorder(0);
             titleTable.addCell(imageCell);
         } catch (IOException e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
 
@@ -101,6 +105,7 @@ public class MedalReport {
             rightCell.setBorder(0);
             titleTable.addCell(rightCell);
         } catch (IOException | BadElementException e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
         doc.add(titleTable);

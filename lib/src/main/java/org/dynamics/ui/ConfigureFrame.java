@@ -1,5 +1,7 @@
 package org.dynamics.ui;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.TablePair;
@@ -12,9 +14,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ConfigureFrame extends CommonFrame{
+    private static final Logger logger = LogManager.getLogger(ConfigureFrame.class);
     private JButton submit = new JButton("Find");
     private TablePair pair;
 
@@ -40,11 +42,12 @@ public class ConfigureFrame extends CommonFrame{
             try {
                 configuration =  db.findObject("configuration");
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
             this.pair.getDefaultTableModel().setRowCount(0);
-            System.out.println(configuration.getKeys());
+            logger.info(configuration.getKeys());
             Map<String, Object> keys =  configuration.getKeys();
 
             keys.forEach((k,v)->{
@@ -100,7 +103,7 @@ public class ConfigureFrame extends CommonFrame{
                 String valueValue = value.getText();
                 try {
                     Configuration configuration = db.findObject("configuration");
-                    System.out.println("before insertino "+configuration);
+                    logger.info("before insertino "+configuration);
                     if(configuration==null){
                         configuration = new Configuration();
                     }
@@ -119,6 +122,7 @@ public class ConfigureFrame extends CommonFrame{
                     SwingUtilities.updateComponentTreeUI(this);
                     createConfiguration.doClick();
                 } catch (Exception ex) {
+                    logger.error("An error occurred", ex);
                     ex.printStackTrace();
                     alert(ex.getMessage());
                 }
@@ -190,6 +194,7 @@ public class ConfigureFrame extends CommonFrame{
             try {
                 jf.setIconImage(ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.png"))));
             } catch (IOException ex) {
+                logger.error("An error occurred", ex);
                 throw new RuntimeException(ex);
             }
         });

@@ -1,7 +1,8 @@
 package org.dynamics.ui;
 
 import com.itextpdf.text.DocumentException;
-import org.checkerframework.checker.units.qual.C;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
 import org.dynamics.model.Event;
 import org.dynamics.model.*;
@@ -10,16 +11,12 @@ import org.dynamics.util.Utility;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-import org.jfree.chart.ChartPanel;
-import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
@@ -40,7 +37,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class CommonFrame extends JFrame {
-
+    private static final Logger logger = LogManager.getLogger(CommonFrame.class);
     private TablePair pair;
     private TablePair teamPair;
     private TablePair eventPair;
@@ -85,6 +82,7 @@ public abstract class CommonFrame extends JFrame {
                     Utility.getTeamRow(db,event,teamRows);
                     Utility.getEventRows(db,event,eventRows);
                 } catch (Exception e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
 
@@ -159,17 +157,14 @@ public abstract class CommonFrame extends JFrame {
                         if(!rowsList.isEmpty()){
                             report.generateReport(medals, rowsList);
                         }else {
+                            logger.info("Nothing to print for the selected "+selectedItem);
                             alert("Nothing to print for the selected "+selectedItem);
                         }
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (DocumentException e) {
-                    throw new RuntimeException(e);
-                } catch (ClassNotFoundException e) {
+                } catch (IOException | DocumentException | ClassNotFoundException e) {
+                    logger.error("An error occurred", e);
                     throw new RuntimeException(e);
                 }
-
             }
         });
 
@@ -203,6 +198,7 @@ public abstract class CommonFrame extends JFrame {
             try {
                 initialConfiguration =  db.findObject("configuration");
                 if(initialConfiguration==null){
+                    logger.info("Configuration is missing, kindly add");
                     alert("Configuration is missing, kindly add");
                     return;
                 }
@@ -219,6 +215,7 @@ public abstract class CommonFrame extends JFrame {
                 String phone = (String)initialConfiguration.get("phone-number");
                 phoneNumber.setText(phone);
             } catch (Exception ess) {
+                logger.error("An error occurred", ess);
                 ess.printStackTrace();
                 alert(ess.getMessage());
             }
@@ -236,6 +233,7 @@ public abstract class CommonFrame extends JFrame {
                             treeModel.reload();
                         }
                     } catch (Exception es) {
+                        logger.error("An error occurred", es);
                         es.printStackTrace();
                     }
 
@@ -259,9 +257,8 @@ public abstract class CommonFrame extends JFrame {
             phoneNumber = Utility.getBasicLable(configuration, "phone-number", bottomLable);
             centerPan.add(phoneNumber);
             jps.add(centerPan,BorderLayout.CENTER);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
+            logger.error("An error occurred", e);
             throw new RuntimeException(e);
         }
         jps.add(theme,BorderLayout.WEST);
@@ -281,6 +278,7 @@ public abstract class CommonFrame extends JFrame {
                         root.add(node);
                     }
                 } catch (Exception e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
 
@@ -293,7 +291,7 @@ public abstract class CommonFrame extends JFrame {
                 Object obj = node.getUserObject();
                 if(obj instanceof Item){
                     Item item = (Item)node.getUserObject();
-                    System.out.println(item);
+                    logger.info(item);
                     this.pair.getDefaultTableModel().setRowCount(0);
                     this.teamPair.getDefaultTableModel().setRowCount(0);
                     this.eventPair.getDefaultTableModel().setRowCount(0);
@@ -342,6 +340,7 @@ public abstract class CommonFrame extends JFrame {
                         }
                         this.medels.getDefaultTableModel().addRow(medalRows);
                     } catch (Exception ex) {
+                        logger.error("An error occurred", ex);
                         ex.printStackTrace();
                     }
                 }else{
@@ -365,6 +364,7 @@ public abstract class CommonFrame extends JFrame {
                             try {
                                 Utility.getEventRows(db,event,eventRows);
                             } catch (Exception ex) {
+                                logger.error("An error occurred", ex);
                                 ex.printStackTrace();
                             }
                             eventRows.forEach(eventRow->{
@@ -375,6 +375,7 @@ public abstract class CommonFrame extends JFrame {
                             try {
                                 parEvent = db.findObject(event);
                             }  catch (Exception ex) {
+                                logger.error("An error occurred", ex);
                                 ex.printStackTrace();
                                 alert(ex.getMessage());
                             }
@@ -463,6 +464,7 @@ public abstract class CommonFrame extends JFrame {
                 jsp.add(titleLable,BorderLayout.CENTER);
             }
         } catch (Exception es) {
+            logger.error("An error occurred", es);
             es.printStackTrace();
             alert(es.getMessage());
         }
@@ -490,6 +492,7 @@ public abstract class CommonFrame extends JFrame {
     }
 
     protected void alert(String message){
+        logger.info(message);
         JOptionPane.showMessageDialog(this,message,"Alert!",JOptionPane.WARNING_MESSAGE);
     }
 
@@ -634,6 +637,7 @@ public abstract class CommonFrame extends JFrame {
                 String description = event.getEventName().concat("("+event.getTeamName()+") ("+event.getRoundOf()+")"+" ("+event.getStatus()+")");
                 sortedItems.add(new Item(event.getId(), description));
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 alert(e.getMessage());
                 e.printStackTrace();
             }
@@ -652,6 +656,7 @@ public abstract class CommonFrame extends JFrame {
                 String description = s.getName()+"("+s.getTeamName()+")";
                 sortedItems.add(new Item(s.getId(), description));
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 alert(e.getMessage());
                 e.printStackTrace();
             }

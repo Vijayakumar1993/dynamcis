@@ -1,5 +1,7 @@
 package org.dynamics.ui;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
 import org.dynamics.model.Categories;
 import org.dynamics.model.Configuration;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class EventListFrame extends CommonFrame{
+    private static final Logger logger = LogManager.getLogger(EventListFrame.class);
     private Vector<String> events = new Vector<>();
     private List<Event> availableEvent = new LinkedList<>();
     private TablePair eventTablePair = null;
@@ -69,6 +72,7 @@ public class EventListFrame extends CommonFrame{
                     try {
                         return (Event)db.findObject(avr);
                     } catch (Exception ex) {
+                        logger.error("An error occurred", ex);
                         ex.printStackTrace();
                         alert(ex.getMessage());
                     }
@@ -104,10 +108,11 @@ public class EventListFrame extends CommonFrame{
                 }).collect(Collectors.toList());
                 this.eventTablePair.getDefaultTableModel().setRowCount(0);
                 this.filterEvents.forEach(event->{
-                    System.out.println(event.getEventName());
+                    logger.info(event.getEventName());
                     eventTablePair.getDefaultTableModel().addRow(event.toVector());
                 });
             }catch (Exception e1){
+                logger.error("An error occurred", e1);
                 e1.printStackTrace();
                 alert(e1.getMessage());
             }
@@ -124,6 +129,7 @@ public class EventListFrame extends CommonFrame{
                 availableEvent.add(ev);
                 return ev.toVector();
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -148,11 +154,11 @@ public class EventListFrame extends CommonFrame{
 
         deleteEvent.addActionListener(a->{
             this.filterEvents.forEach(event->{
-                System.out.println("Event "+event.getId()+" deletion started");
+                logger.info("Event "+event.getId()+" deletion started");
                 int result = JOptionPane.showConfirmDialog(null,"Are you sure to remove "+event.getEventName()+"?");
                 if(JOptionPane.YES_OPTION == result){
                     db.delete("Event_"+event.getId());
-                    System.out.println("Event "+event.getId()+" deletion ends");
+                    logger.info("Event "+event.getId()+" deletion ends");
                     this.find.doClick();
                 }
             });
@@ -169,7 +175,7 @@ public class EventListFrame extends CommonFrame{
                 //lets order the filter events as per the table
                 int actualRowCount = this.eventTablePair.getjTable().getRowCount();
                 for(int i=0;i<actualRowCount;i++){
-                    System.out.println(this.eventTablePair.getjTable().getValueAt(i,0));
+                    logger.info(this.eventTablePair.getjTable().getValueAt(i,0));
                 }
                 List<Long> compartor = IntStream.range(0,actualRowCount).mapToObj(i->Long.valueOf(this.eventTablePair.getjTable().getValueAt(i,0).toString())).collect(Collectors.toList());
 
@@ -187,6 +193,7 @@ public class EventListFrame extends CommonFrame{
                     report.generateReport(this.filterEvents,"");
                 }
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }

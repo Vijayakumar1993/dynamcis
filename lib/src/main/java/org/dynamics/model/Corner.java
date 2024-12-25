@@ -1,7 +1,5 @@
 package org.dynamics.model;
 
-import org.checkerframework.checker.units.qual.C;
-
 import java.awt.*;
 
 public enum Corner {

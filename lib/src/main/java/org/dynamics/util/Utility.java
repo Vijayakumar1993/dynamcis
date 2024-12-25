@@ -1,24 +1,26 @@
 package org.dynamics.util;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.tika.Tika;
 import org.dynamics.db.Db;
-import org.dynamics.model.*;
 import org.dynamics.model.Event;
+import org.dynamics.model.*;
 import org.dynamics.ui.CommonFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utility {
+    private static final Logger logger = LogManager.getLogger(Utility.class);
 
     public static String CSV="csv";
     public static List<String> IMAGE_EXTENSION = Arrays.asList(
@@ -69,8 +71,8 @@ public class Utility {
         Integer matcher = keyPair.get("matcher");
         Integer roundOf = keyPair.get("roundOf");
 
-        System.out.println("Matcher List "+matcher);
-        System.out.println("Fixture List "+fixtureSize);
+        logger.info("Matcher List " + matcher);
+        logger.info("Fixture List "+fixtureSize);
 
         List<Event> events = findListOfEvents(event);
         Optional<Integer> sumOptional = events.stream().map(a->{
@@ -89,7 +91,7 @@ public class Utility {
             appenderSize = appenderSize+1;
             Person fr = matcherList.get(i);
             Person tr = matcherList.get(i+1);
-            System.out.println("From "+fr.getName()+" --- To "+tr.getName());
+            logger.info("From "+fr.getName()+" --- To "+tr.getName());
             Match match = new Match();
             match.setMatchId((long) (appenderSize));
             match.setFromCorner(Corner.BLUE);
@@ -104,7 +106,7 @@ public class Utility {
             appenderSize = appenderSize+1;
             Person fr = fixtureList.get(i);
             Person tr = fixtureList.get(i);
-            System.out.println("From "+fr.getName()+" --- To "+tr.getName());
+            logger.info("From "+fr.getName()+" --- To "+tr.getName());
             Match match = new Match();
             match.setMatchId((long)appenderSize);
             match.setFromCorner(Corner.BLUE);
@@ -140,7 +142,7 @@ public class Utility {
             }
         }
 
-        System.out.println("Chosen Set "+set);
+        logger.info("Chosen Set "+set);
         Integer fixture = set-size;
         Integer matcher = size-fixture;
         keyPair.put("fixture",fixture);
@@ -227,6 +229,7 @@ public class Utility {
                 }
             }
         } catch (Exception e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
     }
@@ -248,6 +251,7 @@ public class Utility {
 
             }
         } catch (Exception e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
         return  row;
@@ -267,6 +271,7 @@ public class Utility {
                 return events;
             }
         }catch (Exception e){
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
         return new LinkedList<>();
@@ -331,6 +336,7 @@ public class Utility {
                 default: UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             }
         } catch (Exception e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
     }
@@ -387,7 +393,7 @@ public class Utility {
     public static String getFileType(String file){
         Tika tika = new Tika();
         String fileType = tika.detect(file);
-        System.out.println(fileType);
+        logger.info(fileType);
         return fileType;
     }
 

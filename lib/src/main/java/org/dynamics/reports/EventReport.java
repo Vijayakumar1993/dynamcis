@@ -4,6 +4,8 @@ package org.dynamics.reports;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.model.Configuration;
 import org.dynamics.model.Event;
 import org.dynamics.model.Match;
@@ -12,13 +14,13 @@ import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 public class EventReport implements Report{
+    private static final Logger logger = LogManager.getLogger(EventReport.class);
     private Configuration configuration;
     private PdfWriter pdfWriter;
     private Document doc;
@@ -49,8 +51,10 @@ public class EventReport implements Report{
                 try {
                     watermarkImage = Image.getInstance((String)configuration.get("watermark-logo"));
                 } catch (BadElementException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 } catch (IOException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
                 watermarkImage.setAbsolutePosition(100, 200); // Position of the watermark image
@@ -59,11 +63,12 @@ public class EventReport implements Report{
                 try {
                     canvas.addImage(watermarkImage);
                 } catch (DocumentException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                 }
             }
         });
-        System.out.println("PDF Document created successfully...!");
+        logger.info("PDF Document created successfully...!");
     }
     @Override
     public void generateReport( Event event) throws DocumentException {
@@ -83,6 +88,7 @@ public class EventReport implements Report{
             imageCell.setBorder(0);
             titleTable.addCell(imageCell);
         } catch (IOException e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
 
@@ -117,6 +123,7 @@ public class EventReport implements Report{
             rightCell.setBorder(0);
             titleTable.addCell(rightCell);
         } catch (IOException e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
         }
         doc.add(titleTable);

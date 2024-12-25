@@ -1,10 +1,10 @@
 package org.dynamics.ui;
 
-import com.itextpdf.text.DocumentException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
-import org.dynamics.model.*;
 import org.dynamics.model.Event;
-import org.dynamics.reports.EventReport;
+import org.dynamics.model.*;
 import org.dynamics.reports.FixturesPdf;
 import org.dynamics.util.Utility;
 
@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class FindFrame extends CommonFrame{
+    private static final Logger logger = LogManager.getLogger(FindFrame.class);
     private List<Person> persons;
     private List<Person> filteredPersons;
     private TablePair tableModel;
@@ -129,7 +130,7 @@ public class FindFrame extends CommonFrame{
                         }
                     }).filter(weightFilter->{
                         if(selectedFrom.length()>0){
-                            this.weightFrom = "+".concat(selectedFrom);
+                            this.weightFrom = selectedFrom;
                             return weightFilter.getWeight().compareTo(Double.parseDouble(selectedFrom))>=0;
                         }else{
                             this.weightFrom = "";
@@ -186,7 +187,7 @@ public class FindFrame extends CommonFrame{
                         if(options == JOptionPane.YES_OPTION){
                             List<Person> removalPersons = this.persons.stream().filter(p->removalIds.contains(p.getId()+"")).collect(Collectors.toList());
                             boolean isRemoved = this.persons.removeAll(removalPersons);
-                            System.out.println("Is Removed "+isRemoved);
+                            logger.info("Is Removed "+isRemoved);
                             fileKey.setPerson(this.persons);
                             db.insert("File_"+fileKey.getId(),fileKey);
                             alert(removalIds.size()+" Removed successfully.");
@@ -195,6 +196,7 @@ public class FindFrame extends CommonFrame{
                     }
 
                 } catch (Exception ex) {
+                    logger.error("An error occurred", ex);
                     alert(ex.getMessage());
                     ex.printStackTrace();
                 }
@@ -222,6 +224,7 @@ public class FindFrame extends CommonFrame{
                     reporter = new FixturesPdf(saveFile.get().concat(".pdf"),configuration);
                     reporter.generateReport(dummyEvent);
                 } catch (Exception ex) {
+                    logger.error("An error occurred", ex);
                     ex.printStackTrace();
                     alert(ex.getMessage());
                 }
@@ -284,6 +287,7 @@ public class FindFrame extends CommonFrame{
                 }
 
             }catch (Exception e){
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }
@@ -313,12 +317,12 @@ public class FindFrame extends CommonFrame{
             int column = 0;
             if(table.getRowCount()<=0) return;
             String personId = table.getValueAt(row,column).toString();
-            System.out.println("Selected person "+personId);
+            logger.info("Selected person "+personId);
             Person existingPerson = this.persons.stream().filter(people->people.getId()==Long.parseLong(personId)).collect(Collectors.toList()).get(0);
             if(existingPerson!=null){
                 int firstRow = modelEvet.getFirstRow();
                 int firstColumn = modelEvet.getColumn();
-                System.out.println("Col "+firstColumn+" / "+firstRow);
+                logger.info("Col "+firstColumn+" / "+firstRow);
                 if(firstColumn==-1 || firstRow==-1) return;
                 Object valueAt = table.getValueAt(firstRow, firstColumn);
                 if(valueAt==null) return;
@@ -363,6 +367,7 @@ public class FindFrame extends CommonFrame{
                     fileKey.setPerson(this.persons);
                     db.insert("File_"+this.fileKey.getId(),fileKey);
                 } catch (IOException e) {
+                    logger.error("An error occurred", e);
                     e.printStackTrace();
                     alert(e.getMessage());
                 }
@@ -375,6 +380,7 @@ public class FindFrame extends CommonFrame{
                 String eventWeight = Stream.of(this.weightFrom,this.weightTo).filter(a-> !Objects.equals(a, "")).collect(Collectors.joining(""));
                 eventPanel(peoples,db,null,eventGender,eventCateogory,eventWeight);
             } catch (Exception e) {
+                logger.error("An error occurred", e);
                 e.printStackTrace();
                 alert(e.getMessage());
             }

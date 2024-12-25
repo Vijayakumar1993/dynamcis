@@ -1,5 +1,7 @@
 package org.dynamics.ui;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
 import org.dynamics.model.FileImport;
 
@@ -8,9 +10,9 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 public class ImportFrame extends CommonFrame{
+    private static final Logger logger = LogManager.getLogger(ImportFrame.class);
     public ImportFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         super(title);
     }
@@ -40,6 +42,7 @@ public class ImportFrame extends CommonFrame{
                 this.createTable(this,rows,FileImport.keys(), LinkedHashMap::new,null);
             }
         }catch (Exception e){
+            logger.error("An error occurred", e);
             e.printStackTrace();
             alert(e.getMessage());
         }

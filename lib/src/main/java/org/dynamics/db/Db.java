@@ -1,7 +1,5 @@
 package org.dynamics.db;
 
-import org.dynamics.model.Person;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;

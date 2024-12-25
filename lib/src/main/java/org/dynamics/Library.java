@@ -3,6 +3,8 @@
  */
 package org.dynamics;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
 import org.dynamics.db.LevelDb;
 import org.dynamics.model.*;
@@ -16,7 +18,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -25,7 +26,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
 public class Library  extends CommonFrame {
+    private static final Logger logger = LogManager.getLogger(Library.class);
     private Map<String, Map<String, ActionListener>> men = new LinkedHashMap<>();
     private Map<String, ActionListener> fileMenuItems = new LinkedHashMap<>();
     private Map<String, ActionListener> bouteMenuItems = new LinkedHashMap<>();
@@ -40,9 +43,11 @@ public class Library  extends CommonFrame {
         try {
             initialConfiguration =  db.findObject("configuration");
             if(initialConfiguration==null){
-              alert("Configuration is missing, kindly add");
+                logger.info("Configuration is missing, kindly add");
+                alert("Configuration is missing, kindly add");
             }
         } catch (Exception e) {
+            logger.error("An error occurred", e);
             e.printStackTrace();
             alert(e.getMessage());
         }
@@ -68,6 +73,7 @@ public class Library  extends CommonFrame {
                 j.add(Utility.getBasicLable(configuration,"website",Utility.CONSUMER_DEFAULT));
                 jf.add(j);
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 throw new RuntimeException(ex);
             }
             jf.setIconImage(icon); // Set the icon for the JFrame
@@ -80,6 +86,7 @@ public class Library  extends CommonFrame {
                 ImportFrame importFrame = new ImportFrame("Imports");
                 importFrame.showList(db);
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 alert(ex.getMessage());
                 ex.printStackTrace();
             }
@@ -87,6 +94,7 @@ public class Library  extends CommonFrame {
         fileMenuItems.put("New Players", (ActionEvent e)->{
             String reportTitle = JOptionPane.showInputDialog("Please Enter the Player list name");
             if(reportTitle.toString().isEmpty()){
+                logger.info("Please enter valid Report title");
                 alert("Please enter valid Report title");
                 return;
             }
@@ -102,6 +110,7 @@ public class Library  extends CommonFrame {
                 findFrame.addDetails(db);
                 findFrame.southPanel(db);
             }catch (Exception es){
+                logger.error("An error occurred", es);
                 alert(es.getMessage());
                 es.printStackTrace();
             }
@@ -111,11 +120,12 @@ public class Library  extends CommonFrame {
                 List<String> fileImports = db.keyFilterBy("File_");
                 JComboBox<Item> comboBox = new JComboBox<>();
 
-                 fileImports.stream().map(a->{
+                fileImports.stream().map(a->{
                     try {
                         FileImport fileImport  = db.findObject(a);
                         comboBox.addItem(new Item(fileImport.getId(),fileImport.getName()));
                     } catch (Exception ex) {
+                        logger.error("An error occurred", ex);
                         ex.printStackTrace();
                         alert(ex.getMessage());
                     }
@@ -133,11 +143,13 @@ public class Library  extends CommonFrame {
                         findFrame.addDetails(db);
                         findFrame.southPanel(db);
                     }else {
+                        logger.info("Please select valid file Id");
                         alert("Please select valid file Id");
                     }
                 }
 
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
@@ -149,6 +161,7 @@ public class Library  extends CommonFrame {
                 bouteFrame.centerPanel();
                 bouteFrame.southPanel();
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
@@ -161,6 +174,7 @@ public class Library  extends CommonFrame {
                 eventListFrame.listEvents(db);
                 eventListFrame.southPanel(db);
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
@@ -174,6 +188,7 @@ public class Library  extends CommonFrame {
                 frame.centerPanel(db);
                 frame.southPanel(db);
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
@@ -185,6 +200,7 @@ public class Library  extends CommonFrame {
 
                     String fileType = Utility.getFileType(filePath);
                     if(!fileType.contains(Utility.CSV)){
+                        logger.info("Invalid file format, Expected "+Utility.CSV+", Actual "+fileType);
                         alert("Invalid file format, Expected "+Utility.CSV+", Actual "+fileType);
                         return;
                     }
@@ -193,6 +209,7 @@ public class Library  extends CommonFrame {
                         FileImport fileImport = new FileImport();
                         String reportTitle = JOptionPane.showInputDialog("Please Enter the Player list name");
                         if(reportTitle.toString().isEmpty()){
+                            logger.info("Please enter valid Report title");
                             alert("Please enter valid Report title");
                             return;
                         }
@@ -203,12 +220,14 @@ public class Library  extends CommonFrame {
                         db.insert("File_"+fileImport.getId(),fileImport);
                         alert("Total : "+persons.size()+" Uploaded Successfully...!");
                     } catch (Exception ex) {
+                        logger.error("An error occurred", ex);
                         ex.printStackTrace();
                         alert("File import failed, Please verify the file.");
                     }
                 });
 
             } catch (Exception ex) {
+                logger.error("An error occurred", ex);
                 ex.printStackTrace();
                 alert(ex.getMessage());
             }
@@ -228,6 +247,6 @@ public class Library  extends CommonFrame {
 
     }
     public static void main(String args[]) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-        Library library = new Library("Dynamcis 101 MMA");
+        new Library("Dynamics 101 MMA");
     }
 }
