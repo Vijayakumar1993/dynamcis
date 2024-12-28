@@ -85,6 +85,7 @@ public class Library  extends CommonFrame {
             try {
                 ImportFrame importFrame = new ImportFrame("Imports");
                 importFrame.showList(db);
+                importFrame.southPanle(db);
             } catch (Exception ex) {
                 logger.error("An error occurred", ex);
                 alert(ex.getMessage());

@@ -1,5 +1,6 @@
 package org.dynamics.ui;
 
+import javafx.scene.layout.Background;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
@@ -75,6 +76,7 @@ public class FindFrame extends CommonFrame{
         jsp.add(categoresBox);
 
         JPanel weightPanel = new JPanel();
+        weightPanel.setBackground(Color.WHITE);
         JTextField weightFrom = numbrFiled();
         weightFrom.setBorder(BorderFactory.createTitledBorder("From"));
         weightPanel.add(weightFrom);

@@ -44,7 +44,8 @@ public class Utility {
     public static List<String> CONFIGURATIONS = Stream.of("club-title","left-logo","right-logo","watermark-logo","title","website","address","phone-number").collect(Collectors.toList());
     public static Long getRandom(){
         Random random = new Random();
-        return Math.abs(Long.valueOf(random.nextInt()));
+        long tenDigitNumber = (long)(1_000_000_000L + random.nextDouble() * 9_000_000_000L);
+        return Math.abs(tenDigitNumber);
     }
     public static String getCurrentDateTime() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");

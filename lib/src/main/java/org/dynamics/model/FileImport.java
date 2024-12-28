@@ -91,4 +91,9 @@ public class FileImport<T> implements Serializable {
         keys.add("Status");
         return keys;
     }
+
+    @Override
+    public String toString() {
+        return   this.name;
+    }
 }
