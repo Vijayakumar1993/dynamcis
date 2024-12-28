@@ -101,6 +101,10 @@ public class ConfigureFrame extends CommonFrame{
             if(JOptionPane.YES_OPTION == result){
                 String keyValue = key.getSelectedItem().toString();
                 String valueValue = value.getText();
+                if(valueValue.isEmpty()){
+                    alert(String.format("Invalid input for %s, Please enter valid",keyValue));
+                    createConfiguration.doClick();
+                }
                 try {
                     Configuration configuration = db.findObject("configuration");
                     logger.info("before insertino "+configuration);
