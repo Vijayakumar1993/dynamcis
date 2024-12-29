@@ -158,7 +158,7 @@ public class FixturesPdf implements Report{
             PrintPdfViewer pdfViewer = new PrintPdfViewer(this.fileName);
             pdfViewer.view();
         }
-        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
+//        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
     }
     public PdfPCell getPdfCell(String msg) {
         PdfPCell cell = new PdfPCell(new Phrase(msg, new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD, BaseColor.WHITE)));

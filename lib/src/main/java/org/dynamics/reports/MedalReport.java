@@ -148,7 +148,7 @@ public class MedalReport {
             PrintPdfViewer pdfViewer = new PrintPdfViewer(this.fileName);
             pdfViewer.view();
         }
-        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
+//        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
     }
 
     public PdfPCell getPdfCell(String msg) {

@@ -195,7 +195,7 @@ public class EventReport implements Report{
             PrintPdfViewer pdfViewer = new PrintPdfViewer(this.fileName);
             pdfViewer.view();
         }
-        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
+//        JOptionPane.showMessageDialog(null, "PDF Generated successfully.");
 
     }
     public long noOFBoxers(Event e){
