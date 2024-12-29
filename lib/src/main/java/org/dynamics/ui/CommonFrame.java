@@ -1,6 +1,7 @@
 package org.dynamics.ui;
 
 import com.itextpdf.text.DocumentException;
+import com.jtattoo.plaf.graphite.GraphiteLookAndFeel;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
@@ -51,7 +52,11 @@ public abstract class CommonFrame extends JFrame {
     private JLabel imageLable;
     public CommonFrame(String title) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
         setTitle(title);
-        UIManager.put("JTattoo.noText", true);
+        Properties props = new Properties();
+        props.put("logoString", ""); // Remove the JTattoo title
+
+        // Apply the theme
+        GraphiteLookAndFeel.setCurrentTheme(props);
         Image icon = ImageIO.read(Objects.requireNonNull(CommonFrame.class.getResource("/logo.png")));
         setIconImage(icon); // Set the icon for the JFrame
         getContentPane().setBackground(Color.WHITE);
@@ -59,7 +64,7 @@ public abstract class CommonFrame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         setVisible(true);
-        UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
+        UIManager.setLookAndFeel("com.jtattoo.plaf.graphite.GraphiteLookAndFeel");
 //        this.commonNorthPanel();
     }
     public void commonCenterPanel(Db db) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {

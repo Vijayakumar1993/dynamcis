@@ -20,11 +20,11 @@ public class MedalReport {
     private Configuration configuration;
     private PdfWriter pdfWriter;
     private Document doc;
-    private Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
-    private Font H1 = new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD);
-    private Font H2 = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-    private Font H3 = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
-    private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
+    private Font NORMAL_FONT = new Font(Font.FontFamily.TIMES_ROMAN, 8, Font.NORMAL);
+    private Font H1 = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
+    private Font H2 = new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.BOLD);
+    private Font H3 = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD);
+    private Font H4 = new Font(Font.FontFamily.TIMES_ROMAN, 9, Font.BOLD);
     public MedalReport(String fileName, String categoryName, Configuration configuration) throws IOException, DocumentException {
         this.categoryName = categoryName;
         this.configuration = configuration;
@@ -38,7 +38,7 @@ public class MedalReport {
             public void onEndPage(PdfWriter writer, Document doc) {
                 ColumnText.showTextAligned(writer.getDirectContent(),
                         Element.ALIGN_CENTER,
-                        new Phrase("Page " + writer.getPageNumber()),
+                        new Phrase("Page " + writer.getPageNumber(),H4),
                         (doc.left() + doc.right()) / 2, doc.bottom()-20 , 0);
 
                 //watermark
@@ -72,6 +72,7 @@ public class MedalReport {
 
         PdfPTable titleTable = new PdfPTable(3);
         titleTable.setWidthPercentage(100);
+        titleTable.setWidths(new float[]{2f,5f,2f});
         Paragraph titleParagraph = new Paragraph();
         try {
             Image img = Image.getInstance((String)configuration.get("left-logo"));
@@ -87,11 +88,20 @@ public class MedalReport {
             e.printStackTrace();
         }
 
-        String title = (String)configuration.get("title");
-        Chunk titleName = new Chunk(title,H1);
+        Chunk titleName = new Chunk((String)configuration.get("title"),H1);
         titleParagraph.add(titleName);
         titleParagraph.add("\n");
+        Chunk clubTitle = new Chunk((String)configuration.get("club-title"),H2);
+        titleParagraph.add(clubTitle);
+        titleParagraph.add("\n");
+        Chunk address = new Chunk((String)configuration.get("address"),H3);
+        titleParagraph.add(address);
+        titleParagraph.add("\n");
+        Chunk website = new Chunk((String)configuration.get("website"),H4);
+        titleParagraph.add(website);
+        titleParagraph.setSpacingAfter(5f);
         titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
+
         PdfPCell titleCell = new PdfPCell();
         titleCell.addElement(titleParagraph);
         titleCell.setBorder(0);
@@ -109,7 +119,14 @@ public class MedalReport {
             e.printStackTrace();
         }
         doc.add(titleTable);
-        doc.add(new LineSeparator());
+        LineSeparator lineSeparator =  new LineSeparator();
+        lineSeparator.setLineWidth(0.5f);
+        doc.add(lineSeparator);
+        Paragraph headerTitle =new Paragraph("Medals List",H3);
+        headerTitle.add("\n");
+        headerTitle.setAlignment(Paragraph.ALIGN_CENTER);
+        headerTitle.setSpacingAfter(10f);
+        doc.add(headerTitle);
 
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
@@ -135,7 +152,7 @@ public class MedalReport {
     }
 
     public PdfPCell getPdfCell(String msg) {
-        PdfPCell cell = new PdfPCell(new Phrase(msg, new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD, BaseColor.WHITE)));
+        PdfPCell cell = new PdfPCell(new Phrase(msg, new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD, BaseColor.WHITE)));
         cell.setBackgroundColor(BaseColor.BLACK);
         cell.setNoWrap(false);
         return cell;
@@ -144,7 +161,7 @@ public class MedalReport {
     public void addStringCell(String msg, PdfPTable table) {
         PdfPCell cell = new PdfPCell();
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
-        Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
+        Font font = new Font(Font.FontFamily.TIMES_ROMAN, 8, Font.NORMAL);
         cell.setNoWrap(false);
         cell.setPadding(10);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);

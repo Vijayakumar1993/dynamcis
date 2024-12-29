@@ -320,6 +320,7 @@ public class Utility {
                     themes,
                     themes[0]
             );
+            if(selectedTheme==null) return;
 
             switch (selectedTheme) {
                 case "Aero": UIManager.setLookAndFeel("com.jtattoo.plaf.aero.AeroLookAndFeel"); break;

@@ -216,7 +216,7 @@ public class FindFrame extends CommonFrame{
                     List<Person> peoples = this.filteredPersons.size()>0?this.filteredPersons:this.persons;
                     Event dummyEvent = new Event();
                     dummyEvent.setEventName(title);
-                    dummyEvent.setTeamName(title);
+                    dummyEvent.setTeamName(configuration.get("club-title").toString());
                     Matcher matcher = new Matcher();
                     matcher.setMatches(new LinkedList<>());
                     dummyEvent.setMatcher(matcher);

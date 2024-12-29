@@ -24,11 +24,11 @@ public class EventReport implements Report{
     private Configuration configuration;
     private PdfWriter pdfWriter;
     private Document doc;
-    private Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
-    private Font H1 = new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD);
-    private Font H2 = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-    private Font H3 = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
-    private Font H4 = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD);
+    private Font NORMAL_FONT = new Font(Font.FontFamily.TIMES_ROMAN, 8, Font.NORMAL);
+    private Font H1 = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
+    private Font H2 = new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.BOLD);
+    private Font H3 = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD);
+    private Font H4 = new Font(Font.FontFamily.TIMES_ROMAN, 9, Font.BOLD);
     private String fileName;
     public EventReport(String fileName, Configuration configuration) throws IOException, DocumentException {
         this.configuration = configuration;
@@ -42,7 +42,7 @@ public class EventReport implements Report{
             public void onEndPage(PdfWriter writer, Document doc) {
                 ColumnText.showTextAligned(writer.getDirectContent(),
                         Element.ALIGN_CENTER,
-                        new Phrase("Page " + writer.getPageNumber()),
+                        new Phrase("Page " + writer.getPageNumber(),H4),
                         (doc.left() + doc.right()) / 2, doc.bottom()-20 , 0);
 
                 //watermark
@@ -76,6 +76,7 @@ public class EventReport implements Report{
         List<Match> matches = event.getMatcher().getMatches();
 
         PdfPTable titleTable = new PdfPTable(3);
+        titleTable.setWidths(new float[]{2f,5f,2f});
         titleTable.setWidthPercentage(100);
         Paragraph titleParagraph = new Paragraph();
         try {
@@ -96,16 +97,18 @@ public class EventReport implements Report{
         Chunk titleName = new Chunk(title,H1);
         titleParagraph.add(titleName);
         titleParagraph.add("\n");
-        Chunk categoryName = new Chunk(event.getEventName(),H2);
-        titleParagraph.add(categoryName);
+        Chunk clubTitle = new Chunk((String)configuration.get("club-title"),H2);
+        titleParagraph.add(clubTitle);
         titleParagraph.add("\n");
-        Chunk teamName = new Chunk(event.getTeamName(),H2);
-        titleParagraph.add(teamName);
+        Chunk address = new Chunk((String)configuration.get("address"),H3);
+        titleParagraph.add(address);
         titleParagraph.add("\n");
-        Chunk drawSheet = new Chunk("Draw Sheet",H3);
+        Chunk website = new Chunk((String)configuration.get("website"),H4);
+        titleParagraph.add(website);
+        titleParagraph.add("\n");
+        Chunk drawSheet = new Chunk(String.format("Draw Sheet for %s ( %s )",event.getEventName(),event.getTeamName()),H3);
         titleParagraph.add(drawSheet);
-        titleParagraph.add("\n");
-        titleParagraph.add("\n");
+        titleParagraph.setSpacingAfter(5f);
 
         titleParagraph.setAlignment(Paragraph.ALIGN_CENTER);
 
@@ -128,17 +131,16 @@ public class EventReport implements Report{
         }
         doc.add(titleTable);
         doc.add(new LineSeparator());
-
         if(event.getEventDate()!=null){
             Paragraph asOfDate = new Paragraph("As of "+ DateTimeFormatter.ofPattern("EEE dd MMM yyyy").format(event.getEventDate()),H3);
             asOfDate.setAlignment(Paragraph.ALIGN_CENTER);
             doc.add(asOfDate);
         }
 
-        Paragraph noOfBoxers = new Paragraph("No of Boxers :"+noOFBoxers(event),H3);
+        Paragraph noOfBoxers = new Paragraph("No of Players :"+noOFBoxers(event),H3);
         noOfBoxers.setAlignment(Paragraph.ALIGN_CENTER);
+        noOfBoxers.setSpacingAfter(5f);
         doc.add(noOfBoxers);
-        doc.add(new Paragraph("\n"));
         PdfPTable table = new PdfPTable(3);
 
         class Content{
@@ -233,7 +235,7 @@ public class EventReport implements Report{
     }
 
     public PdfPCell getPdfCell(String msg) {
-        PdfPCell cell = new PdfPCell(new Phrase(msg, new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD, BaseColor.WHITE)));
+        PdfPCell cell = new PdfPCell(new Phrase(msg, new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD, BaseColor.WHITE)));
         cell.setBackgroundColor(BaseColor.BLACK);
         return cell;
     }
@@ -241,7 +243,7 @@ public class EventReport implements Report{
     public void addStringCell(String msg, PdfPTable table) {
         PdfPCell cell = new PdfPCell();
         cell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
-        Font font = new Font(Font.FontFamily.HELVETICA, 8, Font.NORMAL);
+        Font font = new Font(Font.FontFamily.TIMES_ROMAN, 8, Font.NORMAL);
         cell.addElement(new Phrase(msg, font)); // Add plain text
         cell.setFixedHeight(10f);
         cell.setPadding(0);

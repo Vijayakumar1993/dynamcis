@@ -1,5 +1,6 @@
 package org.dynamics.ui;
 
+import javafx.scene.layout.Background;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
@@ -57,6 +58,7 @@ public class ImportFrame extends CommonFrame{
     public void southPanle(Db db){
         JPanel jp = new JPanel();
         jp.setLayout(new BorderLayout());
+        jp.setBackground(Color.WHITE);
         ImageIcon imageIcon = Utility.getImageIcon("/remove.png");
         ImageIcon combine = Utility.getImageIcon("/combine.png");
         JButton deleteIcon = new JButton(new ImageIcon(imageIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
@@ -75,6 +77,7 @@ public class ImportFrame extends CommonFrame{
             JList<FileImport> multiSelect = new JList<>(this.fileImports.values().toArray(imports));
             multiSelect.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             JPanel jsp = new JPanel();
+            jsp.setBackground(Color.WHITE);
             jsp.setBorder(BorderFactory.createTitledBorder("Combine Players"));
             jsp.setLayout(new GridLayout(2,1,10,10));
             jsp.add(multiSelect);
@@ -123,6 +126,7 @@ public class ImportFrame extends CommonFrame{
             JList<FileImport> multiSelect = new JList<>(this.fileImports.values().toArray(imports));
             multiSelect.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             JPanel jsp = new JPanel();
+            jsp.setBackground(Color.WHITE);
             jsp.setBorder(BorderFactory.createTitledBorder("Delete Imported Players"));
             jsp.setLayout(new GridLayout(2,1,10,10));
             jsp.add(multiSelect);
