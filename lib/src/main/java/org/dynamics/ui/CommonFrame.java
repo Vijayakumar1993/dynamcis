@@ -36,6 +36,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class CommonFrame extends JFrame {
     private static final Logger logger = LogManager.getLogger(CommonFrame.class);
@@ -528,9 +529,10 @@ public abstract class CommonFrame extends JFrame {
             parentEvent.setStatus(Status.FINISHED);
             eventName.setText(parentEvent.getEventName());
         }else{
-            if(categories!=null){
-                eventName.setText(categories.name());
-            }
+                String categoriesName = categories!=null?categories.name():null;
+                String genderNames = gender!=null?gender.name():null;
+                if(categoriesName!=null || genderNames!=null)
+                    eventName.setText(Stream.of(categoriesName,genderNames).filter(Objects::nonNull).collect(Collectors.joining("-")));
         }
         eventName.setEnabled(false);
 

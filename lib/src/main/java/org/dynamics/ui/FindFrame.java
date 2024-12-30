@@ -115,6 +115,7 @@ public class FindFrame extends CommonFrame{
                             this.eventGender = Gender.valueOf(selecetdGender);
                             return genderFilter.getGender().toString().equalsIgnoreCase(selecetdGender);
                         }else{
+                            this.eventGender = null;
                             return true;
                         }
                     }).filter(idsFilter->{
@@ -128,6 +129,7 @@ public class FindFrame extends CommonFrame{
                             this.eventCateogory = Categories.valueOf(selectedCategory);
                             return categoryFilter.getCategories().toString().equalsIgnoreCase(selectedCategory);
                         }else{
+                            this.eventCateogory = null;
                             return true;
                         }
                     }).filter(weightFilter->{

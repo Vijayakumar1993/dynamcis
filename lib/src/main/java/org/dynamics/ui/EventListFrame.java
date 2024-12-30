@@ -3,10 +3,8 @@ package org.dynamics.ui;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.dynamics.db.Db;
-import org.dynamics.model.Categories;
-import org.dynamics.model.Configuration;
+import org.dynamics.model.*;
 import org.dynamics.model.Event;
-import org.dynamics.model.TablePair;
 import org.dynamics.reports.EventListReport;
 import org.dynamics.reports.Report;
 
@@ -31,7 +29,7 @@ public class EventListFrame extends CommonFrame{
 
     public void northPanel(Db db){
         JPanel jsp = new JPanel();
-        jsp.setLayout(new GridLayout(2,3));
+        jsp.setLayout(new GridLayout(3,3));
         jsp.setBorder(BorderFactory.createTitledBorder("Event List"));
 
         JTextField eventId = textField();
@@ -42,6 +40,12 @@ public class EventListFrame extends CommonFrame{
         JTextField teamName = textField();
         teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         jsp.add(teamName);
+
+        JComboBox<String> genderBox = comboBox(Arrays.stream(Gender.values()).map(a->a.toString()).collect(Collectors.toList()));
+        genderBox.setBorder(null);
+        genderBox.setBorder(BorderFactory.createTitledBorder("Gender"));
+        jsp.add(genderBox);
+
 
         List<String> weightsList =  IntStream.rangeClosed(1, 20)
                 .mapToObj(i -> ((int) Math.pow(2, i))+"")
@@ -67,7 +71,7 @@ public class EventListFrame extends CommonFrame{
                 String selectedTeamName = teamName.getText().toString().toLowerCase();
                 String selectedDescription = description.getText().toString().toLowerCase();
                 String selectedmatchesFrom = rndFrom.getSelectedItem().toString().toLowerCase();
-
+                String selectedGender = genderBox.getSelectedItem().toString().toLowerCase();
                 this.availableEvent = db.keyFilterBy("Event_").stream().map(avr->{
                     try {
                         return (Event)db.findObject(avr);
@@ -91,6 +95,11 @@ public class EventListFrame extends CommonFrame{
                 }).filter(event->{
                     if(!selectedTeamName.isEmpty()){
                         return (event.getTeamName()).toLowerCase().contains(selectedTeamName);
+                    }else
+                        return true;
+                }).filter(event->{
+                    if(!selectedGender.isEmpty()){
+                        return (event.getSelectedGenderCategory().toString()).toLowerCase().equals(selectedGender);
                     }else
                         return true;
                 }).filter(event->{

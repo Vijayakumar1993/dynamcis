@@ -109,6 +109,9 @@ public class BouteFrame extends CommonFrame{
             newEvent.setTeamName(this.event.getTeamName());
             newEvent.setId(this.event.getId());
             newEvent.setStatus(this.event.getStatus());
+            newEvent.setEventDate(this.event.getEventDate());
+            newEvent.setSelecetedEventCategory(this.event.getSelecetedEventCategory());
+            newEvent.setSelectedGenderCategory(this.event.getSelectedGenderCategory());
 
             //take matched persons and fixture and shuffle and save, re run
             List<Match> matches = this.event.getMatcher().getMatches();
