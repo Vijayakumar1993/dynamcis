@@ -131,7 +131,11 @@ public abstract class CommonFrame extends JFrame {
         actions.put("Export",(event)->{
             JPanel jsp = new JPanel();
             JComboBox<String> comboBox = comboBox(Arrays.stream(Categories.values()).map(Enum::toString).collect(Collectors.toList()));
+            comboBox.setBorder(BorderFactory.createTitledBorder("Category Name"));
+            JComboBox<String> genderComboBox = comboBox(Arrays.stream(Gender.values()).map(a->a.toString()).collect(Collectors.toList()));
+            genderComboBox.setBorder(BorderFactory.createTitledBorder("Gender"));
             jsp.add(comboBox);
+            jsp.add(genderComboBox);
             int result = confirmation("Select category.", ()->jsp);
             if(JOptionPane.YES_OPTION == result){
                 MedalReport report = null;
@@ -145,19 +149,26 @@ public abstract class CommonFrame extends JFrame {
                         int columnCount = this.medels.getjTable().getColumnCount();
                         List<List<String>> rowsList = new LinkedList<>();
                         String selectedItem = comboBox.getSelectedItem().toString();
+                        String selectedGender = genderComboBox.getSelectedItem().toString();
                         for(int i=0;i<rowCount;i++){
                             Vector<String> row = new Vector<>();
                             for(int j=0;j<columnCount;j++){
                                 String data = this.medels.getjTable().getValueAt(i,j)!=null?this.medels.getjTable().getValueAt(i,j).toString():"";
                                 row.add(data);
                             }
-                            if(selectedItem!=null){
-                                if(row.get(0).contains(comboBox.getSelectedItem().toString())){
-                                    rowsList.add(row);
+                            rowsList.add(row);
+                            rowsList = rowsList.stream().filter(r->{
+                                boolean categoryCondition = true;
+                                boolean genderCondition = true;
+                                String columno1 = r.get(0);
+                                if(selectedItem!=null || selectedItem!=""){
+                                    categoryCondition = columno1.contains(selectedItem);
                                 }
-                            }else {
-                                rowsList.add(row);
-                            }
+                                if(selectedGender!=null || selectedGender!=""){
+                                    genderCondition = columno1.matches(".*\\b"+selectedGender+"\\b.*");
+                                }
+                                return categoryCondition && genderCondition;
+                            }).collect(Collectors.toList());
                         }
 
                         if(!rowsList.isEmpty()){
@@ -529,10 +540,10 @@ public abstract class CommonFrame extends JFrame {
             parentEvent.setStatus(Status.FINISHED);
             eventName.setText(parentEvent.getEventName());
         }else{
-                String categoriesName = categories!=null?categories.name():null;
-                String genderNames = gender!=null?gender.name():null;
-                if(categoriesName!=null || genderNames!=null)
-                    eventName.setText(Stream.of(categoriesName,genderNames).filter(Objects::nonNull).collect(Collectors.joining("-")));
+            String categoriesName = categories!=null?categories.name():null;
+            String genderNames = gender!=null?gender.name():null;
+            if(categoriesName!=null || genderNames!=null)
+                eventName.setText(Stream.of(categoriesName,genderNames).filter(Objects::nonNull).collect(Collectors.joining("-")));
         }
         eventName.setEnabled(false);
 

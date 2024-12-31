@@ -41,6 +41,11 @@ public class EventListFrame extends CommonFrame{
         teamName.setBorder(BorderFactory.createTitledBorder("Weight Category"));
         jsp.add(teamName);
 
+
+        JComboBox<String> eventStatus = comboBox(Arrays.stream(Status.values()).map(Enum::toString).collect(Collectors.toList()));
+        eventStatus.setBorder(BorderFactory.createTitledBorder("Status"));
+        jsp.add(eventStatus);
+
         JComboBox<String> genderBox = comboBox(Arrays.stream(Gender.values()).map(a->a.toString()).collect(Collectors.toList()));
         genderBox.setBorder(null);
         genderBox.setBorder(BorderFactory.createTitledBorder("Gender"));
@@ -72,6 +77,7 @@ public class EventListFrame extends CommonFrame{
                 String selectedDescription = description.getText().toString().toLowerCase();
                 String selectedmatchesFrom = rndFrom.getSelectedItem().toString().toLowerCase();
                 String selectedGender = genderBox.getSelectedItem().toString().toLowerCase();
+                String selectedStatus = eventStatus.getSelectedItem().toString().toLowerCase();
                 this.availableEvent = db.keyFilterBy("Event_").stream().map(avr->{
                     try {
                         return (Event)db.findObject(avr);
@@ -105,6 +111,11 @@ public class EventListFrame extends CommonFrame{
                 }).filter(event->{
                     if(!selectedDescription.isEmpty()){
                         return (event.getDescription()).toLowerCase().contains(selectedDescription);
+                    }else
+                        return true;
+                }).filter(event->{
+                    if(!selectedStatus.isEmpty()){
+                        return (event.getStatus().toString()).toLowerCase().contains(selectedStatus);
                     }else
                         return true;
                 }).filter(event->{
