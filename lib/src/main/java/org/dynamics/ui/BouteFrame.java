@@ -547,7 +547,8 @@ public class BouteFrame extends CommonFrame{
                 .mapToObj(i -> ((int) Math.pow(2, i))+"")
                 .collect(Collectors.toList());
 
-        rndFrom = comboBox(roundOffList);
+        roundOffList.add(0,"");
+        rndFrom = new JComboBox<>(new Vector<>(roundOffList));
         rndFrom.setBorder(BorderFactory.createTitledBorder("Round off"));
 
         eventStatus = comboBox(Arrays.stream(Status.values()).map(Enum::toString).collect(Collectors.toList()));

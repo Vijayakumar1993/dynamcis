@@ -261,35 +261,36 @@ public class FindFrame extends CommonFrame{
                 return;
             }
             try{
-                Object selectedGender = gender.getSelectedItem();
-                Object selectedCategory = category.getSelectedItem();
-                Object selectedWeight = weights.getText();
+                String selectedGender = Objects.requireNonNull(gender.getSelectedItem()).toString();
+                String selectedCategory = Objects.requireNonNull(category.getSelectedItem()).toString();
+                String selectedWeight = weights.getText();
                 Person person = new Person();
                 person.setId(Utility.getRandom());
                 person.setName(name.getText());
                 person.setTeamName(teamName.getText());
-                if(selectedGender!=""){
+                if(!Objects.equals(selectedGender, "")){
                     person.setGender(Gender.valueOf(gender.getSelectedItem().toString()));
                 }
-                if(selectedCategory!=""){
+                if(!Objects.equals(selectedCategory, "")){
                     person.setCategories(Categories.valueOf(category.getSelectedItem().toString()));
                 }
-                if(selectedWeight!=""){
+                if(!Objects.equals(selectedWeight, "")){
                     person.setWeight(Double.valueOf(weights.getText().toString()));
                 }
-                if(person.isValid()){
-                    this.persons.add(person);
-                    fileKey.setPerson(this.persons);
-                    fileKey.setTotalCount(fileKey.getTotalCount()+1);
-                    fileKey.setStatus(Status.FINISHED);
-                    db.insert("File_"+fileKey.getId(),fileKey);
-                    alert("Person "+person.getName()+" created successfully....!");
-                    this.find.doClick();
-                    createPerson.doClick();
-                }else {
-                    alert("Please fill all the fields.");
+                if(result == JOptionPane.YES_OPTION){
+                    if(person.isValid()){
+                        this.persons.add(person);
+                        fileKey.setPerson(this.persons);
+                        fileKey.setTotalCount(fileKey.getTotalCount()+1);
+                        fileKey.setStatus(Status.FINISHED);
+                        db.insert("File_"+fileKey.getId(),fileKey);
+                        alert("Person "+person.getName()+" created successfully....!");
+                        this.find.doClick();
+                        createPerson.doClick();
+                    }else {
+                        alert("Please fill all the fields.");
+                    }
                 }
-
             }catch (Exception e){
                 logger.error("An error occurred", e);
                 e.printStackTrace();

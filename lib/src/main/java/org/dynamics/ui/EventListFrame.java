@@ -55,8 +55,8 @@ public class EventListFrame extends CommonFrame{
         List<String> weightsList =  IntStream.rangeClosed(1, 20)
                 .mapToObj(i -> ((int) Math.pow(2, i))+"")
                 .collect(Collectors.toList());
-
-        JComboBox<String> rndFrom = comboBox(weightsList);
+        weightsList.add(0,"");
+        JComboBox<String> rndFrom = new JComboBox<>(new Vector<>(weightsList));
         rndFrom.setBorder(BorderFactory.createTitledBorder("Round off"));
         jsp.add(rndFrom);
 

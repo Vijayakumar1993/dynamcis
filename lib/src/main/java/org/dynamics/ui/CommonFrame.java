@@ -642,6 +642,7 @@ public abstract class CommonFrame extends JFrame {
 
     public JComboBox<String> comboBox(List<String> data){
         data.add(0,"");
+        Collections.sort(data);
         JComboBox<String> comboBoxs = new JComboBox<>(new Vector<>(data));
         return comboBoxs;
     }
