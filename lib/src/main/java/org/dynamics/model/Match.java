@@ -9,7 +9,7 @@ public class Match  implements Serializable {
     private Person to;
     private Corner toCorner;
     private Person successor = new Person();
-    private boolean isPrimary;
+    public boolean isPrimary;
 
     public boolean isPrimary() {
         return isPrimary;

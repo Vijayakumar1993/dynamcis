@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Vector;
 
-public class Person implements Serializable {
+public class Person implements Serializable, Comparable<Person> {
     private long id;
     private String name;
     private Gender gender;
@@ -110,4 +110,8 @@ public class Person implements Serializable {
         return keys;
     }
 
+    @Override
+    public int compareTo(Person o) {
+        return Long.compare(o.id,this.id);
+    }
 }

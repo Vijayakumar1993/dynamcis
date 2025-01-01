@@ -113,18 +113,15 @@ public class BouteFrame extends CommonFrame{
             newEvent.setSelecetedEventCategory(this.event.getSelecetedEventCategory());
             newEvent.setSelectedGenderCategory(this.event.getSelectedGenderCategory());
 
-            //take matched persons and fixture and shuffle and save, re run
             List<Match> matches = this.event.getMatcher().getMatches();
             List<Person> from = matches.stream().filter(m->!m.isPrimary()).map(Match::getFrom).collect(Collectors.toList());
             List<Person> to = matches.stream().filter(m->!m.isPrimary()).map(Match::getTo).collect(Collectors.toList());
-            List<Person> fixtures = this.event.getFixture().getPersons();
 
             from.addAll(to);
             from.addAll(matches.stream().filter(Match::isPrimary).map(Match::getFrom).collect(Collectors.toList()));
-//            from.addAll(fixtures);
 
+            from = from.stream().sorted().collect(Collectors.toList());
             logger.info("From size is "+from.size());
-            from = from.stream().distinct().collect(Collectors.toList());
             Collections.shuffle(from);
             db.delete("Event_"+this.event.getId());
             Utility.createEvent(from,newEvent);
